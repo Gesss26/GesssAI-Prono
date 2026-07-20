@@ -7,8 +7,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="GesssAI-Prono">
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkdlc3NBSS1Qcm9ubyIsCiAgInNob3J0X25hbWUiOiAiR2Vzc0FJLVByb25vIiwKICAiZGVzY3JpcHRpb24iOiAiQW5hbGlzaSBwYXJ0aXRlIGUgUHJvbm9zdGljaSBzcG9ydGl2aSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMWEyNjM5IiwKICAidGhlbWVfY29sb3IiOiAiIzFhMjYzOSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCw8c3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDUxMiA1MTInPjxyZWN0IHdpZHRoPSc1MTInIGhlaWdodD0nNTEyJyByeD0nNTAlJyBmaWxsPScjZmM1YzdkJy8+PHRleHQgeD0nMjU2JyB5PSczNDAnIGZvbnQtc2l6ZT0nMjUwJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJyBmaWxsPSd3aGl0ZScgZm9udC1mYW1pbHk9J3NhbnMtc2VyaWYnPvCfjIo8L3RleHQ+PC9zdmc+IgogICAgfQogIF0KfQ==">
     <title>GesssAI-Prono</title>
+    <!-- SheetJS per leggere file Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+    </script>
     <style>
         /* ===== RESET & BASE ===== */
         * {
@@ -29,10 +31,6 @@
             overflow: hidden;
             margin: 0;
         }
-        body.dark {
-            background: #12161e;
-        }
-
         .app {
             max-width: 500px;
             width: 100%;
@@ -43,44 +41,63 @@
             padding: 6px 6px 0 6px;
             background: #0d1118;
         }
-        body.dark .app {
-            background: #0d1118;
-        }
 
-        /* ===== HEADER - DOPPIO IN ALTEZZA ===== */
+        /* ===== HEADER ===== */
         header {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 12px 14px;
+            padding: 10px 14px;
             background: rgba(255,255,255,0.04);
             border-radius: 14px;
             color: white;
             margin-bottom: 6px;
             flex-shrink: 0;
             border: 1px solid rgba(255,255,255,0.05);
-            min-height: 72px;
-            gap: 6px;
+            min-height: 80px;
+            gap: 4px;
             position: relative;
         }
-
-        /* Riga superiore: data/ora a sinistra, badge e tab a destra */
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
         }
-        .header-top .clock {
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.5);
+        .header-top .clock-area {
             display: flex;
-            gap: 6px;
-            align-items: center;
+            flex-direction: column;
+            gap: 1px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            user-select: none;
         }
-        .header-top .clock .date-label {
-            opacity: 0.5;
+        .header-top .clock-area:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .header-top .clock-area .clock-date {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+        .header-top .clock-area .clock-date .date-label {
+            opacity: 0.4;
+            font-weight: 400;
+            margin-right: 4px;
+        }
+        .header-top .clock-area .clock-time {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        .header-top .clock-area .clock-time .sep {
+            opacity: 0.3;
+            margin: 0 4px;
         }
         .header-right {
             display: flex;
@@ -111,11 +128,9 @@
             background: rgba(255,255,255,0.08);
             color: white;
         }
-
-        /* Riga centrale: TITOLO GRANDE */
         .header-center {
             font-weight: 700;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             letter-spacing: 1.5px;
             background: linear-gradient(to right, #f0c27f, #fc5c7d);
             -webkit-background-clip: text;
@@ -125,13 +140,109 @@
             line-height: 1.2;
         }
         .header-center .sub {
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             letter-spacing: 3px;
-            opacity: 0.3;
+            opacity: 0.25;
             -webkit-text-fill-color: rgba(255,255,255,0.2);
             display: block;
             font-weight: 300;
             margin-top: -2px;
+        }
+
+        /* ===== CALENDARIO ===== */
+        .calendar-popup {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e2838;
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+            z-index: 1000;
+            min-width: 260px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .calendar-popup.show {
+            display: block;
+        }
+        .calendar-popup .cal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .calendar-popup .cal-header .cal-month {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #e8edf5;
+        }
+        .calendar-popup .cal-header .cal-nav {
+            background: transparent;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 4px 10px;
+            border-radius: 6px;
+            color: rgba(255,255,255,0.5);
+            font-family: inherit;
+        }
+        .calendar-popup .cal-header .cal-nav:hover {
+            background: rgba(255,255,255,0.06);
+        }
+        .calendar-popup .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+        .calendar-popup .cal-grid .cal-day-label {
+            font-size: 0.5rem;
+            text-align: center;
+            color: rgba(255,255,255,0.3);
+            font-weight: 600;
+            padding: 3px 0;
+        }
+        .calendar-popup .cal-grid .cal-day {
+            text-align: center;
+            padding: 6px 2px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #e8edf5;
+            transition: 0.15s;
+        }
+        .calendar-popup .cal-grid .cal-day:hover {
+            background: rgba(252, 92, 125, 0.15);
+        }
+        .calendar-popup .cal-grid .cal-day.selected {
+            background: #fc5c7d;
+            color: white;
+        }
+        .calendar-popup .cal-grid .cal-day.other-month {
+            opacity: 0.25;
+        }
+        .calendar-popup .cal-grid .cal-day.today {
+            border: 2px solid #fc5c7d;
+        }
+        .calendar-popup .cal-footer {
+            margin-top: 10px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .calendar-popup .cal-footer .cal-today-btn {
+            background: rgba(255,255,255,0.06);
+            border: none;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            color: rgba(255,255,255,0.6);
+            font-family: inherit;
+        }
+        .calendar-popup .cal-footer .cal-today-btn:hover {
+            background: rgba(255,255,255,0.1);
         }
 
         /* ===== CONTENUTO PRINCIPALE ===== */
@@ -145,7 +256,6 @@
             height: 100%;
             border: 1px solid rgba(255,255,255,0.03);
         }
-
         .swipe-container {
             display: flex;
             width: 200%;
@@ -159,7 +269,6 @@
         .swipe-container.view-ai {
             transform: translateX(-50%);
         }
-
         .swipe-panel {
             width: 50%;
             height: 100%;
@@ -195,8 +304,8 @@
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            min-height: 82vh;
-            min-height: 82dvh;
+            min-height: 78vh;
+            min-height: 78dvh;
             justify-content: space-between;
         }
         .match-card-swipe:active {
@@ -204,10 +313,9 @@
         }
         .match-card-swipe.active-card {
             border-color: #fc5c7d;
-            box-shadow: 0 0 30px rgba(252,92,125,0.08);
+            box-shadow: 0 0 30px rgba(252, 92, 125, 0.08);
         }
 
-        /* HEADER CARD */
         .card-header-swipe {
             display: flex;
             justify-content: space-between;
@@ -226,7 +334,6 @@
             color: rgba(255,255,255,0.6);
         }
 
-        /* SQUADRE */
         .match-row-swipe {
             display: flex;
             justify-content: space-between;
@@ -252,7 +359,7 @@
             font-size: 0.9rem;
         }
 
-        /* STATO FORMA */
+        /* STATO FORMA - QUADRATINI COLORATI */
         .form-row-swipe {
             display: flex;
             justify-content: space-between;
@@ -274,21 +381,48 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: rgba(255,255,255,0.3);
-            margin-bottom: 2px;
+            margin-bottom: 4px;
             font-weight: 600;
         }
         .form-row-swipe .form-string {
+            display: flex;
+            gap: 4px;
             font-family: 'Courier New', monospace;
             font-weight: 700;
             font-size: 1.2rem;
             letter-spacing: 2px;
             color: #ffffff;
         }
-        .form-row-swipe .form-string .W { color: #3db86b; }
-        .form-row-swipe .form-string .D { color: #e6b422; }
-        .form-row-swipe .form-string .L { color: #e06060; }
+        /* QUADRATINI COLORATI */
+        .form-row-swipe .form-string .form-box-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #000000;
+            background: #3a3a4a;
+        }
+        .form-row-swipe .form-string .form-box-letter.W {
+            background: #3db86b;
+            color: #000000;
+        }
+        .form-row-swipe .form-string .form-box-letter.D {
+            background: #e6b422;
+            color: #000000;
+        }
+        .form-row-swipe .form-string .form-box-letter.L {
+            background: #e06060;
+            color: #000000;
+        }
+        .form-row-swipe .form-string .form-box-letter.- {
+            background: #2a2a3a;
+            color: #666;
+        }
 
-        /* PERCENTUALI */
         .perc-row-swipe {
             display: flex;
             justify-content: space-between;
@@ -315,7 +449,6 @@
             margin-top: 1px;
         }
 
-        /* 3 GIOCATE */
         .stats-row-swipe {
             display: flex;
             flex-direction: column;
@@ -362,7 +495,6 @@
         .stats-row-swipe .stat-chip.flag-gold { background: #ffd966; border-color: #e6b800; }
         .stats-row-swipe .stat-chip.flag-bomb { background: #ffb347; border-color: #e67300; animation: pulse-gold 1.2s ease-in-out infinite; }
 
-        /* FOOTER CARD */
         .card-footer-swipe {
             display: flex;
             justify-content: space-between;
@@ -374,7 +506,6 @@
             padding-top: 8px;
         }
 
-        /* ===== FLAG CLASSI ===== */
         .flag-red { background: #fde0e0; border-color: #e57373; color: #1a1a1a; }
         .flag-red small { color: #1a1a1a; }
         .flag-neutral { background: #f0f2f5; border-color: #b0b8c4; color: #1a1a1a; }
@@ -424,7 +555,6 @@
             color: rgba(255,255,255,0.3);
             font-size: 0.65rem;
         }
-
         .ai-panel-content .ai-grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -507,7 +637,6 @@
         .ai-analysis-box::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
         .ai-analysis-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
-        /* ===== INDICATORI SWIPE ===== */
         .swipe-indicators {
             display: flex;
             justify-content: center;
@@ -541,7 +670,6 @@
             flex-shrink: 0;
             padding: 2px 0;
         }
-
         .empty-state {
             text-align: center;
             padding: 30px 12px;
@@ -549,7 +677,6 @@
         }
         .empty-state span { display: block; font-size: 2rem; margin-bottom: 6px; }
 
-        /* ===== PAGINE ===== */
         .page { display: none; flex-direction: column; height: 100%; flex: 1; }
         .page.active { display: flex; }
 
@@ -630,21 +757,21 @@
         .theme-switch .switch-label { font-weight: 500; font-size: 0.75rem; color: #e8edf5; }
         .theme-switch .switch-icon { font-size: 0.8rem; }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             .app { padding: 4px 4px 0 4px; }
-            header { padding: 10px 12px; min-height: 64px; border-radius: 12px; gap: 4px; }
-            .header-center { font-size: 1.3rem; }
-            .header-center .sub { font-size: 0.5rem; }
-            .header-top .clock { font-size: 0.55rem; }
+            header { padding: 8px 10px; min-height: 70px; border-radius: 12px; gap: 2px; }
+            .header-center { font-size: 1.2rem; }
+            .header-center .sub { font-size: 0.45rem; }
+            .header-top .clock-area .clock-date { font-size: 0.7rem; }
+            .header-top .clock-area .clock-time { font-size: 0.6rem; }
             .header-right .tab-btn { font-size: 0.55rem; padding: 3px 8px; }
             .header-right .badge-count { font-size: 0.5rem; line-height: 18px; padding: 0 8px; }
-
-            .match-card-swipe { padding: 10px 10px 8px 10px; min-height: 78vh; min-height: 78dvh; border-radius: 12px; }
+            .match-card-swipe { padding: 10px 10px 8px 10px; min-height: 72vh; min-height: 72dvh; border-radius: 12px; }
             .match-row-swipe { font-size: 1.1rem; margin-bottom: 6px; }
             .match-row-swipe .team { font-size: 1rem; max-width: 40%; }
             .form-row-swipe { padding: 5px 8px; gap: 8px; }
-            .form-row-swipe .form-string { font-size: 0.95rem; }
+            .form-row-swipe .form-string .form-box-letter { width: 22px; height: 22px; font-size: 0.7rem; }
+            .form-row-swipe .form-string { font-size: 0.9rem; }
             .perc-row-swipe .perc-box { font-size: 0.95rem; padding: 4px 6px; }
             .stats-row-swipe { gap: 4px; min-height: 90px; padding-top: 6px; }
             .stats-row-swipe .stat-chip { font-size: 0.8rem; padding: 6px 10px; min-height: 36px; gap: 6px; }
@@ -657,50 +784,110 @@
             .ai-panel-content .ai-box .ai-value { font-size: 0.7rem; }
             .ai-panel-content .ai-stats-grid .ai-stat-item .stat-value { font-size: 0.8rem; }
             .ai-analysis-box { font-size: 0.65rem; padding: 8px; max-height: 120px; min-height: 60px; }
+            .calendar-popup { min-width: 220px; padding: 10px; left: 50%; transform: translateX(-50%); }
+            .calendar-popup .cal-grid .cal-day { font-size: 0.65rem; padding: 4px 1px; }
             .swipe-indicators .dot { width: 4px; height: 4px; }
             .swipe-indicators .dot.active { width: 12px; }
             .footer-note { font-size: 0.4rem; }
         }
 
         @media (max-width: 380px) {
-            header { padding: 8px 10px; min-height: 56px; }
-            .header-center { font-size: 1.1rem; }
-            .header-center .sub { font-size: 0.45rem; }
+            header { padding: 6px 8px; min-height: 60px; }
+            .header-center { font-size: 1rem; }
+            .header-center .sub { font-size: 0.4rem; }
+            .header-top .clock-area .clock-date { font-size: 0.6rem; }
+            .header-top .clock-area .clock-time { font-size: 0.5rem; }
             .match-row-swipe { font-size: 0.95rem; }
             .match-row-swipe .team { font-size: 0.85rem; }
-            .form-row-swipe .form-string { font-size: 0.8rem; letter-spacing: 1px; }
+            .form-row-swipe .form-string .form-box-letter { width: 18px; height: 18px; font-size: 0.6rem; }
             .perc-row-swipe .perc-box { font-size: 0.8rem; }
             .stats-row-swipe .stat-chip { font-size: 0.7rem; padding: 4px 8px; min-height: 30px; }
             .stats-row-swipe .stat-chip .num { font-size: 0.75rem; }
             .stats-row-swipe .stat-chip .multigol-fasce { font-size: 0.7rem; padding: 0 6px; }
-            .match-card-swipe { min-height: 72vh; min-height: 72dvh; padding: 8px 8px 6px 8px; }
+            .match-card-swipe { min-height: 68vh; min-height: 68dvh; padding: 8px 8px 6px 8px; }
+            .calendar-popup { min-width: 180px; padding: 8px; }
+            .calendar-popup .cal-grid .cal-day { font-size: 0.55rem; padding: 3px 1px; }
         }
 
         @media (min-width: 481px) {
-            header { min-height: 80px; padding: 14px 18px; }
-            .header-center { font-size: 2rem; }
-            .header-center .sub { font-size: 0.7rem; }
-            .match-card-swipe { min-height: 75vh; min-height: 75dvh; }
+            header { min-height: 88px; padding: 14px 18px; }
+            .header-center { font-size: 1.8rem; }
+            .header-center .sub { font-size: 0.65rem; }
+            .header-top .clock-area .clock-date { font-size: 1rem; }
+            .header-top .clock-area .clock-time { font-size: 0.8rem; }
+            .match-card-swipe { min-height: 72vh; min-height: 72dvh; }
             .match-row-swipe { font-size: 1.6rem; }
             .match-row-swipe .team { font-size: 1.5rem; }
-            .form-row-swipe .form-string { font-size: 1.4rem; }
+            .form-row-swipe .form-string .form-box-letter { width: 32px; height: 32px; font-size: 1rem; }
             .perc-row-swipe .perc-box { font-size: 1.3rem; }
             .stats-row-swipe .stat-chip { font-size: 1.1rem; padding: 12px 16px; }
             .stats-row-swipe .stat-chip .num { font-size: 1.2rem; }
             .stats-row-swipe .stat-chip .multigol-fasce { font-size: 1.1rem; }
         }
+
+        /* ===== LOADING ===== */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: rgba(255,255,255,0.3);
+            gap: 12px;
+        }
+        .loading-container .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.05);
+            border-top: 3px solid #fc5c7d;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-container .load-text {
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+        }
+
+        /* ===== FILE INPUT HIDDEN ===== */
+        #fileInput {
+            display: none;
+        }
+        .upload-btn {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.5);
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 0.55rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+        .upload-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
     </style>
 </head>
 <body>
 <div class="app">
-    <!-- HEADER - DOPPIO IN ALTEZZA -->
+    <!-- HEADER -->
     <header>
         <div class="header-top">
-            <div class="clock">
-                <span class="date-label">📅</span>
-                <span id="currentDate">--/--/----</span>
-                <span>•</span>
-                <span id="currentTime">--:--</span>
+            <div class="clock-area" id="clockButton">
+                <div class="clock-date">
+                    <span class="date-label">📅</span>
+                    <span id="currentDate">--/--/----</span>
+                </div>
+                <div class="clock-time">
+                    <span id="currentTime">--:--</span>
+                    <span class="sep">•</span>
+                    <span style="opacity:0.3;font-size:0.6rem;">▼</span>
+                </div>
             </div>
             <div class="header-right">
                 <button class="tab-btn active" data-tab="partite">📋 <span class="badge-count" id="matchCountBadge">0</span></button>
@@ -711,6 +898,18 @@
             ⚡ GesssAI-Prono
             <span class="sub">ANALISI SPORTIVA</span>
         </div>
+        <!-- CALENDARIO POPUP -->
+        <div class="calendar-popup" id="calendarPopup">
+            <div class="cal-header">
+                <button class="cal-nav" id="calPrev">‹</button>
+                <span class="cal-month" id="calMonth">Luglio 2026</span>
+                <button class="cal-nav" id="calNext">›</button>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+            <div class="cal-footer">
+                <button class="cal-today-btn" id="calToday">📅 Oggi</button>
+            </div>
+        </div>
     </header>
 
     <!-- PAGINA PARTITE -->
@@ -718,10 +917,22 @@
         <div class="main-content" id="mainContent">
             <div class="swipe-container view-card" id="swipeContainer">
                 <div class="swipe-panel" id="cardPanel">
-                    <div id="cardsSwipeContainer"></div>
+                    <div id="cardsSwipeContainer">
+                        <div class="loading-container">
+                            <div class="spinner"></div>
+                            <div class="load-text">Caricamento partite...</div>
+                            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                                📂 Carica file Excel
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="swipe-panel" id="aiPanel">
-                    <div id="aiContainer" class="ai-panel-content"></div>
+                    <div id="aiContainer" class="ai-panel-content">
+                        <div class="loading-container">
+                            <div class="load-text">🤖 Seleziona una partita</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -761,7 +972,15 @@
                 <input type="password" id="weatherKey" value="d8df501134ef44eab6515526262007">
                 <button class="show-hide-btn" onclick="toggleVisibility('weatherKey')">👁️ Mostra/Nascondi</button>
             </div>
-            <div style="font-size:0.6rem; color:rgba(255,255,255,0.2); text-align:center;">
+            <div class="setting-group">
+                <label>📂 Carica file Excel</label>
+                <div class="description">Carica il file Prono.xlsx per vedere le partite</div>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()" style="width:100%;padding:8px;font-size:0.8rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:white;cursor:pointer;">
+                    📂 Scegli file Excel
+                </button>
+                <input type="file" id="fileInput" accept=".xlsx,.xls">
+            </div>
+            <div style="font-size:0.6rem; color:rgba(255,255,255,0.2); text-align:center;margin-top:8px;">
                 Le chiavi sono salvate nel browser
             </div>
         </div>
@@ -770,6 +989,28 @@
 
 <script>
     (function() {
+        // ============================================================
+        //  VARIABILI GLOBALI
+        // ============================================================
+        let allMatches = [];
+        let currentMatches = [];
+        let currentIndex = 0;
+        let currentView = 'card';
+        let selectedDate = new Date();
+        let currentViewDate = new Date();
+        let calendarVisible = false;
+        let dataLoaded = false;
+
+        // ============================================================
+        //  DOM REFS
+        // ============================================================
+        const swipeContainer = document.getElementById('swipeContainer');
+        const cardsContainer = document.getElementById('cardsSwipeContainer');
+        const aiContainer = document.getElementById('aiContainer');
+        const dots = document.querySelectorAll('.dot');
+        const badge = document.getElementById('matchCountBadge');
+        const fileInput = document.getElementById('fileInput');
+
         // ============================================================
         //  OROLOGIO
         // ============================================================
@@ -780,6 +1021,109 @@
         }
         updateClock();
         setInterval(updateClock, 10000);
+
+        // ============================================================
+        //  CALENDARIO
+        // ============================================================
+        const clockButton = document.getElementById('clockButton');
+        const calendarPopup = document.getElementById('calendarPopup');
+        const calGrid = document.getElementById('calGrid');
+        const calMonth = document.getElementById('calMonth');
+        const calPrev = document.getElementById('calPrev');
+        const calNext = document.getElementById('calNext');
+        const calToday = document.getElementById('calToday');
+
+        clockButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            calendarVisible = !calendarVisible;
+            calendarPopup.classList.toggle('show', calendarVisible);
+            if (calendarVisible) {
+                currentViewDate = new Date(selectedDate);
+                renderCalendar();
+            }
+        });
+
+        document.addEventListener('click', () => {
+            calendarPopup.classList.remove('show');
+            calendarVisible = false;
+        });
+
+        calendarPopup.addEventListener('click', (e) => e.stopPropagation());
+
+        function renderCalendar() {
+            const year = currentViewDate.getFullYear();
+            const month = currentViewDate.getMonth();
+
+            calMonth.textContent = currentViewDate.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            const today = new Date();
+            const todayStr = today.toDateString();
+
+            let html = '';
+            const dayLabels = ['L', 'M', 'M', 'G', 'V', 'S', 'D'];
+            dayLabels.forEach(label => {
+                html += `<div class="cal-day-label">${label}</div>`;
+            });
+
+            const firstDayIndex = firstDay === 0 ? 6 : firstDay - 1;
+            for (let i = firstDayIndex - 1; i >= 0; i--) {
+                const day = daysInPrevMonth - i;
+                html += `<div class="cal-day other-month" data-date="${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}">${day}</div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateObj = new Date(year, month, day);
+                const dateStr = dateObj.toDateString();
+                let classes = 'cal-day';
+                if (dateStr === todayStr) classes += ' today';
+                if (dateStr === selectedDate.toDateString()) classes += ' selected';
+                html += `<div class="${classes}" data-date="${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}">${day}</div>`;
+            }
+
+            const totalCells = firstDayIndex + daysInMonth;
+            const remainingCells = (7 - (totalCells % 7)) % 7;
+            for (let day = 1; day <= remainingCells; day++) {
+                html += `<div class="cal-day other-month" data-date="${year}-${String(month + 2).padStart(2, '0')}-${String(day).padStart(2, '0')}">${day}</div>`;
+            }
+
+            calGrid.innerHTML = html;
+
+            calGrid.querySelectorAll('.cal-day').forEach(el => {
+                el.addEventListener('click', function() {
+                    const dateParts = this.dataset.date.split('-').map(Number);
+                    selectedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                    calendarPopup.classList.remove('show');
+                    calendarVisible = false;
+                    document.getElementById('currentDate').textContent =
+                        selectedDate.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    filterMatchesByDate(selectedDate);
+                });
+            });
+        }
+
+        calPrev.addEventListener('click', () => {
+            currentViewDate.setMonth(currentViewDate.getMonth() - 1);
+            renderCalendar();
+        });
+
+        calNext.addEventListener('click', () => {
+            currentViewDate.setMonth(currentViewDate.getMonth() + 1);
+            renderCalendar();
+        });
+
+        calToday.addEventListener('click', () => {
+            selectedDate = new Date();
+            currentViewDate = new Date();
+            document.getElementById('currentDate').textContent =
+                selectedDate.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            calendarPopup.classList.remove('show');
+            calendarVisible = false;
+            filterMatchesByDate(selectedDate);
+        });
 
         // ============================================================
         //  TAB NAVIGATION
@@ -837,84 +1181,236 @@
             return 'flag-red';
         }
 
-        // ============================================================
-        //  DATI PARTITE
-        // ============================================================
-        const allMatches = [
-            {
-                id: 1, campionato: "J1 League", giornata: 24,
-                data: "20/07/2026", dataObj: new Date(2026, 6, 20), ora: "19:00",
-                home: "F. Okayama", away: "Vissel Kobe",
-                formHome: "WLDWD", formAway: "DWWLD",
-                percHome: 67, percAway: 33,
-                under45: 78, multigol: 62, multigolFasce: "0-2 - 1-3", over15: 84,
-                homeStats: { xG: 1.8, goalsAvg: 1.4, shots: 12 },
-                awayStats: { xG: 1.2, goalsAvg: 0.9, shots: 9 },
-                venue: "JFE Sunny Country Stadium",
-                weather: { temp: 24, condition: 'Parzialmente nuvoloso', wind: 12, humidity: 65, icon: '⛅' }
-            },
-            {
-                id: 2, campionato: "J1 League", giornata: 24,
-                data: "20/07/2026", dataObj: new Date(2026, 6, 20), ora: "19:00",
-                home: "Yokohama F.M.", away: "Grampus",
-                formHome: "LWDWL", formAway: "DLWDL",
-                percHome: 55, percAway: 45,
-                under45: 69, multigol: 55, multigolFasce: "1-3 - 2-5", over15: 71,
-                homeStats: { xG: 1.6, goalsAvg: 1.8, shots: 14 },
-                awayStats: { xG: 1.1, goalsAvg: 0.7, shots: 8 },
-                venue: "Nissan Stadium",
-                weather: { temp: 26, condition: 'Sereno', wind: 8, humidity: 55, icon: '☀️' }
-            },
-            {
-                id: 3, campionato: "J1 League", giornata: 24,
-                data: "20/07/2026", dataObj: new Date(2026, 6, 20), ora: "19:00",
-                home: "Albirex Niigata", away: "Sanf. Hiroshima",
-                formHome: "LDDWL", formAway: "WDWWL",
-                percHome: 38, percAway: 62,
-                under45: 81, multigol: 44, multigolFasce: "0-2 - 1-3", over15: 59,
-                homeStats: { xG: 0.9, goalsAvg: 0.7, shots: 8 },
-                awayStats: { xG: 1.5, goalsAvg: 1.7, shots: 13 },
-                venue: "Denka Big Swan Stadium",
-                weather: { temp: 22, condition: 'Pioggia leggera', wind: 18, humidity: 80, icon: '🌧️' }
-            }
-        ];
+        function getFormLetters(formStr) {
+            if (!formStr) return '-----';
+            // Prendi solo le prime 5 lettere (W, D, L)
+            let letters = formStr.replace(/[^WDL]/g, '').slice(0, 5);
+            while (letters.length < 5) letters += '-';
+            return letters;
+        }
 
         // ============================================================
-        //  STATO SWIPE
+        //  CARICAMENTO FILE EXCEL
         // ============================================================
-        let currentMatches = [];
-        let currentIndex = 0;
-        let currentView = 'card';
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        const swipeContainer = document.getElementById('swipeContainer');
-        const cardsContainer = document.getElementById('cardsSwipeContainer');
-        const aiContainer = document.getElementById('aiContainer');
-        const dots = document.querySelectorAll('.dot');
-        const badge = document.getElementById('matchCountBadge');
+            const reader = new FileReader();
+            reader.onload = function(loadEvent) {
+                try {
+                    const data = new Uint8Array(loadEvent.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    // Leggi il foglio "Palinsesto"
+                    const sheet = workbook.Sheets['Palinsesto'];
+                    if (!sheet) {
+                        alert('Foglio "Palinsesto" non trovato nel file Excel!');
+                        return;
+                    }
+
+                    const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                    console.log('Dati caricati:', jsonData.length, 'righe');
+
+                    // Pulisci e mappa i dati
+                    allMatches = [];
+                    jsonData.forEach(row => {
+                        // Cerca le colonne necessarie
+                        const campionato = row['Campionato'] || row['Campionato '] || '';
+                        const giornata = row['Giornata'] || row['Giornata '] || '';
+                        const data = row['Data'] || row['Data '] || '';
+                        const ora = row['Ora'] || row['Ora '] || '';
+                        const home = row['Squadra'] || row['Squadra '] || '';
+                        const away = row['Avversario'] || row['Avversario '] || row['Squadra Ospite'] || '';
+
+                        // Salta righe vuote
+                        if (!campionato && !home && !away) return;
+
+                        // Cerca le percentuali e le giocate
+                        const percHome = parseFloat(row['% Home'] || row['% Casa'] || row['%']) || 50;
+                        const percAway = 100 - percHome;
+
+                        const under45 = parseFloat(row['12+U 4,5'] || row['12+under 4,5'] || row['Under 4,5'] || '0');
+                        const multigol = parseFloat(row['Multigol'] || row['Multigol %'] || '0');
+                        const multigolFasce = row['Multigol Fasce'] || row['Fasce'] || row['0-2 - 1-3'] || '0-2 - 1-3';
+                        const over15 = parseFloat(row['Over 1,5'] || row['Over 1,5 %'] || '0');
+
+                        // Stato forma (colonne Forma1-Forma5 o Last 5)
+                        let formHome = '';
+                        for (let i = 1; i <= 5; i++) {
+                            const f = row['Forma' + i] || row['Forma ' + i] || '';
+                            if (f) formHome += f;
+                        }
+                        if (!formHome) formHome = row['Last 5'] || row['Stato Forma'] || '-----';
+
+                        // Dati aggiuntivi
+                        const xGHome = parseFloat(row['xG Home'] || row['xG Casa'] || '1.5');
+                        const xGAway = parseFloat(row['xG Away'] || row['xG Ospite'] || '1.2');
+                        const goalsHome = parseFloat(row['Media Gol Home'] || row['Media Gol Casa'] || '1.3');
+                        const goalsAway = parseFloat(row['Media Gol Away'] || row['Media Gol Ospite'] || '1.1');
+
+                        allMatches.push({
+                            id: allMatches.length + 1,
+                            campionato: String(campionato).trim(),
+                            giornata: String(giornata).trim(),
+                            data: String(data).trim(),
+                            ora: String(ora).trim(),
+                            home: String(home).trim(),
+                            away: String(away).trim(),
+                            formHome: getFormLetters(String(formHome).trim()),
+                            formAway: getFormLetters(''), // da implementare con colonne separate
+                            percHome: percHome,
+                            percAway: percAway,
+                            under45: under45 || 50,
+                            multigol: multigol || 50,
+                            multigolFasce: multigolFasce || '0-2 - 1-3',
+                            over15: over15 || 50,
+                            homeStats: { xG: xGHome, goalsAvg: goalsHome, shots: Math.round(xGHome * 8) },
+                            awayStats: { xG: xGAway, goalsAvg: goalsAway, shots: Math.round(xGAway * 8) },
+                            venue: row['Stadio'] || row['Venue'] || 'Stadio',
+                            weather: { temp: 24, condition: 'Parzialmente nuvoloso', wind: 12, humidity: 65, icon: '⛅' }
+                        });
+                    });
+
+                    // Se non ci sono dati, usa i dati di esempio
+                    if (allMatches.length === 0) {
+                        console.log('Nessun dato trovato, uso dati di esempio');
+                        loadSampleData();
+                    } else {
+                        console.log('Caricate', allMatches.length, 'partite');
+                        dataLoaded = true;
+                        filterMatchesByDate(selectedDate);
+                    }
+
+                } catch (err) {
+                    console.error('Errore nel leggere il file:', err);
+                    alert('Errore nella lettura del file. Controlla che sia un file Excel valido.');
+                    loadSampleData();
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
 
         // ============================================================
-        //  FUNZIONI
+        //  DATI DI ESEMPIO (fallback)
         // ============================================================
-        function loadMatchesForDate(date) {
+        function loadSampleData() {
+            allMatches = [{
+                id: 1,
+                campionato: "Allsvenskan",
+                giornata: "13",
+                data: "20/07/2026",
+                ora: "19:00",
+                home: "Kalmar",
+                away: "Västerås",
+                formHome: "WDLWD",
+                formAway: "DLWWL",
+                percHome: 55,
+                percAway: 45,
+                under45: 68,
+                multigol: 52,
+                multigolFasce: "1-3 - 2-5",
+                over15: 73,
+                homeStats: { xG: 1.4, goalsAvg: 1.2, shots: 10 },
+                awayStats: { xG: 1.1, goalsAvg: 0.9, shots: 8 },
+                venue: "Guldfågeln Arena",
+                weather: { temp: 22, condition: 'Sereno', wind: 8, humidity: 50, icon: '☀️' }
+            }, {
+                id: 2,
+                campionato: "Veikkausliiga",
+                giornata: "16",
+                data: "20/07/2026",
+                ora: "18:00",
+                home: "TPS",
+                away: "Ilves",
+                formHome: "WLLDW",
+                formAway: "WDWLL",
+                percHome: 48,
+                percAway: 52,
+                under45: 72,
+                multigol: 58,
+                multigolFasce: "0-2 - 1-3",
+                over15: 65,
+                homeStats: { xG: 1.2, goalsAvg: 1.0, shots: 9 },
+                awayStats: { xG: 1.3, goalsAvg: 1.4, shots: 11 },
+                venue: "Veritas Stadion",
+                weather: { temp: 19, condition: 'Nuvoloso', wind: 12, humidity: 70, icon: '☁️' }
+            }, {
+                id: 3,
+                campionato: "Veikkausliiga",
+                giornata: "16",
+                data: "20/07/2026",
+                ora: "19:00",
+                home: "IFK Mariehamn",
+                away: "Lahti",
+                formHome: "LDLWW",
+                formAway: "WDLWL",
+                percHome: 42,
+                percAway: 58,
+                under45: 78,
+                multigol: 44,
+                multigolFasce: "2-5 - 0-2",
+                over15: 55,
+                homeStats: { xG: 0.9, goalsAvg: 0.7, shots: 7 },
+                awayStats: { xG: 1.5, goalsAvg: 1.6, shots: 12 },
+                venue: "Wiklöf Holding Arena",
+                weather: { temp: 17, condition: 'Pioggia leggera', wind: 20, humidity: 85, icon: '🌧️' }
+            }];
+            dataLoaded = true;
+            filterMatchesByDate(selectedDate);
+        }
+
+        // ============================================================
+        //  FILTRA PARTITE PER DATA
+        // ============================================================
+        function filterMatchesByDate(date) {
             const dateStr = date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
             currentMatches = allMatches.filter(m => m.data === dateStr);
+
+            // Se non ci sono partite per questa data, mostra tutte quelle disponibili
+            if (currentMatches.length === 0 && allMatches.length > 0) {
+                // Mostra un messaggio ma mantieni le partite
+                currentMatches = allMatches;
+            }
+
             currentIndex = 0;
             renderCards();
             badge.textContent = currentMatches.length;
             switchView('card');
         }
 
+        // ============================================================
+        //  RENDER CARDS
+        // ============================================================
         function renderCards() {
             if (!currentMatches.length) {
-                cardsContainer.innerHTML = `<div class="empty-state"><span>📅</span>Nessuna partita</div>`;
+                cardsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <span>📅</span>
+                        Nessuna partita per questa data<br>
+                        <small style="font-size:0.6rem;color:rgba(255,255,255,0.2);">
+                            Carica un file Excel o seleziona un'altra data
+                        </small>
+                        <br><br>
+                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()" style="padding:6px 16px;font-size:0.7rem;">
+                            📂 Carica file Excel
+                        </button>
+                    </div>
+                `;
                 aiContainer.innerHTML = `<div class="empty-state"><span>🤖</span>Nessuna partita</div>`;
                 return;
             }
 
             let html = '';
             currentMatches.forEach((m, idx) => {
-                const fh = m.formHome.split('').map(c => `<span class="${c}">${c}</span>`).join('');
-                const fa = m.formAway.split('').map(c => `<span class="${c}">${c}</span>`).join('');
+                const fh = m.formHome.split('').map(c =>
+                    `<span class="form-box-letter ${c === '-' ? '-' : c}">${c}</span>`
+                ).join('');
+
+                const fa = m.formAway.split('').map(c =>
+                    `<span class="form-box-letter ${c === '-' ? '-' : c}">${c}</span>`
+                ).join('');
+
                 const hc = getFlagClass(m.percHome);
                 const ac = getFlagClass(m.percAway);
                 const uc = getFlagClass(m.under45);
@@ -964,9 +1460,12 @@
             renderAI(currentMatches[currentIndex] || currentMatches[0]);
         }
 
+        // ============================================================
+        //  RENDER AI
+        // ============================================================
         function renderAI(match) {
             if (!match) {
-                aiContainer.innerHTML = `<div class="empty-state"><span>🤖</span>Nessuna partita</div>`;
+                aiContainer.innerHTML = `<div class="empty-state"><span>🤖</span>Nessuna partita selezionata</div>`;
                 return;
             }
 
@@ -1032,6 +1531,9 @@
             `;
         }
 
+        // ============================================================
+        //  GENERA ANALISI
+        // ============================================================
         function generateAnalysis(m) {
             let a = `🔍 **Analisi tattica**:\n\n`;
             a += `**${m.home}** (${m.percHome}%) - Ultime 5: ${m.formHome}\n`;
@@ -1081,12 +1583,20 @@
         // ============================================================
         //  SWIPE
         // ============================================================
-        let ty = 0, tx = 0, dy = 0, dx = 0, swiping = false;
+        let ty = 0,
+            tx = 0,
+            dy = 0,
+            dx = 0,
+            swiping = false;
         const mc = document.getElementById('mainContent');
 
         mc.addEventListener('touchstart', (e) => {
             const t = e.touches[0];
-            ty = t.clientY; tx = t.clientX; dy = 0; dx = 0; swiping = true;
+            ty = t.clientY;
+            tx = t.clientX;
+            dy = 0;
+            dx = 0;
+            swiping = true;
         }, { passive: true });
 
         mc.addEventListener('touchmove', (e) => {
@@ -1114,11 +1624,16 @@
         mc.addEventListener('touchend', () => { swiping = false; }, { passive: true });
 
         // Mouse drag
-        let mdX = 0, mdY = 0, dragging = false;
-        mc.addEventListener('mousedown', (e) => { mdX = e.clientX; mdY = e.clientY; dragging = true; });
+        let mdX = 0,
+            mdY = 0,
+            dragging = false;
+        mc.addEventListener('mousedown', (e) => { mdX = e.clientX;
+            mdY = e.clientY;
+            dragging = true; });
         mc.addEventListener('mousemove', (e) => {
             if (!dragging) return;
-            const dX = e.clientX - mdX, dY = e.clientY - mdY;
+            const dX = e.clientX - mdX,
+                dY = e.clientY - mdY;
             if (Math.abs(dX) > 30 && Math.abs(dX) > Math.abs(dY) * 1.2) {
                 if (dX < -30 && currentView === 'card') switchView('ai');
                 else if (dX > 30 && currentView === 'ai') switchView('card');
@@ -1131,10 +1646,13 @@
         //  KEYBOARD
         // ============================================================
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp' && currentIndex > 0) { e.preventDefault(); selectMatch(currentIndex - 1); }
-            else if (e.key === 'ArrowDown' && currentIndex < currentMatches.length - 1) { e.preventDefault(); selectMatch(currentIndex + 1); }
-            else if (e.key === 'ArrowRight' && currentView === 'card') { e.preventDefault(); switchView('ai'); }
-            else if (e.key === 'ArrowLeft' && currentView === 'ai') { e.preventDefault(); switchView('card'); }
+            if (e.key === 'ArrowUp' && currentIndex > 0) { e.preventDefault();
+                selectMatch(currentIndex - 1); } else if (e.key === 'ArrowDown' && currentIndex < currentMatches.length - 1) { e
+                    .preventDefault();
+                selectMatch(currentIndex + 1); } else if (e.key === 'ArrowRight' && currentView === 'card') { e
+                    .preventDefault();
+                switchView('ai'); } else if (e.key === 'ArrowLeft' && currentView === 'ai') { e.preventDefault();
+                switchView('card'); }
         });
 
         // ============================================================
@@ -1147,11 +1665,14 @@
         });
 
         // ============================================================
-        //  INIT
+        //  INIT - Carica dati di esempio in attesa del file
         // ============================================================
-        loadMatchesForDate(new Date());
+        // Carica i dati di esempio subito
+        loadSampleData();
 
-        console.log('GesssAI-Prono · header doppio in altezza');
+        // Se l'utente ha già un file, può caricarlo
+        console.log('GesssAI-Prono · in attesa di file Excel');
+        console.log('Carica il file Prono.xlsx per vedere le partite reali');
     })();
 </script>
 </body>
