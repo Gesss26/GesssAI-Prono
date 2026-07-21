@@ -32,6 +32,7 @@
             --green: #22c55e;
             --red: #ef4444;
             --yellow: #eab308;
+            --font-size-base: 16px;
         }
         body.light {
             --bg: #f1f5f9;
@@ -58,7 +59,14 @@
             transition: background 0.3s, color 0.3s;
             color: var(--text-primary);
             touch-action: pan-y;
+            font-size: var(--font-size-base);
         }
+
+        /* Dimensioni font */
+        .font-sm { --font-size-base: 13px; }
+        .font-md { --font-size-base: 16px; }
+        .font-lg { --font-size-base: 19px; }
+        .font-xl { --font-size-base: 22px; }
 
         .top-bar {
             display: flex;
@@ -79,11 +87,11 @@
             display: flex;
             align-items: baseline;
             gap: 10px;
-            font-size: 13px;
+            font-size: 0.85rem;
             color: var(--text-secondary);
         }
         .datetime .date { font-weight: 600; color: var(--text-primary); }
-        .datetime .time { background: var(--badge-bg); padding: 3px 12px; border-radius: 30px; font-size: 12px; font-weight: 500; }
+        .datetime .time { background: var(--badge-bg); padding: 3px 12px; border-radius: 30px; font-size: 0.8rem; font-weight: 500; }
 
         .tabs {
             display: flex;
@@ -100,7 +108,7 @@
             background: transparent;
             color: var(--text-secondary);
             font-weight: 600;
-            font-size: 12px;
+            font-size: 0.75rem;
             cursor: pointer;
             transition: 0.2s;
             white-space: nowrap;
@@ -146,7 +154,7 @@
         .card-header {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 0.85rem;
             font-weight: 600;
             color: var(--text-secondary);
             padding-bottom: 6px;
@@ -157,7 +165,7 @@
             background: var(--badge-bg);
             padding: 0 12px 0 8px;
             border-radius: 30px;
-            font-size: 11px;
+            font-size: 0.7rem;
             font-weight: 600;
             color: var(--text-primary);
             display: inline-flex;
@@ -166,7 +174,7 @@
         .card-header .giornata { color: var(--text-secondary); font-weight: 500; }
 
         .data-ora {
-            font-size: 13px;
+            font-size: 0.8rem;
             color: var(--text-secondary);
             background: var(--badge-bg);
             padding: 5px 12px;
@@ -180,11 +188,11 @@
             justify-content: space-between;
             align-items: center;
             font-weight: 700;
-            font-size: 17px;
+            font-size: 1.1rem;
             padding: 4px 0 8px;
             color: var(--text-primary);
         }
-        .squadre .vs { color: var(--text-secondary); font-weight: 400; font-size: 14px; }
+        .squadre .vs { color: var(--text-secondary); font-weight: 400; font-size: 0.9rem; }
 
         .forme {
             display: flex;
@@ -199,7 +207,7 @@
             background: var(--form-bg);
             padding: 4px 10px;
             border-radius: 30px;
-            font-size: 12px;
+            font-size: 0.75rem;
             font-weight: 700;
             letter-spacing: 0.2px;
             color: var(--text-primary);
@@ -216,7 +224,7 @@
             height: 26px;
             border-radius: 6px;
             font-weight: 700;
-            font-size: 12px;
+            font-size: 0.75rem;
             color: #000;
             background: #6b7280;
         }
@@ -235,7 +243,7 @@
             background: var(--score-bg);
             padding: 2px 12px;
             border-radius: 30px;
-            font-size: 12px;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--text-secondary);
             flex: 1;
@@ -247,7 +255,7 @@
             display: flex;
             justify-content: center;
             gap: 20px;
-            font-size: 13px;
+            font-size: 0.8rem;
             font-weight: 600;
             padding: 4px 0 6px;
             background: var(--diff-bg);
@@ -258,7 +266,7 @@
         .diff-perc .diff-value { padding: 2px 12px; border-radius: 20px; font-weight: 700; }
 
         .stat-perc {
-            font-size: 13px;
+            font-size: 0.8rem;
             font-weight: 600;
             padding: 4px 12px;
             border-radius: 30px;
@@ -298,7 +306,7 @@
         .stat-row {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
+            font-size: 0.75rem;
             padding: 4px 0;
             border-bottom: 1px solid var(--card-border);
             color: var(--text-secondary);
@@ -309,7 +317,7 @@
         .multigol-row {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
+            font-size: 0.75rem;
             padding: 2px 0;
             color: var(--text-secondary);
         }
@@ -332,7 +340,7 @@
             background: var(--footer-bg);
             padding: 8px 12px;
             border-radius: 40px;
-            font-size: 12px;
+            font-size: 0.75rem;
             font-weight: 500;
             color: var(--text-secondary);
         }
@@ -342,7 +350,7 @@
             text-align: center;
             padding: 50px 16px;
             color: var(--text-secondary);
-            font-size: 16px;
+            font-size: 1rem;
             background: var(--card-bg);
             border-radius: 30px;
             border: 1px solid var(--card-border);
@@ -371,12 +379,12 @@
             gap: 8px;
         }
         .ai-header .match-title {
-            font-size: 20px;
+            font-size: 1.25rem;
             font-weight: 700;
             color: var(--text-primary);
         }
         .ai-header .match-league {
-            font-size: 13px;
+            font-size: 0.8rem;
             color: var(--text-secondary);
             background: var(--badge-bg);
             padding: 4px 14px;
@@ -395,21 +403,21 @@
             gap: 8px;
         }
         .ai-weather .temp {
-            font-size: 28px;
+            font-size: 1.75rem;
             font-weight: 700;
             color: var(--text-primary);
         }
         .ai-weather .city {
-            font-size: 14px;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             font-weight: 500;
         }
         .ai-weather .desc {
-            font-size: 14px;
+            font-size: 0.85rem;
             color: var(--text-secondary);
         }
         .ai-weather .weather-icon {
-            font-size: 28px;
+            font-size: 1.75rem;
         }
 
         .ai-section {
@@ -422,7 +430,7 @@
         .ai-section .section-title {
             font-weight: 600;
             color: var(--text-secondary);
-            font-size: 12px;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 4px;
@@ -432,36 +440,9 @@
         }
         .ai-section .section-content {
             color: var(--text-primary);
-            font-size: 14px;
+            font-size: 0.85rem;
             line-height: 1.6;
             white-space: pre-wrap;
-        }
-
-        .ai-grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .ai-grid-2 .box {
-            background: var(--section-bg);
-            border-radius: 12px;
-            padding: 10px 12px;
-            border-left: 3px solid var(--green);
-        }
-        .ai-grid-2 .box.weakness {
-            border-left-color: var(--red);
-        }
-        .ai-grid-2 .box .team-name {
-            font-weight: 600;
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 2px;
-        }
-        .ai-grid-2 .box .items {
-            font-size: 13px;
-            color: var(--text-primary);
-            line-height: 1.5;
         }
 
         .ai-pronostico {
@@ -478,20 +459,20 @@
             border: 1px solid var(--card-border);
         }
         .ai-pronostico .pron-box .label {
-            font-size: 10px;
+            font-size: 0.65rem;
             text-transform: uppercase;
             color: var(--text-secondary);
             font-weight: 600;
             letter-spacing: 0.3px;
         }
         .ai-pronostico .pron-box .value {
-            font-size: 22px;
+            font-size: 1.4rem;
             font-weight: 700;
             color: var(--text-primary);
             margin-top: 4px;
         }
         .ai-pronostico .pron-box .sub {
-            font-size: 12px;
+            font-size: 0.75rem;
             color: var(--text-secondary);
             margin-top: 2px;
         }
@@ -510,14 +491,14 @@
             text-align: center;
         }
         .ai-tips .tip-box .tip-label {
-            font-size: 10px;
+            font-size: 0.65rem;
             text-transform: uppercase;
             color: var(--text-secondary);
             font-weight: 600;
             letter-spacing: 0.3px;
         }
         .ai-tips .tip-box .tip-value {
-            font-size: 16px;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--text-primary);
             margin-top: 4px;
@@ -565,62 +546,86 @@
 
         .swipe-indicator {
             text-align: center;
-            font-size: 11px;
+            font-size: 0.7rem;
             color: var(--text-secondary);
             padding: 6px 0 2px;
             opacity: 0.6;
         }
 
-        .ai-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 8px;
-            font-size: 13px;
+        /* ================================================================ */
+        /* IMPOSTAZIONI - Slider dimensione caratteri */
+        /* ================================================================ */
+
+        .font-slider-container {
+            margin: 12px 0 8px;
         }
-        .ai-table th {
-            text-align: left;
+        .font-slider-container .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
             color: var(--text-secondary);
-            font-weight: 600;
-            padding: 6px 8px;
-            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 4px;
         }
-        .ai-table td {
-            padding: 6px 8px;
-            border-bottom: 1px solid var(--card-border);
-            color: var(--text-primary);
+        .font-slider-container input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 10px;
+            background: var(--badge-bg);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
         }
-        .ai-table tr:last-child td { border-bottom: none; }
-
-        .badge-giocata {
-            display: inline-block;
+        .font-slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
             background: var(--tab-active);
-            color: #fff;
-            padding: 2px 12px;
-            border-radius: 30px;
-            font-size: 11px;
+            cursor: pointer;
+        }
+        .font-slider-container input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--tab-active);
+            cursor: pointer;
+            border: none;
+        }
+        .font-slider-container .font-size-display {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            padding: 4px 0;
+        }
+        .font-slider-container .font-size-example {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            padding: 4px 0 8px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 8px;
+        }
+        .font-slider-container .font-size-example span {
+            color: var(--text-primary);
             font-weight: 600;
         }
-
-        .badge-success { background: var(--green); color: #000; padding: 2px 10px; border-radius: 30px; font-size: 11px; font-weight: 600; }
-        .badge-warning { background: var(--yellow); color: #000; padding: 2px 10px; border-radius: 30px; font-size: 11px; font-weight: 600; }
-        .badge-danger { background: var(--red); color: #fff; padding: 2px 10px; border-radius: 30px; font-size: 11px; font-weight: 600; }
 
         @media (max-width: 480px) {
             .top-bar { flex-direction: column; align-items: stretch; gap: 8px; }
             .datetime { justify-content: space-between; }
             .tabs { justify-content: center; }
             .card { padding: 14px 12px; }
-            .squadre { font-size: 15px; }
-            .forma-box { width: 22px; height: 22px; font-size: 10px; }
-            .diff-perc { font-size: 12px; gap: 12px; }
-            .stat-footer { font-size: 11px; }
-            .ai-grid-2 { grid-template-columns: 1fr; }
+            .squadre { font-size: 1rem; }
+            .forma-box { width: 22px; height: 22px; font-size: 0.65rem; }
+            .diff-perc { font-size: 0.7rem; gap: 12px; }
+            .stat-footer { font-size: 0.65rem; }
             .ai-pronostico { grid-template-columns: 1fr 1fr 1fr; }
             .ai-tips { grid-template-columns: 1fr; }
             .home-btn { width: 48px; height: 48px; font-size: 20px; bottom: 16px; right: 16px; }
-            .ai-header .match-title { font-size: 17px; }
-            .ai-weather .temp { font-size: 22px; }
-            .ai-table { font-size: 11px; }
+            .ai-header .match-title { font-size: 1.05rem; }
+            .ai-weather .temp { font-size: 1.4rem; }
         }
         @media (max-width: 380px) {
             .ai-pronostico { grid-template-columns: 1fr; }
@@ -657,22 +662,34 @@
 
 <div class="tab-content" id="tab-impostazioni">
     <div class="ai-container">
-        <h3 style="font-size:16px;margin-bottom:12px;color:var(--text-primary);">⚙️ Impostazioni</h3>
-        <label style="display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">Tema</label>
+        <h3 style="font-size:1rem;margin-bottom:12px;color:var(--text-primary);">⚙️ Impostazioni</h3>
+
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">Tema</label>
         <div style="display:flex;gap:12px;margin-bottom:16px;">
             <button id="themeDark" class="tab-btn active" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-weight:600;cursor:pointer;">🌙 Scuro</button>
             <button id="themeLight" class="tab-btn" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-weight:600;cursor:pointer;">☀️ Chiaro</button>
         </div>
 
-        <label style="display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">GROQ API Key</label>
-        <input type="text" id="groqKey" placeholder="Inserisci API Key GROQ" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-size:14px;outline:none;margin-bottom:4px;">
-        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">✅ API Key salvata localmente</div>
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">Dimensione caratteri</label>
+        <div class="font-slider-container">
+            <div class="slider-label">
+                <span>🔤 Piccolo</span>
+                <span>🔤 Grande</span>
+            </div>
+            <input type="range" id="fontSizeSlider" min="1" max="4" step="1" value="2">
+            <div class="font-size-display" id="fontSizeDisplay">Medio (16px)</div>
+            <div class="font-size-example">Esempio: <span>Testo di prova</span> — <span style="font-weight:400;color:var(--text-secondary);">Tutte le scritte si ridimensionano</span></div>
+        </div>
 
-        <label style="display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">World Weather Online API Key</label>
-        <input type="text" id="weatherKey" placeholder="Inserisci API Key Weather" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-size:14px;outline:none;margin-bottom:4px;">
-        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">✅ API Key salvata localmente</div>
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">GROQ API Key</label>
+        <input type="text" id="groqKey" placeholder="Inserisci API Key GROQ" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-size:0.85rem;outline:none;margin-bottom:4px;">
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:12px;">✅ API Key salvata localmente</div>
 
-        <button id="saveSettings" style="width:100%;padding:12px;border-radius:30px;border:none;background:#3b82f6;color:#fff;font-weight:600;font-size:15px;cursor:pointer;">💾 Salva Impostazioni</button>
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">World Weather Online API Key</label>
+        <input type="text" id="weatherKey" placeholder="Inserisci API Key Weather" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-size:0.85rem;outline:none;margin-bottom:4px;">
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:16px;">✅ API Key salvata localmente</div>
+
+        <button id="saveSettings" style="width:100%;padding:12px;border-radius:30px;border:none;background:#3b82f6;color:#fff;font-weight:600;font-size:0.95rem;cursor:pointer;">💾 Salva Impostazioni</button>
     </div>
 </div>
 
@@ -967,10 +984,20 @@
     let currentMatchIndex = 0;
     let matches = [];
 
+    // ================================================================
+    // FILTRO PARTITE: oggi e domani (FUTURE)
+    // ================================================================
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
     const todayStr = today.toISOString().split('T')[0];
-    matches = matchesData.filter(m => m.data === todayStr);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    // Filtra partite con data >= oggi (oggi e future)
+    matches = matchesData.filter(m => m.data >= todayStr);
     matches.sort((a, b) => (a.data + a.ora).localeCompare(b.data + b.ora));
 
     // ================================================================
@@ -980,7 +1007,7 @@
     function renderCards() {
         const container = document.getElementById('cardsContainer');
         if (matches.length === 0) {
-            container.innerHTML = `<div class="no-match">📅 Nessuna partita in programma per oggi (${formatDate(todayStr)}).</div>`;
+            container.innerHTML = `<div class="no-match">📅 Nessuna partita in programma per oggi o domani (${formatDate(todayStr)} - ${formatDate(tomorrowStr)}).</div>`;
             return;
         }
 
@@ -1008,6 +1035,11 @@
             const homeBestFlag = getFlag(homeBest);
             const awayBestFlag = getFlag(awayBest);
 
+            // Data display con indicazione "OGGI" o "DOMANI"
+            let dataDisplay = formatDate(match.data);
+            if (match.data === todayStr) dataDisplay = '🔴 OGGI ' + dataDisplay;
+            else if (match.data === tomorrowStr) dataDisplay = '🟡 DOMANI ' + dataDisplay;
+
             html += `
                 <div class="card" data-index="${idx}" data-tab="palinsesto">
                     <div class="card-header">
@@ -1015,7 +1047,7 @@
                         <span class="giornata">Giornata ${match.giornata}</span>
                     </div>
                     <div class="data-ora">
-                        <span>📅 ${formatDate(match.data)}</span>
+                        <span>📅 ${dataDisplay}</span>
                         <span>⏰ ${match.ora}</span>
                     </div>
                     <div class="squadre">
@@ -1094,11 +1126,8 @@
 
         const homeDiff = homeGf - homeGs;
         const awayDiff = awayGf - awayGs;
-        const totalGf = homeGf + awayGf;
-        const totalGs = homeGs + awayGs;
-        const totalGoals = totalGf + totalGs;
+        const totalGoals = homeGf + homeGs + awayGf + awayGs;
 
-        // Calcolo percentuali base
         const homeWinPerc = Math.min(100, Math.round((homePts * 4.2) + (homeDiff * 1.5)));
         const awayWinPerc = Math.min(100, Math.round((awayPts * 4.2) + (awayDiff * 1.5)));
         const drawPerc = Math.max(0, 100 - homeWinPerc - awayWinPerc);
@@ -1107,25 +1136,20 @@
         const awayWin = Math.min(100, Math.max(5, awayWinPerc));
         const draw = Math.min(100, Math.max(5, drawPerc));
 
-        // Pronostico 1X2
         let pronostico = 'X';
         if (homeWin > awayWin && homeWin > draw) pronostico = '1';
         else if (awayWin > homeWin && awayWin > draw) pronostico = '2';
 
-        // Sicurezza (basata sul margine)
         const maxPerc = Math.max(homeWin, awayWin, draw);
         const sicurezza = Math.min(100, Math.round(maxPerc + 10));
 
-        // Giocate
         const over15 = Math.min(100, Math.round((totalGoals / 20) * 100 + 20));
         const under45 = Math.min(100, Math.round(100 - (totalGoals / 20) * 15));
 
-        // Multigol 1-3 media
         const homeMulti = multiGoalValues(homeStats);
         const awayMulti = multiGoalValues(awayStats);
         const multi13 = Math.round((homeMulti.p13 + awayMulti.p13) / 2);
 
-        // Consigli
         let tip1 = 'X';
         if (homeWin > 60) tip1 = '1';
         else if (awayWin > 60) tip1 = '2';
@@ -1151,7 +1175,7 @@
     }
 
     // ================================================================
-    // RENDER ANALISI AI - CON GROQ E FALLBACK
+    // RENDER ANALISI AI
     // ================================================================
 
     async function renderAnalisiAI(index) {
@@ -1166,7 +1190,6 @@
         const awayStats = getTeamStats(match.campionato, match.ospite);
         const homeCity = teamCityMap[match.casa] || match.casa;
 
-        // Mostra loading
         container.innerHTML = `
             <div class="ai-container">
                 <div class="ai-header">
@@ -1186,7 +1209,7 @@
             </div>
         `;
 
-        // Recupera meteo
+        // Meteo
         const weatherKey = localStorage.getItem('weatherApiKey') || 'd8df501134ef44eab6515526262007';
         let weatherTemp = '--°C', weatherDesc = '--', weatherIcon = '🌤️';
         try {
@@ -1206,10 +1229,7 @@
         document.getElementById('weatherDesc').textContent = weatherDesc;
         document.querySelector('#weatherDisplay .weather-icon').textContent = weatherIcon;
 
-        // ================================================================
-        // PROMPT DETTAGLIATO PER GROQ
-        // ================================================================
-
+        // GROQ
         const groqKey = localStorage.getItem('groqApiKey') || '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';
 
         const homeForma = homeStats.forma || 'N/D';
@@ -1217,28 +1237,21 @@
         const homeScore = calculateFormScore(homeStats.forma);
         const awayScore = calculateFormScore(awayStats.forma);
 
-        const prompt = `Sei un analista sportivo professionista specializzato in statistica calcistica e trading di scommesse. Analizza la partita:
+        const prompt = `Sei un analista sportivo professionista. Analizza:
 
 CAMPIONATO: ${match.campionato}
-SQUADRA DI CASA: ${match.casa}
-SQUADRA OSPITE: ${match.ospite}
+CASA: ${match.casa} (Punti ${homeStats.punti}, Pos. ${homeStats.pos}, Gol ${homeStats.gf}/${homeStats.gs}, Forma: ${homeForma}, Punteggio: ${homeScore})
+OSPITE: ${match.ospite} (Punti ${awayStats.punti}, Pos. ${awayStats.pos}, Gol ${awayStats.gf}/${awayStats.gs}, Forma: ${awayForma}, Punteggio: ${awayScore})
 
-DATI STATISTICI:
-- ${match.casa}: Punti ${homeStats.punti}, Posizione ${homeStats.pos}, Gol Fatti ${homeStats.gf}, Gol Subiti ${homeStats.gs}, Forma: ${homeForma}, Punteggio forma: ${homeScore}
-- ${match.ospite}: Punti ${awayStats.punti}, Posizione ${awayStats.pos}, Gol Fatti ${awayStats.gf}, Gol Subiti ${awayStats.gs}, Forma: ${awayForma}, Punteggio forma: ${awayScore}
+Genera un report conciso con:
+1. STATO DI FORMA - sequenza e trend
+2. STATISTICHE CHIAVE - punti, gol, differenza reti
+3. PRONOSTICO 1X2
+4. SICUREZZA (0-100%)
+5. CONSIGLIO SINGOLA
+6. CONSIGLIO COMBO
 
-Genera un report con queste sezioni:
-1. STATO DI FORMA - sequenza risultati e trend
-2. MEDIA GOL - fatti, subiti, totali
-3. RANGE GOL PIÙ FREQUENTE
-4. MULTIGOL - 0-1, 0-2, 1-3, Over 1.5
-5. UNDER/OVER - 1.5, 2.5, 3.5, 4.5
-6. POSIZIONE IN CLASSIFICA
-7. DETTAGLIO 3 GIOCATE - 12+U4.5, Combinata, Libera
-8. CONSIGLI DI TRADING
-9. VALUTAZIONE FINALE - Score, Rischio, Affidabilità
-
-Usa solo i dati forniti. Arrotonda le percentuali all'intero.`;
+Usa solo i dati forniti. Arrotonda le percentuali.`;
 
         let groqSuccess = false;
         let analysis = '';
@@ -1254,7 +1267,7 @@ Usa solo i dati forniti. Arrotonda le percentuali all'intero.`;
                     model: 'llama3-8b-8192',
                     messages: [{ role: 'user', content: prompt }],
                     temperature: 0.3,
-                    max_tokens: 1000
+                    max_tokens: 600
                 })
             });
 
@@ -1270,10 +1283,9 @@ Usa solo i dati forniti. Arrotonda le percentuali all'intero.`;
             console.error('Errore GROQ:', error);
         }
 
-        // Se GROQ fallisce, usa il fallback statistico
-        if (!groqSuccess || !analysis || analysis.length < 50) {
+        // Fallback se GROQ fallisce
+        if (!groqSuccess || !analysis || analysis.length < 30) {
             const tips = generateStatisticalTips(match);
-
             const homePerc = winPercentage(homeStats);
             const awayPerc = winPercentage(awayStats);
             const under45 = under45Percent(homeStats, awayStats);
@@ -1300,7 +1312,7 @@ Usa solo i dati forniti. Arrotonda le percentuali all'intero.`;
                         <div class="section-content">
                             <strong>${match.casa}:</strong> ${homeStats.forma || 'N/D'} (Punteggio: ${homeScore})<br>
                             <strong>${match.ospite}:</strong> ${awayStats.forma || 'N/D'} (Punteggio: ${awayScore})<br>
-                            <strong>Trend:</strong> ${homeScore > awayScore ? '📈 ${match.casa} in crescita' : awayScore > homeScore ? '📈 ${match.ospite} in crescita' : '⚖️ Equilibrato'}
+                            <strong>Trend:</strong> ${homeScore > awayScore ? '📈 ' + match.casa + ' in crescita' : awayScore > homeScore ? '📈 ' + match.ospite + ' in crescita' : '⚖️ Equilibrato'}
                         </div>
                     </div>
 
@@ -1309,13 +1321,7 @@ Usa solo i dati forniti. Arrotonda le percentuali all'intero.`;
                         <div class="section-content">
                             <strong>${match.casa}:</strong> Punti ${homeStats.punti} | Pos. ${homeStats.pos} | Gol Fatti ${homeStats.gf} | Subiti ${homeStats.gs} | Diff ${homeStats.gf - homeStats.gs}<br>
                             <strong>${match.ospite}:</strong> Punti ${awayStats.punti} | Pos. ${awayStats.pos} | Gol Fatti ${awayStats.gf} | Subiti ${awayStats.gs} | Diff ${awayStats.gf - awayStats.gs}<br>
-                            <strong>Multigol 1-3 Media:</strong> ${multiAvg13}%
-                        </div>
-                    </div>
-
-                    <div class="ai-section">
-                        <div class="section-title">📊 UNDER/OVER</div>
-                        <div class="section-content">
+                            <strong>Multigol 1-3 Media:</strong> ${multiAvg13}%<br>
                             <strong>Over 1.5:</strong> ${over15.label} | <strong>12+Under 4.5:</strong> ${under45.label}
                         </div>
                     </div>
@@ -1348,47 +1354,16 @@ Usa solo i dati forniti. Arrotonda le percentuali all'intero.`;
                         </div>
                     </div>
 
-                    <div style="text-align:center;padding:12px;color:var(--text-secondary);font-size:12px;margin-top:10px;border-top:1px solid var(--card-border);">
-                        ℹ️ Analisi basata su dati statistici reali (GROQ non disponibile)
+                    <div style="text-align:center;padding:12px;color:var(--text-secondary);font-size:0.75rem;margin-top:10px;border-top:1px solid var(--card-border);">
+                        ℹ️ Analisi basata su dati statistici reali
                     </div>
                 </div>
             `;
             return;
         }
 
-        // ================================================================
-        // PARSER DEL REPORT GROQ
-        // ================================================================
-
-        const sections = parseReportSections(analysis, match);
-
-        // Se il parser non ha trovato sezioni, mostra tutto il testo
-        const hasSections = Object.values(sections).some(v => v && v.length > 10);
-
-        if (!hasSections) {
-            container.innerHTML = `
-                <div class="ai-container">
-                    <div class="ai-header">
-                        <span class="match-title">${match.casa} vs ${match.ospite}</span>
-                        <span class="match-league">${match.campionato}</span>
-                    </div>
-                    <div class="ai-weather">
-                        <span class="weather-icon">${weatherIcon}</span>
-                        <span class="temp">${weatherTemp}</span>
-                        <span class="city">📍 ${homeCity}</span>
-                        <span class="desc">${weatherDesc}</span>
-                    </div>
-                    <div class="ai-section">
-                        <div class="section-title">📋 Report Completo</div>
-                        <div class="section-content" style="white-space:pre-wrap;">${analysis}</div>
-                    </div>
-                </div>
-            `;
-            return;
-        }
-
-        // Costruisci la visualizzazione con le sezioni trovate
-        let html = `
+        // GROQ successo - mostra il report
+        container.innerHTML = `
             <div class="ai-container">
                 <div class="ai-header">
                     <span class="match-title">${match.casa} vs ${match.ospite}</span>
@@ -1400,73 +1375,12 @@ Usa solo i dati forniti. Arrotonda le percentuali all'intero.`;
                     <span class="city">📍 ${homeCity}</span>
                     <span class="desc">${weatherDesc}</span>
                 </div>
+                <div class="ai-section">
+                    <div class="section-title">📋 Report Completo</div>
+                    <div class="section-content" style="white-space:pre-wrap;">${analysis}</div>
+                </div>
+            </div>
         `;
-
-        const sectionMap = {
-            'forma': '📊 STATO DI FORMA',
-            'mediaGol': '📊 MEDIA GOL',
-            'rangeGol': '📊 RANGE GOL PIÙ FREQUENTE',
-            'multigol': '📊 MULTIGOL',
-            'underOver': '📊 UNDER/OVER',
-            'posizione': '📊 POSIZIONE IN CLASSIFICA',
-            'giocate': '🎯 DETTAGLIO 3 GIOCATE',
-            'trading': '🎯 CONSIGLI DI TRADING',
-            'valutazione': '⭐ VALUTAZIONE FINALE'
-        };
-
-        for (const [key, title] of Object.entries(sectionMap)) {
-            if (sections[key] && sections[key].length > 5) {
-                const borderColor = key === 'valutazione' ? '#f59e0b' : 'var(--tab-active)';
-                html += `
-                    <div class="ai-section" style="border-left-color: ${borderColor};">
-                        <div class="section-title">${title}</div>
-                        <div class="section-content">${sections[key]}</div>
-                    </div>
-                `;
-            }
-        }
-
-        html += `</div>`;
-        container.innerHTML = html;
-    }
-
-    // ================================================================
-    // PARSER DEL REPORT GROQ
-    // ================================================================
-
-    function parseReportSections(text, match) {
-        const sections = {};
-
-        const patterns = [
-            { key: 'forma', titles: ['STATO DI FORMA', 'STATO FORMA'] },
-            { key: 'mediaGol', titles: ['MEDIA GOL'] },
-            { key: 'rangeGol', titles: ['RANGE GOL PIÙ FREQUENTE', 'RANGE GOL'] },
-            { key: 'multigol', titles: ['MULTIGOL'] },
-            { key: 'underOver', titles: ['UNDER/OVER'] },
-            { key: 'posizione', titles: ['POSIZIONE IN CLASSIFICA', 'POSIZIONE CLASSIFICA'] },
-            { key: 'giocate', titles: ['DETTAGLIO 3 GIOCATE', '3 GIOCATE', 'GIOCATE'] },
-            { key: 'trading', titles: ['CONSIGLI DI TRADING', 'CONSIGLI TRADING', 'TRADING'] },
-            { key: 'valutazione', titles: ['VALUTAZIONE FINALE', 'VALUTAZIONE'] }
-        ];
-
-        let remainingText = text;
-
-        for (const pattern of patterns) {
-            for (const title of pattern.titles) {
-                const regex = new RegExp(`[\\*]*${title}[\\*]*\\s*[\\n\\r]+([\\s\\S]*?)(?=\\n\\s*[\\*]*[A-Z][A-Z\\s]+[\\*]*\\s*[\\n\\r]|$)`, 'i');
-                const matchResult = remainingText.match(regex);
-                if (matchResult && matchResult[1]) {
-                    let content = matchResult[1].trim();
-                    content = content.replace(/^[\d\.]+\s*/, '');
-                    content = content.replace(/^[\s]*[-•*]\s*/gm, '• ');
-                    sections[pattern.key] = content;
-                    remainingText = remainingText.replace(matchResult[0], '');
-                    break;
-                }
-            }
-        }
-
-        return sections;
     }
 
     // ================================================================
@@ -1562,7 +1476,7 @@ Usa solo i dati forniti. Arrotonda le percentuali all'intero.`;
     }
 
     // ================================================================
-    // CLOCK, TEMA, IMPOSTAZIONI
+    // CLOCK, TEMA, FONT SIZE
     // ================================================================
 
     function updateClock() {
@@ -1581,8 +1495,38 @@ Usa solo i dati forniti. Arrotonda le percentuali all'intero.`;
         document.getElementById('themeLight').className = theme === 'light' ? 'tab-btn active' : 'tab-btn';
     }
 
+    // ================================================================
+    // FONT SIZE
+    // ================================================================
+
+    const fontClasses = ['font-sm', 'font-md', 'font-lg', 'font-xl'];
+    const fontLabels = ['Piccolo (13px)', 'Medio (16px)', 'Grande (19px)', 'Extra Grande (22px)'];
+    const fontValues = [13, 16, 19, 22];
+
+    function applyFontSize(level) {
+        // Rimuovi tutte le classi di font
+        document.body.classList.remove(...fontClasses);
+        // Aggiungi la classe corrispondente
+        if (level >= 1 && level <= 4) {
+            document.body.classList.add(fontClasses[level - 1]);
+        }
+        // Aggiorna il display
+        document.getElementById('fontSizeDisplay').textContent = fontLabels[level - 1] || 'Medio (16px)';
+        document.getElementById('fontSizeSlider').value = level;
+        localStorage.setItem('fontSize', level);
+    }
+
+    // ================================================================
+    // IMPOSTAZIONI
+    // ================================================================
+
     document.getElementById('themeDark').addEventListener('click', () => applyTheme('dark'));
     document.getElementById('themeLight').addEventListener('click', () => applyTheme('light'));
+
+    document.getElementById('fontSizeSlider').addEventListener('input', function() {
+        const level = parseInt(this.value);
+        applyFontSize(level);
+    });
 
     document.getElementById('saveSettings').addEventListener('click', () => {
         const groq = document.getElementById('groqKey').value.trim();
@@ -1624,6 +1568,10 @@ Usa solo i dati forniti. Arrotonda le percentuali all'intero.`;
     // ================================================================
     // AVVIO
     // ================================================================
+
+    // Carica font size salvato
+    const savedFontSize = parseInt(localStorage.getItem('fontSize')) || 2;
+    applyFontSize(savedFontSize);
 
     applyTheme(currentTheme);
     updateClock();
