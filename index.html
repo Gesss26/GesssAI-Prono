@@ -2,1678 +2,1638 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#1a2639">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GesssAI-Prono">
-    <title>GesssAI-Prono</title>
-    <!-- SheetJS per leggere file Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Calcio Card - Statistiche Partite</title>
     <style>
-        /* ===== RESET & BASE ===== */
         * {
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --badge-bg: #2d3a4f;
+            --stat-bg: #2d3a4f;
+            --footer-bg: #1e2a3a;
+            --shadow: rgba(0,0,0,0.4);
+            --form-bg: #1e293b;
+            --diff-bg: #1e2a3a;
+            --score-bg: #1e2a3a;
+            --tab-active: #3b82f6;
+            --tab-inactive: #334155;
+            --home-btn: #f59e0b;
+            --section-bg: #1a2744;
+            --pronostico-bg: #1e3a5f;
+            --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #eab308;
+        }
+        body.light {
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --badge-bg: #e9edf4;
+            --stat-bg: #f1f5f9;
+            --footer-bg: #f1f5f9;
+            --shadow: rgba(0,0,0,0.08);
+            --form-bg: #f1f5f9;
+            --diff-bg: #f1f5f9;
+            --score-bg: #f1f5f9;
+            --tab-inactive: #cbd5e1;
+            --home-btn: #d97706;
+            --section-bg: #f1f5f9;
+            --pronostico-bg: #dbeafe;
         }
         body {
-            background: #12161e;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            height: 100dvh;
-            overflow: hidden;
-            margin: 0;
-        }
-        .app {
-            max-width: 500px;
-            width: 100%;
-            height: 100vh;
-            height: 100dvh;
-            display: flex;
-            flex-direction: column;
-            padding: 6px 6px 0 6px;
-            background: #0d1118;
+            background: var(--bg);
+            padding: 0 12px 80px;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+            color: var(--text-primary);
+            touch-action: pan-y;
         }
 
-        /* ===== HEADER ===== */
-        header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 14px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 14px;
-            color: white;
-            margin-bottom: 6px;
-            flex-shrink: 0;
-            border: 1px solid rgba(255,255,255,0.05);
-            min-height: 80px;
-            gap: 4px;
-            position: relative;
-        }
-        .header-top {
+        .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
-        }
-        .header-top .clock-area {
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-            cursor: pointer;
-            padding: 2px 6px;
-            border-radius: 8px;
-            transition: background 0.2s;
-            user-select: none;
-        }
-        .header-top .clock-area:hover {
-            background: rgba(255,255,255,0.05);
-        }
-        .header-top .clock-area .clock-date {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #ffffff;
-            letter-spacing: 0.5px;
-        }
-        .header-top .clock-area .clock-date .date-label {
-            opacity: 0.4;
-            font-weight: 400;
-            margin-right: 4px;
-        }
-        .header-top .clock-area .clock-time {
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.4);
-            font-weight: 300;
-            letter-spacing: 1px;
-        }
-        .header-top .clock-area .clock-time .sep {
-            opacity: 0.3;
-            margin: 0 4px;
-        }
-        .header-right {
-            display: flex;
-            align-items: center;
+            padding: 8px 4px 12px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 12px;
+            flex-wrap: wrap;
             gap: 6px;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            z-index: 10;
+            transition: background 0.3s;
         }
-        .header-right .badge-count {
-            background: #fc5c7d;
-            color: white;
-            border-radius: 40px;
-            padding: 0 10px;
-            font-size: 0.6rem;
-            font-weight: 700;
-            line-height: 20px;
+        .datetime {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--text-secondary);
         }
-        .header-right .tab-btn {
-            background: transparent;
+        .datetime .date { font-weight: 600; color: var(--text-primary); }
+        .datetime .time { background: var(--badge-bg); padding: 3px 12px; border-radius: 30px; font-size: 12px; font-weight: 500; }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--badge-bg);
+            border-radius: 30px;
+            padding: 3px;
+            flex-shrink: 0;
+        }
+        .tab-btn {
+            padding: 6px 14px;
+            border-radius: 30px;
             border: none;
-            color: rgba(255,255,255,0.4);
-            font-size: 0.65rem;
-            padding: 4px 12px;
-            border-radius: 40px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 12px;
             cursor: pointer;
-            font-family: inherit;
             transition: 0.2s;
-        }
-        .header-right .tab-btn.active {
-            background: rgba(255,255,255,0.08);
-            color: white;
-        }
-        .header-center {
-            font-weight: 700;
-            font-size: 1.4rem;
-            letter-spacing: 1.5px;
-            background: linear-gradient(to right, #f0c27f, #fc5c7d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-align: center;
-            line-height: 1.2;
-        }
-        .header-center .sub {
-            font-size: 0.55rem;
-            letter-spacing: 3px;
-            opacity: 0.25;
-            -webkit-text-fill-color: rgba(255,255,255,0.2);
-            display: block;
-            font-weight: 300;
-            margin-top: -2px;
-        }
-
-        /* ===== CALENDARIO ===== */
-        .calendar-popup {
-            display: none;
-            position: absolute;
-            top: calc(100% + 6px);
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1e2838;
-            border-radius: 16px;
-            padding: 14px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-            z-index: 1000;
-            min-width: 260px;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-        .calendar-popup.show {
-            display: block;
-        }
-        .calendar-popup .cal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .calendar-popup .cal-header .cal-month {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: #e8edf5;
-        }
-        .calendar-popup .cal-header .cal-nav {
-            background: transparent;
-            border: none;
-            font-size: 1rem;
-            cursor: pointer;
-            padding: 4px 10px;
-            border-radius: 6px;
-            color: rgba(255,255,255,0.5);
-            font-family: inherit;
-        }
-        .calendar-popup .cal-header .cal-nav:hover {
-            background: rgba(255,255,255,0.06);
-        }
-        .calendar-popup .cal-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
-        }
-        .calendar-popup .cal-grid .cal-day-label {
-            font-size: 0.5rem;
-            text-align: center;
-            color: rgba(255,255,255,0.3);
-            font-weight: 600;
-            padding: 3px 0;
-        }
-        .calendar-popup .cal-grid .cal-day {
-            text-align: center;
-            padding: 6px 2px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: #e8edf5;
-            transition: 0.15s;
-        }
-        .calendar-popup .cal-grid .cal-day:hover {
-            background: rgba(252, 92, 125, 0.15);
-        }
-        .calendar-popup .cal-grid .cal-day.selected {
-            background: #fc5c7d;
-            color: white;
-        }
-        .calendar-popup .cal-grid .cal-day.other-month {
-            opacity: 0.25;
-        }
-        .calendar-popup .cal-grid .cal-day.today {
-            border: 2px solid #fc5c7d;
-        }
-        .calendar-popup .cal-footer {
-            margin-top: 10px;
-            display: flex;
-            justify-content: flex-end;
-        }
-        .calendar-popup .cal-footer .cal-today-btn {
-            background: rgba(255,255,255,0.06);
-            border: none;
-            padding: 4px 14px;
-            border-radius: 40px;
-            font-size: 0.65rem;
-            cursor: pointer;
-            color: rgba(255,255,255,0.6);
-            font-family: inherit;
-        }
-        .calendar-popup .cal-footer .cal-today-btn:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        /* ===== CONTENUTO PRINCIPALE ===== */
-        .main-content {
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-            border-radius: 14px;
-            background: #0d1118;
-            min-height: 0;
-            height: 100%;
-            border: 1px solid rgba(255,255,255,0.03);
-        }
-        .swipe-container {
-            display: flex;
-            width: 200%;
-            height: 100%;
-            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            touch-action: none;
-        }
-        .swipe-container.view-card {
-            transform: translateX(0%);
-        }
-        .swipe-container.view-ai {
-            transform: translateX(-50%);
-        }
-        .swipe-panel {
-            width: 50%;
-            height: 100%;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 4px 4px 40px 4px;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            display: flex;
-            flex-direction: column;
-        }
-        .swipe-panel::-webkit-scrollbar {
-            width: 2px;
-        }
-        .swipe-panel::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.03);
-            border-radius: 10px;
-        }
-        .swipe-panel::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-        }
-
-        /* ===== CARD ===== */
-        .match-card-swipe {
-            background: rgba(255,255,255,0.04);
-            border-radius: 16px;
-            padding: 14px 14px 12px 14px;
-            margin-bottom: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
-            cursor: pointer;
-            transition: 0.15s;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 78vh;
-            min-height: 78dvh;
-            justify-content: space-between;
-        }
-        .match-card-swipe:active {
-            transform: scale(0.98);
-        }
-        .match-card-swipe.active-card {
-            border-color: #fc5c7d;
-            box-shadow: 0 0 30px rgba(252, 92, 125, 0.08);
-        }
-
-        .card-header-swipe {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.4);
-            margin-bottom: 8px;
-            flex-shrink: 0;
-        }
-        .card-header-swipe .championship {
-            background: rgba(255,255,255,0.06);
-            padding: 2px 10px;
-            border-radius: 40px;
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: rgba(255,255,255,0.6);
-        }
-
-        .match-row-swipe {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 4px;
-            font-weight: 700;
-            font-size: 1.4rem;
-            color: #ffffff;
-            margin-bottom: 10px;
-            flex-shrink: 0;
-            padding: 0 2px;
-        }
-        .match-row-swipe .team {
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 42%;
-            font-size: 1.3rem;
         }
-        .match-row-swipe .vs {
-            color: rgba(255,255,255,0.15);
-            font-weight: 300;
-            font-size: 0.9rem;
+        .tab-btn.active {
+            background: var(--tab-active);
+            color: #fff;
+        }
+        .tab-btn:hover:not(.active) { background: var(--tab-inactive); color: var(--text-primary); }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0.5; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* STATO FORMA - QUADRATINI COLORATI */
-        .form-row-swipe {
+        .grid-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 4px;
+            padding-bottom: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            box-shadow: 0 4px 16px var(--shadow);
+            padding: 16px 14px 18px;
+            border: 1px solid var(--card-border);
+            transition: 0.2s;
+            width: 100%;
+            cursor: pointer;
+            touch-action: pan-y;
+        }
+        .card:active { transform: scale(0.98); }
+
+        .card-header {
             display: flex;
             justify-content: space-between;
-            gap: 12px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 12px;
-            padding: 8px 12px;
-            margin: 4px 0 10px;
-            flex-shrink: 0;
-        }
-        .form-row-swipe .form-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
-        }
-        .form-row-swipe .form-box .label {
-            font-size: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: rgba(255,255,255,0.3);
-            margin-bottom: 4px;
+            font-size: 13px;
             font-weight: 600;
+            color: var(--text-secondary);
+            padding-bottom: 6px;
+            border-bottom: 1px dashed var(--card-border);
+            margin-bottom: 10px;
         }
-        .form-row-swipe .form-string {
+        .card-header .campionato {
+            background: var(--badge-bg);
+            padding: 0 12px 0 8px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: inline-flex;
+            align-items: center;
+        }
+        .card-header .giornata { color: var(--text-secondary); font-weight: 500; }
+
+        .data-ora {
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: var(--badge-bg);
+            padding: 5px 12px;
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .squadre {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 17px;
+            padding: 4px 0 8px;
+            color: var(--text-primary);
+        }
+        .squadre .vs { color: var(--text-secondary); font-weight: 400; font-size: 14px; }
+
+        .forme {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 8px 0 4px;
+        }
+        .forma-badge {
             display: flex;
             gap: 4px;
-            font-family: 'Courier New', monospace;
+            flex-wrap: wrap;
+            background: var(--form-bg);
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 12px;
             font-weight: 700;
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            color: #ffffff;
+            letter-spacing: 0.2px;
+            color: var(--text-primary);
+            flex: 1;
+            justify-content: center;
+            min-height: 32px;
+            align-items: center;
         }
-        /* QUADRATINI COLORATI */
-        .form-row-swipe .form-string .form-box-letter {
+        .forma-box {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 4px;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
             font-weight: 700;
-            font-size: 0.9rem;
-            color: #000000;
-            background: #3a3a4a;
+            font-size: 12px;
+            color: #000;
+            background: #6b7280;
         }
-        .form-row-swipe .form-string .form-box-letter.W {
-            background: #3db86b;
-            color: #000000;
-        }
-        .form-row-swipe .form-string .form-box-letter.D {
-            background: #e6b422;
-            color: #000000;
-        }
-        .form-row-swipe .form-string .form-box-letter.L {
-            background: #e06060;
-            color: #000000;
-        }
-        .form-row-swipe .form-string .form-box-letter.- {
-            background: #2a2a3a;
-            color: #666;
-        }
+        .forma-box.V { background: #22c55e; }
+        .forma-box.P { background: #eab308; }
+        .forma-box.S { background: #ef4444; }
+        .forma-box.\- { background: #6b7280; color: #fff; }
 
-        .perc-row-swipe {
+        .forma-score {
             display: flex;
             justify-content: space-between;
-            gap: 10px;
-            margin: 4px 0 12px;
-            flex-shrink: 0;
+            gap: 8px;
+            margin: 2px 0 6px;
         }
-        .perc-row-swipe .perc-box {
-            border-radius: 40px;
-            padding: 6px 10px;
-            flex: 1;
-            text-align: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: #1a1a1a;
-            border: 1px solid transparent;
-        }
-        .perc-row-swipe .perc-box small {
-            font-weight: 500;
-            font-size: 0.55rem;
-            color: #1a1a1a;
-            opacity: 0.8;
-            display: block;
-            margin-top: 1px;
-        }
-
-        .stats-row-swipe {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            border-top: 1px solid rgba(255,255,255,0.06);
-            padding-top: 10px;
-            flex: 1;
-            justify-content: center;
-            min-height: 120px;
-        }
-        .stats-row-swipe .stat-chip {
+        .forma-score .score {
+            background: var(--score-bg);
+            padding: 2px 12px;
             border-radius: 30px;
-            padding: 10px 14px;
-            font-size: 1rem;
-            font-weight: 700;
-            color: #1a1a1a;
-            width: 100%;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            flex: 1;
             text-align: center;
-            border: 1px solid transparent;
+        }
+        .forma-score .score .num { color: var(--text-primary); font-weight: 700; }
+
+        .diff-perc {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            min-height: 48px;
+            gap: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 0 6px;
+            background: var(--diff-bg);
+            border-radius: 30px;
+            margin: 2px 0 6px;
+            color: var(--text-secondary);
         }
-        .stats-row-swipe .stat-chip .num {
-            font-weight: 700;
-            color: #1a1a1a;
-            font-size: 1.1rem;
-        }
-        .stats-row-swipe .stat-chip .multigol-fasce {
-            font-weight: 700;
-            font-size: 1rem;
-            color: #1a1a1a;
-            letter-spacing: 0.5px;
-            background: rgba(0,0,0,0.1);
-            padding: 0 10px;
-            border-radius: 12px;
-        }
-        .stats-row-swipe .stat-chip.flag-red { background: #fde0e0; border-color: #e57373; }
-        .stats-row-swipe .stat-chip.flag-neutral { background: #f0f2f5; border-color: #b0b8c4; }
-        .stats-row-swipe .stat-chip.flag-green { background: #d4edda; border-color: #58b36b; }
-        .stats-row-swipe .stat-chip.flag-gold { background: #ffd966; border-color: #e6b800; }
-        .stats-row-swipe .stat-chip.flag-bomb { background: #ffb347; border-color: #e67300; animation: pulse-gold 1.2s ease-in-out infinite; }
+        .diff-perc .diff-value { padding: 2px 12px; border-radius: 20px; font-weight: 700; }
 
-        .card-footer-swipe {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 8px;
-            font-size: 0.6rem;
-            color: rgba(255,255,255,0.25);
-            flex-shrink: 0;
-            border-top: 1px solid rgba(255,255,255,0.04);
-            padding-top: 8px;
+        .stat-perc {
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 30px;
+            text-align: center;
+            margin: 4px 0 8px;
+            background: var(--stat-bg);
+            color: var(--text-secondary);
         }
+        .stat-perc .perc {
+            padding: 2px 8px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 700;
+        }
+        .stat-perc .label { color: var(--text-secondary); font-weight: 500; margin-right: 4px; }
 
-        .flag-red { background: #fde0e0; border-color: #e57373; color: #1a1a1a; }
-        .flag-red small { color: #1a1a1a; }
-        .flag-neutral { background: #f0f2f5; border-color: #b0b8c4; color: #1a1a1a; }
-        .flag-neutral small { color: #1a1a1a; }
-        .flag-green { background: #d4edda; border-color: #58b36b; color: #1a1a1a; }
-        .flag-green small { color: #1a1a1a; }
-        .flag-gold {
-            background: #ffd966;
-            border-color: #e6b800;
-            color: #1a1a1a;
-            box-shadow: 0 0 0 1px #0d1118, 0 0 0 3px #ffd966;
-        }
-        .flag-gold small { color: #1a1a1a; }
+        .flag-red { background: #dc2626; color: #fff; }
+        .flag-neutral { background: #6b7280; color: #fff; }
+        .flag-green { background: #22c55e; color: #000; }
+        .flag-gold { background: #facc15; color: #000; font-weight: 700; }
         .flag-bomb {
-            background: #ffb347;
-            border-color: #e67300;
-            color: #1a1a1a;
-            animation: pulse-gold 1.2s ease-in-out infinite;
-        }
-        .flag-bomb small { color: #1a1a1a; }
-
-        @keyframes pulse-gold {
-            0% { box-shadow: 0 0 8px rgba(255, 179, 71, 0.3); }
-            50% { box-shadow: 0 0 24px rgba(255, 179, 71, 0.6); }
-            100% { box-shadow: 0 0 8px rgba(255, 179, 71, 0.3); }
-        }
-
-        /* ===== PANEL AI ===== */
-        .ai-panel-content {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            height: 100%;
-            padding-bottom: 4px;
-        }
-        .ai-panel-content .ai-header {
-            display: flex;
-            justify-content: space-between;
+            background: #facc15;
+            color: #000;
+            font-weight: 700;
+            animation: bombPulse 0.8s infinite alternate;
+            padding: 2px 10px;
+            border-radius: 20px;
+            display: inline-flex;
             align-items: center;
-            flex-shrink: 0;
-        }
-        .ai-panel-content .ai-header h2 {
-            color: #ffffff;
-            font-size: 1rem;
-        }
-        .ai-panel-content .ai-header .match-counter {
-            color: rgba(255,255,255,0.3);
-            font-size: 0.65rem;
-        }
-        .ai-panel-content .ai-grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
             gap: 4px;
         }
-        .ai-panel-content .ai-box {
-            background: rgba(255,255,255,0.04);
-            border-radius: 10px;
-            padding: 8px;
+        @keyframes bombPulse {
+            0% { transform: scale(1); box-shadow: 0 0 5px #facc15; }
+            100% { transform: scale(1.05); box-shadow: 0 0 20px #facc15; }
         }
-        .ai-panel-content .ai-box .ai-label {
-            font-size: 0.5rem;
-            color: rgba(255,255,255,0.3);
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-secondary);
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-row .stat-value { color: var(--text-primary); font-weight: 600; }
+
+        .multigol-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            padding: 2px 0;
+            color: var(--text-secondary);
+        }
+        .multigol-row .label { font-weight: 500; }
+        .multigol-row .value {
+            color: var(--text-primary);
+            font-weight: 600;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .multigol-row .value .perc { padding: 0 6px; border-radius: 12px; }
+
+        .stat-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 6px;
+            margin-top: 10px;
+            background: var(--footer-bg);
+            padding: 8px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .stat-footer span { background: var(--badge-bg); padding: 2px 12px; border-radius: 40px; }
+
+        .no-match {
+            text-align: center;
+            padding: 50px 16px;
+            color: var(--text-secondary);
+            font-size: 16px;
+            background: var(--card-bg);
+            border-radius: 30px;
+            border: 1px solid var(--card-border);
+        }
+
+        /* ================================================================ */
+        /* ANALISI AI - Stile professionale */
+        /* ================================================================ */
+
+        .ai-container {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 16px;
+            border: 1px solid var(--card-border);
+            margin-top: 4px;
+        }
+
+        .ai-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .ai-header .match-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .ai-header .match-league {
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: var(--badge-bg);
+            padding: 4px 14px;
+            border-radius: 30px;
+        }
+
+        .ai-weather {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--badge-bg);
+            padding: 12px 16px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .ai-weather .temp {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .ai-weather .city {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .ai-weather .desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .ai-weather .weather-icon {
+            font-size: 28px;
+        }
+
+        .ai-section {
+            background: var(--section-bg);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--tab-active);
+        }
+        .ai-section .section-title {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 12px;
             text-transform: uppercase;
-            font-weight: 600;
             letter-spacing: 0.5px;
-        }
-        .ai-panel-content .ai-box .ai-value {
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-        .ai-panel-content .ai-box .ai-weather {
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 6px;
         }
-        .ai-panel-content .ai-box .ai-weather .wi { font-size: 1.4rem; }
-        .ai-panel-content .ai-box .ai-weather .temp { font-size: 1rem; font-weight: 700; color: #fff; }
-        .ai-panel-content .ai-box .ai-weather .cond { color: rgba(255,255,255,0.4); font-size: 0.65rem; }
-        .ai-panel-content .ai-box .ai-weather .details { color: rgba(255,255,255,0.2); font-size: 0.55rem; }
+        .ai-section .section-content {
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
 
-        .ai-panel-content .ai-stats-grid {
+        .ai-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .ai-grid-2 .box {
+            background: var(--section-bg);
+            border-radius: 12px;
+            padding: 10px 12px;
+            border-left: 3px solid var(--green);
+        }
+        .ai-grid-2 .box.weakness {
+            border-left-color: var(--red);
+        }
+        .ai-grid-2 .box .team-name {
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+        .ai-grid-2 .box .items {
+            font-size: 13px;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .ai-pronostico {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 3px;
-        }
-        .ai-panel-content .ai-stats-grid .ai-stat-item {
-            border-radius: 8px;
-            padding: 6px 4px;
-            text-align: center;
-        }
-        .ai-panel-content .ai-stats-grid .ai-stat-item .stat-label {
-            font-size: 0.45rem;
-            color: rgba(0,0,0,0.5);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-        .ai-panel-content .ai-stats-grid .ai-stat-item .stat-value {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-        .ai-panel-content .ai-stats-grid .ai-stat-item .stat-sub {
-            font-size: 0.45rem;
-            font-weight: 700;
-            color: #1a1a1a;
-            background: rgba(0,0,0,0.08);
-            padding: 0 6px;
-            border-radius: 6px;
-            display: inline-block;
-        }
-
-        .ai-analysis-box {
-            background: rgba(255,255,255,0.04);
-            border-radius: 10px;
-            padding: 10px;
-            line-height: 1.5;
-            color: #ffffff;
-            border: 1px solid rgba(255,255,255,0.04);
-            white-space: pre-wrap;
-            font-size: 0.75rem;
-            flex: 1;
-            min-height: 80px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .ai-analysis-box strong { color: #fc5c7d; }
-        .ai-analysis-box::-webkit-scrollbar { width: 2px; }
-        .ai-analysis-box::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
-        .ai-analysis-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-
-        .swipe-indicators {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
-            padding: 3px 0;
-            flex-shrink: 0;
-        }
-        .swipe-indicators .dot {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.1);
-            transition: 0.3s;
-            cursor: pointer;
-        }
-        .swipe-indicators .dot.active {
-            background: #fc5c7d;
-            width: 14px;
-            border-radius: 10px;
-        }
-        .swipe-indicators .dot-label {
-            font-size: 0.45rem;
-            color: rgba(255,255,255,0.15);
-            margin: 0 2px;
-        }
-
-        .footer-note {
-            text-align: center;
-            font-size: 0.45rem;
-            color: rgba(255,255,255,0.08);
-            flex-shrink: 0;
-            padding: 2px 0;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 30px 12px;
-            color: rgba(255,255,255,0.4);
-        }
-        .empty-state span { display: block; font-size: 2rem; margin-bottom: 6px; }
-
-        .page { display: none; flex-direction: column; height: 100%; flex: 1; }
-        .page.active { display: flex; }
-
-        /* ===== IMPOSTAZIONI ===== */
-        .settings-container {
-            background: rgba(255,255,255,0.04);
-            border-radius: 14px;
-            padding: 14px;
-            width: 100%;
-            flex: 1;
-            overflow-y: auto;
-            border: 1px solid rgba(255,255,255,0.04);
-        }
-        .settings-container h2 { color: #fff; font-size: 1rem; margin-bottom: 10px; }
-        .setting-group {
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-        .setting-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .setting-group label { display: block; font-weight: 600; color: #e8edf5; margin-bottom: 2px; font-size: 0.7rem; }
-        .setting-group .description { font-size: 0.6rem; color: rgba(255,255,255,0.3); margin-bottom: 4px; }
-        .setting-group input[type="text"],
-        .setting-group input[type="password"] {
-            width: 100%;
-            padding: 5px 10px;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
-            font-size: 0.7rem;
-            font-family: 'Courier New', monospace;
-            background: rgba(255,255,255,0.05);
-            color: #e8edf5;
-        }
-        .setting-group input:focus {
-            outline: none;
-            border-color: #fc5c7d;
-        }
-        .show-hide-btn {
-            margin-top: 4px;
-            background: rgba(255,255,255,0.06);
-            border: none;
-            padding: 2px 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.55rem;
-            color: rgba(255,255,255,0.6);
-            font-family: inherit;
-        }
-        .theme-switch {
-            display: flex;
-            align-items: center;
             gap: 10px;
-            padding: 4px 0;
+            margin-top: 12px;
         }
-        .theme-switch .switch {
-            position: relative;
-            width: 36px;
-            height: 20px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 40px;
-            cursor: pointer;
-            flex-shrink: 0;
+        .ai-pronostico .pron-box {
+            background: var(--pronostico-bg);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--card-border);
         }
-        .theme-switch .switch .slider {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 16px;
-            height: 16px;
-            background: white;
-            border-radius: 50%;
-            transition: 0.3s;
+        .ai-pronostico .pron-box .label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: 0.3px;
         }
-        .theme-switch .switch.active .slider {
-            left: 18px;
-            background: #fc5c7d;
+        .ai-pronostico .pron-box .value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 4px;
         }
-        .theme-switch .switch-label { font-weight: 500; font-size: 0.75rem; color: #e8edf5; }
-        .theme-switch .switch-icon { font-size: 0.8rem; }
-
-        @media (max-width: 480px) {
-            .app { padding: 4px 4px 0 4px; }
-            header { padding: 8px 10px; min-height: 70px; border-radius: 12px; gap: 2px; }
-            .header-center { font-size: 1.2rem; }
-            .header-center .sub { font-size: 0.45rem; }
-            .header-top .clock-area .clock-date { font-size: 0.7rem; }
-            .header-top .clock-area .clock-time { font-size: 0.6rem; }
-            .header-right .tab-btn { font-size: 0.55rem; padding: 3px 8px; }
-            .header-right .badge-count { font-size: 0.5rem; line-height: 18px; padding: 0 8px; }
-            .match-card-swipe { padding: 10px 10px 8px 10px; min-height: 72vh; min-height: 72dvh; border-radius: 12px; }
-            .match-row-swipe { font-size: 1.1rem; margin-bottom: 6px; }
-            .match-row-swipe .team { font-size: 1rem; max-width: 40%; }
-            .form-row-swipe { padding: 5px 8px; gap: 8px; }
-            .form-row-swipe .form-string .form-box-letter { width: 22px; height: 22px; font-size: 0.7rem; }
-            .form-row-swipe .form-string { font-size: 0.9rem; }
-            .perc-row-swipe .perc-box { font-size: 0.95rem; padding: 4px 6px; }
-            .stats-row-swipe { gap: 4px; min-height: 90px; padding-top: 6px; }
-            .stats-row-swipe .stat-chip { font-size: 0.8rem; padding: 6px 10px; min-height: 36px; gap: 6px; }
-            .stats-row-swipe .stat-chip .num { font-size: 0.85rem; }
-            .stats-row-swipe .stat-chip .multigol-fasce { font-size: 0.8rem; padding: 0 8px; }
-            .card-footer-swipe { font-size: 0.5rem; padding-top: 6px; margin-top: 4px; }
-            .swipe-panel { padding: 3px 3px 30px 3px; }
-            .ai-panel-content .ai-header h2 { font-size: 0.85rem; }
-            .ai-panel-content .ai-box { padding: 6px; }
-            .ai-panel-content .ai-box .ai-value { font-size: 0.7rem; }
-            .ai-panel-content .ai-stats-grid .ai-stat-item .stat-value { font-size: 0.8rem; }
-            .ai-analysis-box { font-size: 0.65rem; padding: 8px; max-height: 120px; min-height: 60px; }
-            .calendar-popup { min-width: 220px; padding: 10px; left: 50%; transform: translateX(-50%); }
-            .calendar-popup .cal-grid .cal-day { font-size: 0.65rem; padding: 4px 1px; }
-            .swipe-indicators .dot { width: 4px; height: 4px; }
-            .swipe-indicators .dot.active { width: 12px; }
-            .footer-note { font-size: 0.4rem; }
+        .ai-pronostico .pron-box .sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
         }
 
-        @media (max-width: 380px) {
-            header { padding: 6px 8px; min-height: 60px; }
-            .header-center { font-size: 1rem; }
-            .header-center .sub { font-size: 0.4rem; }
-            .header-top .clock-area .clock-date { font-size: 0.6rem; }
-            .header-top .clock-area .clock-time { font-size: 0.5rem; }
-            .match-row-swipe { font-size: 0.95rem; }
-            .match-row-swipe .team { font-size: 0.85rem; }
-            .form-row-swipe .form-string .form-box-letter { width: 18px; height: 18px; font-size: 0.6rem; }
-            .perc-row-swipe .perc-box { font-size: 0.8rem; }
-            .stats-row-swipe .stat-chip { font-size: 0.7rem; padding: 4px 8px; min-height: 30px; }
-            .stats-row-swipe .stat-chip .num { font-size: 0.75rem; }
-            .stats-row-swipe .stat-chip .multigol-fasce { font-size: 0.7rem; padding: 0 6px; }
-            .match-card-swipe { min-height: 68vh; min-height: 68dvh; padding: 8px 8px 6px 8px; }
-            .calendar-popup { min-width: 180px; padding: 8px; }
-            .calendar-popup .cal-grid .cal-day { font-size: 0.55rem; padding: 3px 1px; }
+        .ai-tips {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .ai-tips .tip-box {
+            background: var(--section-bg);
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid var(--card-border);
+            text-align: center;
+        }
+        .ai-tips .tip-box .tip-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .ai-tips .tip-box .tip-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 4px;
         }
 
-        @media (min-width: 481px) {
-            header { min-height: 88px; padding: 14px 18px; }
-            .header-center { font-size: 1.8rem; }
-            .header-center .sub { font-size: 0.65rem; }
-            .header-top .clock-area .clock-date { font-size: 1rem; }
-            .header-top .clock-area .clock-time { font-size: 0.8rem; }
-            .match-card-swipe { min-height: 72vh; min-height: 72dvh; }
-            .match-row-swipe { font-size: 1.6rem; }
-            .match-row-swipe .team { font-size: 1.5rem; }
-            .form-row-swipe .form-string .form-box-letter { width: 32px; height: 32px; font-size: 1rem; }
-            .perc-row-swipe .perc-box { font-size: 1.3rem; }
-            .stats-row-swipe .stat-chip { font-size: 1.1rem; padding: 12px 16px; }
-            .stats-row-swipe .stat-chip .num { font-size: 1.2rem; }
-            .stats-row-swipe .stat-chip .multigol-fasce { font-size: 1.1rem; }
+        .ai-loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
         }
-
-        /* ===== LOADING ===== */
-        .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: rgba(255,255,255,0.3);
-            gap: 12px;
-        }
-        .loading-container .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255,255,255,0.05);
-            border-top: 3px solid #fc5c7d;
+        .ai-loading .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--badge-bg);
+            border-top-color: var(--tab-active);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .home-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--home-btn);
+            color: #000;
+            border: none;
+            font-size: 24px;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
         }
-        .loading-container .load-text {
-            font-size: 0.8rem;
-            letter-spacing: 2px;
+        .home-btn:hover { transform: scale(1.1); }
+        .home-btn:active { transform: scale(0.9); }
+
+        .swipe-indicator {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-secondary);
+            padding: 6px 0 2px;
+            opacity: 0.6;
         }
 
-        /* ===== FILE INPUT HIDDEN ===== */
-        #fileInput {
-            display: none;
+        .ai-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 13px;
         }
-        .upload-btn {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: rgba(255,255,255,0.5);
-            padding: 4px 12px;
-            border-radius: 40px;
-            font-size: 0.55rem;
-            cursor: pointer;
-            font-family: inherit;
-            transition: 0.2s;
+        .ai-table th {
+            text-align: left;
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--card-border);
         }
-        .upload-btn:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
+        .ai-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-primary);
+        }
+        .ai-table tr:last-child td { border-bottom: none; }
+
+        .badge-giocata {
+            display: inline-block;
+            background: var(--tab-active);
+            color: #fff;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success { background: var(--green); color: #000; padding: 2px 10px; border-radius: 30px; font-size: 11px; font-weight: 600; }
+        .badge-warning { background: var(--yellow); color: #000; padding: 2px 10px; border-radius: 30px; font-size: 11px; font-weight: 600; }
+        .badge-danger { background: var(--red); color: #fff; padding: 2px 10px; border-radius: 30px; font-size: 11px; font-weight: 600; }
+
+        @media (max-width: 480px) {
+            .top-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+            .datetime { justify-content: space-between; }
+            .tabs { justify-content: center; }
+            .card { padding: 14px 12px; }
+            .squadre { font-size: 15px; }
+            .forma-box { width: 22px; height: 22px; font-size: 10px; }
+            .diff-perc { font-size: 12px; gap: 12px; }
+            .stat-footer { font-size: 11px; }
+            .ai-grid-2 { grid-template-columns: 1fr; }
+            .ai-pronostico { grid-template-columns: 1fr 1fr 1fr; }
+            .ai-tips { grid-template-columns: 1fr; }
+            .home-btn { width: 48px; height: 48px; font-size: 20px; bottom: 16px; right: 16px; }
+            .ai-header .match-title { font-size: 17px; }
+            .ai-weather .temp { font-size: 22px; }
+            .ai-table { font-size: 11px; }
+        }
+        @media (max-width: 380px) {
+            .ai-pronostico { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-<div class="app">
-    <!-- HEADER -->
-    <header>
-        <div class="header-top">
-            <div class="clock-area" id="clockButton">
-                <div class="clock-date">
-                    <span class="date-label">📅</span>
-                    <span id="currentDate">--/--/----</span>
-                </div>
-                <div class="clock-time">
-                    <span id="currentTime">--:--</span>
-                    <span class="sep">•</span>
-                    <span style="opacity:0.3;font-size:0.6rem;">▼</span>
-                </div>
-            </div>
-            <div class="header-right">
-                <button class="tab-btn active" data-tab="partite">📋 <span class="badge-count" id="matchCountBadge">0</span></button>
-                <button class="tab-btn" data-tab="impostazioni">⚙️</button>
-            </div>
-        </div>
-        <div class="header-center">
-            ⚡ GesssAI-Prono
-            <span class="sub">ANALISI SPORTIVA</span>
-        </div>
-        <!-- CALENDARIO POPUP -->
-        <div class="calendar-popup" id="calendarPopup">
-            <div class="cal-header">
-                <button class="cal-nav" id="calPrev">‹</button>
-                <span class="cal-month" id="calMonth">Luglio 2026</span>
-                <button class="cal-nav" id="calNext">›</button>
-            </div>
-            <div class="cal-grid" id="calGrid"></div>
-            <div class="cal-footer">
-                <button class="cal-today-btn" id="calToday">📅 Oggi</button>
-            </div>
-        </div>
-    </header>
 
-    <!-- PAGINA PARTITE -->
-    <div id="page-partite" class="page active">
-        <div class="main-content" id="mainContent">
-            <div class="swipe-container view-card" id="swipeContainer">
-                <div class="swipe-panel" id="cardPanel">
-                    <div id="cardsSwipeContainer">
-                        <div class="loading-container">
-                            <div class="spinner"></div>
-                            <div class="load-text">Caricamento partite...</div>
-                            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                                📂 Carica file Excel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="swipe-panel" id="aiPanel">
-                    <div id="aiContainer" class="ai-panel-content">
-                        <div class="loading-container">
-                            <div class="load-text">🤖 Seleziona una partita</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="swipe-indicators">
-            <span class="dot-label">⬅️</span>
-            <div class="dot active" data-view="card" onclick="switchView('card')"></div>
-            <div class="dot" data-view="ai" onclick="switchView('ai')"></div>
-            <span class="dot-label">AI ➡️</span>
-        </div>
-        <div class="footer-note">⬆️⬇️ swipe partita · ⬅️➡️ swipe AI</div>
+<div class="top-bar">
+    <div class="datetime">
+        <span class="date" id="currentDate"></span>
+        <span class="time" id="currentTime"></span>
     </div>
+    <div class="tabs" id="tabContainer">
+        <button class="tab-btn active" data-tab="palinsesto">📋 Palinsesto</button>
+        <button class="tab-btn" data-tab="analisi">🧠 Analisi AI</button>
+        <button class="tab-btn" data-tab="impostazioni">⚙️ Impostazioni</button>
+    </div>
+</div>
 
-    <!-- PAGINA IMPOSTAZIONI -->
-    <div id="page-impostazioni" class="page">
-        <div class="settings-container">
-            <h2>⚙️ Impostazioni</h2>
-            <div class="setting-group">
-                <label>Tema</label>
-                <div class="description">Seleziona il tema dell'applicazione</div>
-                <div class="theme-switch">
-                    <span class="switch-icon" id="settingsThemeIcon">🌙</span>
-                    <div class="switch active" id="settingsThemeSwitch">
-                        <div class="slider"></div>
-                    </div>
-                    <span class="switch-label" id="settingsThemeLabel">Scuro</span>
-                </div>
-            </div>
-            <div class="setting-group">
-                <label>🔑 GROQ AI Key</label>
-                <div class="description">Chiave API per l'analisi AI delle partite</div>
-                <input type="password" id="groqKey" value="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">
-                <button class="show-hide-btn" onclick="toggleVisibility('groqKey')">👁️ Mostra/Nascondi</button>
-            </div>
-            <div class="setting-group">
-                <label>🌤️ World Weather Online Key</label>
-                <div class="description">Chiave API per il meteo in tempo reale</div>
-                <input type="password" id="weatherKey" value="d8df501134ef44eab6515526262007">
-                <button class="show-hide-btn" onclick="toggleVisibility('weatherKey')">👁️ Mostra/Nascondi</button>
-            </div>
-            <div class="setting-group">
-                <label>📂 Carica file Excel</label>
-                <div class="description">Carica il file Prono.xlsx per vedere le partite</div>
-                <button class="upload-btn" onclick="document.getElementById('fileInput').click()" style="width:100%;padding:8px;font-size:0.8rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:white;cursor:pointer;">
-                    📂 Scegli file Excel
-                </button>
-                <input type="file" id="fileInput" accept=".xlsx,.xls">
-            </div>
-            <div style="font-size:0.6rem; color:rgba(255,255,255,0.2); text-align:center;margin-top:8px;">
-                Le chiavi sono salvate nel browser
-            </div>
+<div class="tab-content active" id="tab-palinsesto">
+    <div class="swipe-indicator">⬅️ 👆 Scorri per navigare tra le partite 👇 ➡️</div>
+    <div class="grid-cards" id="cardsContainer"></div>
+</div>
+
+<div class="tab-content" id="tab-analisi">
+    <div id="aiContent">
+        <div class="ai-loading">
+            <div class="spinner"></div>
+            <p>Seleziona una partita per l'analisi AI</p>
         </div>
     </div>
 </div>
 
+<div class="tab-content" id="tab-impostazioni">
+    <div class="ai-container">
+        <h3 style="font-size:16px;margin-bottom:12px;color:var(--text-primary);">⚙️ Impostazioni</h3>
+        <label style="display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">Tema</label>
+        <div style="display:flex;gap:12px;margin-bottom:16px;">
+            <button id="themeDark" class="tab-btn active" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-weight:600;cursor:pointer;">🌙 Scuro</button>
+            <button id="themeLight" class="tab-btn" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-weight:600;cursor:pointer;">☀️ Chiaro</button>
+        </div>
+
+        <label style="display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">GROQ API Key</label>
+        <input type="text" id="groqKey" placeholder="Inserisci API Key GROQ" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-size:14px;outline:none;margin-bottom:4px;">
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">✅ API Key salvata localmente</div>
+
+        <label style="display:block;font-size:13px;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">World Weather Online API Key</label>
+        <input type="text" id="weatherKey" placeholder="Inserisci API Key Weather" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-size:14px;outline:none;margin-bottom:4px;">
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">✅ API Key salvata localmente</div>
+
+        <button id="saveSettings" style="width:100%;padding:12px;border-radius:30px;border:none;background:#3b82f6;color:#fff;font-weight:600;font-size:15px;cursor:pointer;">💾 Salva Impostazioni</button>
+    </div>
+</div>
+
+<button class="home-btn" id="homeBtn" title="Torna all'inizio">🏠</button>
+
 <script>
-    (function() {
-        // ============================================================
-        //  VARIABILI GLOBALI
-        // ============================================================
-        let allMatches = [];
-        let currentMatches = [];
-        let currentIndex = 0;
-        let currentView = 'card';
-        let selectedDate = new Date();
-        let currentViewDate = new Date();
-        let calendarVisible = false;
-        let dataLoaded = false;
+    // ================================================================
+    // DATI REALI
+    // ================================================================
 
-        // ============================================================
-        //  DOM REFS
-        // ============================================================
-        const swipeContainer = document.getElementById('swipeContainer');
-        const cardsContainer = document.getElementById('cardsSwipeContainer');
-        const aiContainer = document.getElementById('aiContainer');
-        const dots = document.querySelectorAll('.dot');
-        const badge = document.getElementById('matchCountBadge');
-        const fileInput = document.getElementById('fileInput');
+    const matchesData = [
+        // Allsvenskan
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-19', ora: '16:30', casa: 'Halmstad', ospite: 'BK Häcken' },
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-19', ora: '16:30', casa: 'Elfsborg', ospite: 'Sirius' },
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-19', ora: '16:30', casa: 'Hammarby', ospite: 'Degerfors' },
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-20', ora: '19:00', casa: 'Kalmar', ospite: 'Malmö' },
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-20', ora: '20:00', casa: 'Örgryte', ospite: 'Djurgården' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-24', ora: '19:00', casa: 'Västerås', ospite: 'Örgryte' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-25', ora: '15:00', casa: 'Degerfors', ospite: 'Djurgården' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-25', ora: '17:30', casa: 'Kalmar', ospite: 'Mjällby' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-26', ora: '14:00', casa: 'Sirius', ospite: 'Göteborg' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-26', ora: '14:00', casa: 'Brommapojkarna', ospite: 'Hammarby' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-26', ora: '16:30', casa: 'Malmö', ospite: 'Elfsborg' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-26', ora: '17:30', casa: 'GAIS', ospite: 'Halmstad' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-27', ora: '19:00', casa: 'BK Häcken', ospite: 'AIK Stockholm' },
+        // Austria Bundesliga
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-07-31', ora: '19:30', casa: 'LASK', ospite: 'Grazer AK' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-01', ora: '17:00', casa: 'WSG Tirol', ospite: 'Sturm Graz' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-01', ora: '19:30', casa: 'RB Salzburg', ospite: 'Hartberg' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-02', ora: '17:00', casa: 'Austria Lustenau', ospite: 'Ried' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-02', ora: '17:00', casa: 'RZ Pellets WAC', ospite: 'Austria Wien' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-02', ora: '19:00', casa: 'Rapid Wien', ospite: 'Rheindorf Altach' },
+        // Chinese Super League
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-25', ora: '17:30', casa: 'Qingdao Hainiu', ospite: 'Jinmen Tiger' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-25', ora: '19:35', casa: 'Shanghai Port', ospite: 'Shanghai Shen' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-25', ora: '19:35', casa: 'Shenyang Urban', ospite: 'Q. West Coast' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-26', ora: '19:00', casa: 'Yunnan Yukun', ospite: 'SZ Peng City' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-26', ora: '19:35', casa: 'SD Taishan', ospite: 'Henan' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-26', ora: '19:35', casa: 'Rongcheng', ospite: 'Beijing Guoan' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-26', ora: '20:00', casa: 'Zhejiang', ospite: 'Dalian Yingbo' },
+        // Veikkausliiga
+        { campionato: 'Veikkausliiga', giornata: 16, data: '2026-07-19', ora: '18:30', casa: 'FF Jaro', ospite: 'Inter Turku' },
+        { campionato: 'Veikkausliiga', giornata: 16, data: '2026-07-20', ora: '18:00', casa: 'TPS', ospite: 'Ilves' },
+        { campionato: 'Veikkausliiga', giornata: 16, data: '2026-07-20', ora: '19:00', casa: 'IFK Mariehamn', ospite: 'Lahti' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-24', ora: '19:00', casa: 'FF Jaro', ospite: 'SJK' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-25', ora: '16:30', casa: 'IFK Mariehamn', ospite: 'AC Oulu' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-25', ora: '17:00', casa: 'KuPS', ospite: 'VPS' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-26', ora: '15:00', casa: 'Ilves', ospite: 'Lahti' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-26', ora: '15:00', casa: 'Inter Turku', ospite: 'IF Gnistan' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-26', ora: '17:00', casa: 'HJK Helsinki', ospite: 'TPS' },
+        // Ireland Premier Division
+        { campionato: 'Ireland Premier Division', giornata: 25, data: '2026-07-24', ora: '20:00', casa: 'St Patrick\'s', ospite: 'Dundalk FC' },
+        { campionato: 'Ireland Premier Division', giornata: 25, data: '2026-07-25', ora: '17:00', casa: 'Galway United', ospite: 'Waterford United' },
+        { campionato: 'Ireland Premier Division', giornata: 25, data: '2026-07-25', ora: '19:45', casa: 'Sligo Rovers', ospite: 'Drogheda United' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-07-31', ora: '19:45', casa: 'Dundalk FC', ospite: 'Sligo Rovers' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-07-31', ora: '20:00', casa: 'Drogheda United', ospite: 'Shamrock' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-08-02', ora: '15:00', casa: 'Waterford United', ospite: 'Shelbourne FC' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-08-02', ora: '17:00', casa: 'St Patrick\'s', ospite: 'Derry City' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-08-02', ora: '19:00', casa: 'Bohemian FC', ospite: 'Galway United' },
+        // K League 1
+        { campionato: 'K League 1', giornata: 18, data: '2026-07-19', ora: '19:30', casa: 'FC Anyang', ospite: 'Gwangju FC' },
+        { campionato: 'K League 1', giornata: 18, data: '2026-07-19', ora: '19:30', casa: 'Bucheon FC', ospite: 'FC Seoul' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-21', ora: '19:30', casa: 'Jeju United', ospite: 'Gangwon FC' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-21', ora: '19:30', casa: 'Ulsan HD', ospite: 'Incheon United' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-21', ora: '19:30', casa: 'Jeonbuk', ospite: 'Daejeon Hana' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-22', ora: '19:30', casa: 'FC Seoul', ospite: 'Pohang Steelers' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-22', ora: '19:30', casa: 'Gwangju FC', ospite: 'Sangmu' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-22', ora: '19:30', casa: 'Bucheon FC', ospite: 'FC Anyang' },
+    ];
 
-        // ============================================================
-        //  OROLOGIO
-        // ============================================================
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            document.getElementById('currentTime').textContent = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    // --------------------- CLASSIFICA ---------------------
+    const standings = [
+        // Allsvenskan
+        { campionato: 'Allsvenskan', squadra: 'Sirius', pos: 1, punti: 32, forma: 'W W W D W', gf: 33, gs: 15 },
+        { campionato: 'Allsvenskan', squadra: 'Hammarby', pos: 2, punti: 23, forma: 'L L L W W', gf: 28, gs: 14 },
+        { campionato: 'Allsvenskan', squadra: 'AIK Stockholm', pos: 3, punti: 21, forma: 'W L W W W', gf: 18, gs: 18 },
+        { campionato: 'Allsvenskan', squadra: 'BK Häcken', pos: 4, punti: 20, forma: 'W D W L L', gf: 25, gs: 22 },
+        { campionato: 'Allsvenskan', squadra: 'Djurgården', pos: 5, punti: 19, forma: 'W L L W W', gf: 26, gs: 15 },
+        { campionato: 'Allsvenskan', squadra: 'Malmö', pos: 6, punti: 19, forma: 'L L W W W', gf: 25, gs: 20 },
+        { campionato: 'Allsvenskan', squadra: 'GAIS', pos: 7, punti: 19, forma: 'L W D W L', gf: 18, gs: 14 },
+        { campionato: 'Allsvenskan', squadra: 'Västerås', pos: 8, punti: 19, forma: 'W L W W D', gf: 22, gs: 23 },
+        { campionato: 'Allsvenskan', squadra: 'Elfsborg', pos: 9, punti: 18, forma: 'D D D L L', gf: 17, gs: 14 },
+        { campionato: 'Allsvenskan', squadra: 'Mjällby', pos: 10, punti: 17, forma: 'D D D L D', gf: 19, gs: 17 },
+        { campionato: 'Allsvenskan', squadra: 'Brommapojkarna', pos: 11, punti: 16, forma: 'W D D L L', gf: 18, gs: 21 },
+        { campionato: 'Allsvenskan', squadra: 'Kalmar', pos: 12, punti: 13, forma: 'L W L W L', gf: 14, gs: 17 },
+        { campionato: 'Allsvenskan', squadra: 'Göteborg', pos: 13, punti: 13, forma: 'D W L L W', gf: 16, gs: 29 },
+        { campionato: 'Allsvenskan', squadra: 'Degerfors', pos: 14, punti: 10, forma: 'D L D L L', gf: 12, gs: 19 },
+        { campionato: 'Allsvenskan', squadra: 'Örgryte', pos: 15, punti: 9, forma: 'L L D L W', gf: 14, gs: 31 },
+        { campionato: 'Allsvenskan', squadra: 'Halmstad', pos: 16, punti: 6, forma: 'D W L L L', gf: 10, gs: 26 },
+        // Chinese Super League
+        { campionato: 'Chinese Super League', squadra: 'Rongcheng', pos: 1, punti: 43, forma: 'W W D D D', gf: 39, gs: 18 },
+        { campionato: 'Chinese Super League', squadra: 'Chongqing', pos: 2, punti: 29, forma: 'L W L D D', gf: 23, gs: 21 },
+        { campionato: 'Chinese Super League', squadra: 'Dalian Yingbo', pos: 3, punti: 28, forma: 'W L L W W', gf: 28, gs: 32 },
+        { campionato: 'Chinese Super League', squadra: 'Q. West Coast', pos: 4, punti: 25, forma: 'D W W L D', gf: 23, gs: 29 },
+        { campionato: 'Chinese Super League', squadra: 'Yunnan Yukun', pos: 5, punti: 25, forma: 'D L W L D', gf: 36, gs: 35 },
+        { campionato: 'Chinese Super League', squadra: 'SD Taishan', pos: 6, punti: 30, forma: 'L W L W L', gf: 35, gs: 34 },
+        { campionato: 'Chinese Super League', squadra: 'Beijing Guoan', pos: 7, punti: 27, forma: 'L W W W D', gf: 30, gs: 24 },
+        { campionato: 'Chinese Super League', squadra: 'Shenyang Urban', pos: 8, punti: 21, forma: 'W W L W D', gf: 25, gs: 30 },
+        { campionato: 'Chinese Super League', squadra: 'Zhejiang', pos: 9, punti: 26, forma: 'W L L W D', gf: 27, gs: 32 },
+        { campionato: 'Chinese Super League', squadra: 'SZ Peng City', pos: 10, punti: 20, forma: 'W L L W L', gf: 25, gs: 33 },
+        { campionato: 'Chinese Super League', squadra: 'Shanghai Shen', pos: 11, punti: 29, forma: 'L D W W L', gf: 36, gs: 29 },
+        { campionato: 'Chinese Super League', squadra: 'Henan', pos: 12, punti: 24, forma: 'W L L L W', gf: 23, gs: 23 },
+        { campionato: 'Chinese Super League', squadra: 'Shanghai Port', pos: 13, punti: 21, forma: 'D L W L D', gf: 28, gs: 26 },
+        { campionato: 'Chinese Super League', squadra: 'Qingdao Hainiu', pos: 14, punti: 21, forma: 'L W D L L', gf: 30, gs: 36 },
+        { campionato: 'Chinese Super League', squadra: 'Jinmen Tiger', pos: 15, punti: 21, forma: 'D W L W W', gf: 24, gs: 22 },
+        { campionato: 'Chinese Super League', squadra: 'Wuhan 3 Towns', pos: 16, punti: 16, forma: 'D D L L W', gf: 26, gs: 34 },
+        // Veikkausliiga
+        { campionato: 'Veikkausliiga', squadra: 'KuPS', pos: 1, punti: 33, forma: 'D W W W W', gf: 29, gs: 15 },
+        { campionato: 'Veikkausliiga', squadra: 'Inter Turku', pos: 2, punti: 30, forma: 'D D D D W', gf: 23, gs: 12 },
+        { campionato: 'Veikkausliiga', squadra: 'VPS', pos: 3, punti: 27, forma: 'W D W W L', gf: 23, gs: 13 },
+        { campionato: 'Veikkausliiga', squadra: 'AC Oulu', pos: 4, punti: 26, forma: 'W L D L L', gf: 20, gs: 20 },
+        { campionato: 'Veikkausliiga', squadra: 'HJK Helsinki', pos: 5, punti: 25, forma: 'D W L L W', gf: 27, gs: 20 },
+        { campionato: 'Veikkausliiga', squadra: 'IF Gnistan', pos: 6, punti: 25, forma: 'D D L W W', gf: 25, gs: 20 },
+        { campionato: 'Veikkausliiga', squadra: 'TPS', pos: 7, punti: 22, forma: 'L D W L W', gf: 19, gs: 16 },
+        { campionato: 'Veikkausliiga', squadra: 'Lahti', pos: 8, punti: 19, forma: 'L D D W W', gf: 18, gs: 15 },
+        { campionato: 'Veikkausliiga', squadra: 'Ilves', pos: 9, punti: 16, forma: 'W W L D L', gf: 25, gs: 29 },
+        { campionato: 'Veikkausliiga', squadra: 'SJK', pos: 10, punti: 14, forma: 'D D W L L', gf: 18, gs: 25 },
+        { campionato: 'Veikkausliiga', squadra: 'FF Jaro', pos: 11, punti: 11, forma: 'L L D L W', gf: 15, gs: 32 },
+        { campionato: 'Veikkausliiga', squadra: 'IFK Mariehamn', pos: 12, punti: 4, forma: 'L L L L L', gf: 8, gs: 33 },
+        // Ireland Premier Division
+        { campionato: 'Ireland Premier Division', squadra: 'Shamrock', pos: 1, punti: 50, forma: 'L W D W W', gf: 40, gs: 22 },
+        { campionato: 'Ireland Premier Division', squadra: 'Bohemian FC', pos: 2, punti: 43, forma: 'L L W W W', gf: 40, gs: 27 },
+        { campionato: 'Ireland Premier Division', squadra: 'St Patrick\'s', pos: 3, punti: 42, forma: 'W W L W D', gf: 39, gs: 20 },
+        { campionato: 'Ireland Premier Division', squadra: 'Dundalk FC', pos: 4, punti: 35, forma: 'W W L L L', gf: 38, gs: 36 },
+        { campionato: 'Ireland Premier Division', squadra: 'Shelbourne FC', pos: 5, punti: 34, forma: 'W D L D W', gf: 35, gs: 35 },
+        { campionato: 'Ireland Premier Division', squadra: 'Derry City', pos: 6, punti: 29, forma: 'W L D W L', gf: 32, gs: 31 },
+        { campionato: 'Ireland Premier Division', squadra: 'Galway United', pos: 7, punti: 27, forma: 'L W L L W', gf: 32, gs: 39 },
+        { campionato: 'Ireland Premier Division', squadra: 'Drogheda United', pos: 8, punti: 25, forma: 'L D L L W', gf: 29, gs: 41 },
+        { campionato: 'Ireland Premier Division', squadra: 'Waterford United', pos: 9, punti: 21, forma: 'W L W W D', gf: 33, gs: 47 },
+        { campionato: 'Ireland Premier Division', squadra: 'Sligo Rovers', pos: 10, punti: 20, forma: 'L L D L L', gf: 20, gs: 40 },
+        // K League 1
+        { campionato: 'K League 1', squadra: 'FC Seoul', pos: 1, punti: 36, forma: 'L W W W D', gf: 28, gs: 12 },
+        { campionato: 'K League 1', squadra: 'Gangwon FC', pos: 2, punti: 31, forma: 'W W W D W', gf: 23, gs: 11 },
+        { campionato: 'K League 1', squadra: 'Jeonbuk', pos: 3, punti: 29, forma: 'D W L W L', gf: 25, gs: 16 },
+        { campionato: 'K League 1', squadra: 'Ulsan HD', pos: 4, punti: 28, forma: 'W L D L D', gf: 26, gs: 26 },
+        { campionato: 'K League 1', squadra: 'Pohang Steelers', pos: 5, punti: 28, forma: 'W L W W L', gf: 19, gs: 16 },
+        { campionato: 'K League 1', squadra: 'Incheon United', pos: 6, punti: 24, forma: 'L W L L W', gf: 22, gs: 19 },
+        { campionato: 'K League 1', squadra: 'FC Anyang', pos: 7, punti: 23, forma: 'D D W L W', gf: 22, gs: 19 },
+        { campionato: 'K League 1', squadra: 'Jeju United', pos: 8, punti: 23, forma: 'L L D D W', gf: 16, gs: 18 },
+        { campionato: 'K League 1', squadra: 'Daejeon Hana', pos: 9, punti: 19, forma: 'L L D D D', gf: 21, gs: 20 },
+        { campionato: 'K League 1', squadra: 'Bucheon FC', pos: 10, punti: 19, forma: 'L D W D D', gf: 14, gs: 18 },
+        { campionato: 'K League 1', squadra: 'Sangmu', pos: 11, punti: 16, forma: 'D L D D L', gf: 17, gs: 25 },
+        { campionato: 'K League 1', squadra: 'Gwangju FC', pos: 12, punti: 8, forma: 'D L L D L', gf: 8, gs: 41 },
+        // Austria Bundesliga
+        { campionato: 'Austria Bundesliga', squadra: 'LASK', pos: 1, punti: 0, forma: '', gf: 0, gs: 0 },
+        { campionato: 'Austria Bundesliga', squadra: 'Sturm Graz', pos: 2, punti: 0, forma: '', gf: 0, gs: 0 },
+        { campionato: 'Austria Bundesliga', squadra: 'Rapid Wien', pos: 3, punti: 0, forma: '', gf: 0, gs: 0 },
+        { campionato: 'Austria Bundesliga', squadra: 'Austria Wien', pos: 4, punti: 0, forma: '', gf: 0, gs: 0 },
+        { campionato: 'Austria Bundesliga', squadra: 'RB Salzburg', pos: 5, punti: 0, forma: '', gf: 0, gs: 0 },
+        { campionato: 'Austria Bundesliga', squadra: 'Grazer AK', pos: 6, punti: 0, forma: '', gf: 0, gs: 0 },
+        { campionato: 'Austria Bundesliga', squadra: 'Ried', pos: 7, punti: 0, forma: '', gf: 0, gs: 0 },
+        { campionato: 'Austria Bundesliga', squadra: 'WSG Tirol', pos: 8, punti: 0, forma: '', gf: 0, gs: 0 },
+        { campionato: 'Austria Bundesliga', squadra: 'Austria Lustenau', pos: 9, punti: 0, forma: '', gf: 0, gs: 0 },
+        { campionato: 'Austria Bundesliga', squadra: 'Rheindorf Altach', pos: 10, punti: 0, forma: '', gf: 0, gs: 0 },
+        { campionato: 'Austria Bundesliga', squadra: 'RZ Pellets WAC', pos: 11, punti: 0, forma: '', gf: 0, gs: 0 },
+        { campionato: 'Austria Bundesliga', squadra: 'Hartberg', pos: 12, punti: 0, forma: '', gf: 0, gs: 0 },
+    ];
+
+    // --------------------- MAPPATURA SQUADRA -> CITTÀ ---------------------
+    const teamCityMap = {
+        'AIK Stockholm': 'Stockholm', 'BK Häcken': 'Gothenburg', 'Brommapojkarna': 'Stockholm',
+        'Degerfors': 'Degerfors', 'Djurgården': 'Stockholm', 'Elfsborg': 'Borås',
+        'GAIS': 'Gothenburg', 'Göteborg': 'Gothenburg', 'Halmstad': 'Halmstad',
+        'Hammarby': 'Stockholm', 'Kalmar': 'Kalmar', 'Malmö': 'Malmö',
+        'Mjällby': 'Hällevik', 'Sirius': 'Uppsala', 'Västerås': 'Västerås', 'Örgryte': 'Gothenburg',
+        'LASK': 'Linz', 'Sturm Graz': 'Graz', 'Rapid Wien': 'Vienna', 'Austria Wien': 'Vienna',
+        'RB Salzburg': 'Salzburg', 'Grazer AK': 'Graz', 'Ried': 'Ried im Innkreis',
+        'WSG Tirol': 'Innsbruck', 'Austria Lustenau': 'Lustenau', 'Rheindorf Altach': 'Altach',
+        'RZ Pellets WAC': 'Wolfsberg', 'Hartberg': 'Hartberg',
+        'Rongcheng': 'Chengdu', 'Chongqing': 'Chongqing', 'Dalian Yingbo': 'Dalian',
+        'Q. West Coast': 'Qingdao', 'Yunnan Yukun': 'Kunming', 'SD Taishan': 'Jinan',
+        'Beijing Guoan': 'Beijing', 'Shenyang Urban': 'Shenyang', 'Zhejiang': 'Hangzhou',
+        'SZ Peng City': 'Shenzhen', 'Shanghai Shen': 'Shanghai', 'Henan': 'Zhengzhou',
+        'Shanghai Port': 'Shanghai', 'Qingdao Hainiu': 'Qingdao', 'Jinmen Tiger': 'Tianjin',
+        'Wuhan 3 Towns': 'Wuhan',
+        'KuPS': 'Kuopio', 'Inter Turku': 'Turku', 'VPS': 'Vaasa', 'AC Oulu': 'Oulu',
+        'HJK Helsinki': 'Helsinki', 'IF Gnistan': 'Helsinki', 'TPS': 'Turku', 'Lahti': 'Lahti',
+        'Ilves': 'Tampere', 'SJK': 'Seinäjoki', 'FF Jaro': 'Jakobstad', 'IFK Mariehamn': 'Mariehamn',
+        'Shamrock': 'Dublin', 'Bohemian FC': 'Dublin', 'St Patrick\'s': 'Dublin',
+        'Dundalk FC': 'Dundalk', 'Shelbourne FC': 'Dublin', 'Derry City': 'Derry',
+        'Galway United': 'Galway', 'Drogheda United': 'Drogheda', 'Waterford United': 'Waterford',
+        'Sligo Rovers': 'Sligo',
+        'FC Seoul': 'Seoul', 'Gangwon FC': 'Chuncheon', 'Jeonbuk': 'Jeonju',
+        'Ulsan HD': 'Ulsan', 'Pohang Steelers': 'Pohang', 'Incheon United': 'Incheon',
+        'FC Anyang': 'Anyang', 'Jeju United': 'Jeju', 'Daejeon Hana': 'Daejeon',
+        'Bucheon FC': 'Bucheon', 'Sangmu': 'Gimcheon', 'Gwangju FC': 'Gwangju',
+    };
+
+    // ================================================================
+    // FUNZIONI STATISTICHE
+    // ================================================================
+
+    function getTeamStats(campionato, squadra) {
+        const found = standings.find(s => s.campionato === campionato && s.squadra === squadra);
+        if (found) return found;
+        return { pos: '-', punti: '-', forma: '', gf: 0, gs: 0 };
+    }
+
+    function calculateFormScore(forma) {
+        if (!forma || forma === '') return 0;
+        let total = 0;
+        forma.split(' ').forEach(c => { if (c === 'W') total += 20; else if (c === 'D') total += 7.5; });
+        return total;
+    }
+
+    function winPercentage(stats) {
+        if (!stats || stats.punti === '-') return { value: 0, label: '0%', flag: 'flag-red' };
+        const pts = parseInt(stats.punti) || 0;
+        if (pts === 0) return { value: 0, label: '0%', flag: 'flag-red' };
+        const gf = parseInt(stats.gf) || 0;
+        const gs = parseInt(stats.gs) || 0;
+        const diff = gf - gs;
+        let base = Math.min(100, Math.round((pts * 4.2) + (diff * 1.5)));
+        base = Math.min(100, Math.max(5, base));
+        return { value: base, label: base + '%', flag: getFlag(base) };
+    }
+
+    function multiGoalValues(stats) {
+        if (!stats) return { p02: 0, p13: 0, p25: 0 };
+        const gf = parseInt(stats.gf) || 0;
+        const gs = parseInt(stats.gs) || 0;
+        const total = gf + gs;
+        if (total === 0) return { p02: 0, p13: 0, p25: 0 };
+        const media = total / 10;
+        let p02 = 40, p13 = 35, p25 = 25;
+        if (media < 1.5) { p02 = 70; p13 = 20; p25 = 10; }
+        else if (media < 2.5) { p02 = 50; p13 = 35; p25 = 15; }
+        else if (media < 3.5) { p02 = 30; p13 = 45; p25 = 25; }
+        else if (media < 4.5) { p02 = 20; p13 = 40; p25 = 40; }
+        else { p02 = 10; p13 = 30; p25 = 60; }
+        return { p02, p13, p25 };
+    }
+
+    function under45Percent(homeStats, awayStats) {
+        const hTotal = (parseInt(homeStats.gf) || 0) + (parseInt(homeStats.gs) || 0);
+        const aTotal = (parseInt(awayStats.gf) || 0) + (parseInt(awayStats.gs) || 0);
+        const total = hTotal + aTotal;
+        if (total === 0) return { value: 0, label: '0%', flag: 'flag-red' };
+        const media = total / 20;
+        let value = 0;
+        if (media < 1.5) value = 78;
+        else if (media < 2.5) value = 62;
+        else if (media < 3.5) value = 48;
+        else if (media < 4.5) value = 35;
+        else value = 22;
+        return { value, label: value + '%', flag: getFlag(value) };
+    }
+
+    function over15Percent(homeStats, awayStats) {
+        const hTotal = (parseInt(homeStats.gf) || 0) + (parseInt(homeStats.gs) || 0);
+        const aTotal = (parseInt(awayStats.gf) || 0) + (parseInt(awayStats.gs) || 0);
+        const total = hTotal + aTotal;
+        if (total === 0) return { value: 0, label: '0%', flag: 'flag-red' };
+        const media = total / 20;
+        let value = 0;
+        if (media < 1.5) value = 30;
+        else if (media < 2.5) value = 55;
+        else if (media < 3.5) value = 70;
+        else if (media < 4.5) value = 82;
+        else value = 92;
+        return { value, label: value + '%', flag: getFlag(value) };
+    }
+
+    function getFlag(value) {
+        if (value >= 90) return 'flag-bomb';
+        if (value >= 66.67) return 'flag-gold';
+        if (value >= 33.34) return 'flag-green';
+        return 'flag-neutral';
+    }
+
+    function formaBoxes(forma) {
+        if (!forma || forma === '') {
+            return '<span class="forma-box">-</span><span class="forma-box">-</span><span class="forma-box">-</span><span class="forma-box">-</span><span class="forma-box">-</span>';
         }
-        updateClock();
-        setInterval(updateClock, 10000);
+        return forma.split(' ').map(c => {
+            const letter = c === 'W' ? 'V' : c === 'D' ? 'P' : c === 'L' ? 'S' : '-';
+            return `<span class="forma-box ${letter}">${letter}</span>`;
+        }).join('');
+    }
 
-        // ============================================================
-        //  CALENDARIO
-        // ============================================================
-        const clockButton = document.getElementById('clockButton');
-        const calendarPopup = document.getElementById('calendarPopup');
-        const calGrid = document.getElementById('calGrid');
-        const calMonth = document.getElementById('calMonth');
-        const calPrev = document.getElementById('calPrev');
-        const calNext = document.getElementById('calNext');
-        const calToday = document.getElementById('calToday');
+    function formatDate(dateStr) {
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return dateStr;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
 
-        clockButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            calendarVisible = !calendarVisible;
-            calendarPopup.classList.toggle('show', calendarVisible);
-            if (calendarVisible) {
-                currentViewDate = new Date(selectedDate);
-                renderCalendar();
-            }
-        });
+    // ================================================================
+    // STATO APP
+    // ================================================================
 
-        document.addEventListener('click', () => {
-            calendarPopup.classList.remove('show');
-            calendarVisible = false;
-        });
+    let currentTab = 'palinsesto';
+    let currentMatchIndex = 0;
+    let matches = [];
 
-        calendarPopup.addEventListener('click', (e) => e.stopPropagation());
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStr = today.toISOString().split('T')[0];
+    matches = matchesData.filter(m => m.data === todayStr);
+    matches.sort((a, b) => (a.data + a.ora).localeCompare(b.data + b.ora));
 
-        function renderCalendar() {
-            const year = currentViewDate.getFullYear();
-            const month = currentViewDate.getMonth();
+    // ================================================================
+    // RENDER PALINSESTO
+    // ================================================================
 
-            calMonth.textContent = currentViewDate.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const daysInPrevMonth = new Date(year, month, 0).getDate();
-
-            const today = new Date();
-            const todayStr = today.toDateString();
-
-            let html = '';
-            const dayLabels = ['L', 'M', 'M', 'G', 'V', 'S', 'D'];
-            dayLabels.forEach(label => {
-                html += `<div class="cal-day-label">${label}</div>`;
-            });
-
-            const firstDayIndex = firstDay === 0 ? 6 : firstDay - 1;
-            for (let i = firstDayIndex - 1; i >= 0; i--) {
-                const day = daysInPrevMonth - i;
-                html += `<div class="cal-day other-month" data-date="${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}">${day}</div>`;
-            }
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateObj = new Date(year, month, day);
-                const dateStr = dateObj.toDateString();
-                let classes = 'cal-day';
-                if (dateStr === todayStr) classes += ' today';
-                if (dateStr === selectedDate.toDateString()) classes += ' selected';
-                html += `<div class="${classes}" data-date="${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}">${day}</div>`;
-            }
-
-            const totalCells = firstDayIndex + daysInMonth;
-            const remainingCells = (7 - (totalCells % 7)) % 7;
-            for (let day = 1; day <= remainingCells; day++) {
-                html += `<div class="cal-day other-month" data-date="${year}-${String(month + 2).padStart(2, '0')}-${String(day).padStart(2, '0')}">${day}</div>`;
-            }
-
-            calGrid.innerHTML = html;
-
-            calGrid.querySelectorAll('.cal-day').forEach(el => {
-                el.addEventListener('click', function() {
-                    const dateParts = this.dataset.date.split('-').map(Number);
-                    selectedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-                    calendarPopup.classList.remove('show');
-                    calendarVisible = false;
-                    document.getElementById('currentDate').textContent =
-                        selectedDate.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                    filterMatchesByDate(selectedDate);
-                });
-            });
-        }
-
-        calPrev.addEventListener('click', () => {
-            currentViewDate.setMonth(currentViewDate.getMonth() - 1);
-            renderCalendar();
-        });
-
-        calNext.addEventListener('click', () => {
-            currentViewDate.setMonth(currentViewDate.getMonth() + 1);
-            renderCalendar();
-        });
-
-        calToday.addEventListener('click', () => {
-            selectedDate = new Date();
-            currentViewDate = new Date();
-            document.getElementById('currentDate').textContent =
-                selectedDate.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            calendarPopup.classList.remove('show');
-            calendarVisible = false;
-            filterMatchesByDate(selectedDate);
-        });
-
-        // ============================================================
-        //  TAB NAVIGATION
-        // ============================================================
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const pages = {
-            partite: document.getElementById('page-partite'),
-            impostazioni: document.getElementById('page-impostazioni')
-        };
-
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tab = this.dataset.tab;
-                tabBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                Object.keys(pages).forEach(key => {
-                    pages[key].classList.toggle('active', key === tab);
-                });
-            });
-        });
-
-        // ============================================================
-        //  TEMA
-        // ============================================================
-        let darkMode = true;
-        const themeSwitch = document.getElementById('settingsThemeSwitch');
-        const themeIcon = document.getElementById('settingsThemeIcon');
-        const themeLabel = document.getElementById('settingsThemeLabel');
-
-        function applyTheme() {
-            document.body.classList.toggle('dark', darkMode);
-            themeIcon.textContent = darkMode ? '🌙' : '☀️';
-            themeLabel.textContent = darkMode ? 'Scuro' : 'Chiaro';
-            themeSwitch.classList.toggle('active', darkMode);
-        }
-
-        themeSwitch.addEventListener('click', function() {
-            darkMode = !darkMode;
-            applyTheme();
-        });
-        applyTheme();
-
-        // ============================================================
-        //  UTILITY
-        // ============================================================
-        window.toggleVisibility = function(id) {
-            const input = document.getElementById(id);
-            input.type = input.type === 'password' ? 'text' : 'password';
-        };
-
-        function getFlagClass(p) {
-            if (p >= 90) return 'flag-bomb';
-            if (p >= 66.67) return 'flag-green';
-            if (p >= 33.34) return 'flag-neutral';
-            return 'flag-red';
-        }
-
-        function getFormLetters(formStr) {
-            if (!formStr) return '-----';
-            // Prendi solo le prime 5 lettere (W, D, L)
-            let letters = formStr.replace(/[^WDL]/g, '').slice(0, 5);
-            while (letters.length < 5) letters += '-';
-            return letters;
-        }
-
-        // ============================================================
-        //  CARICAMENTO FILE EXCEL
-        // ============================================================
-        fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(loadEvent) {
-                try {
-                    const data = new Uint8Array(loadEvent.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-
-                    // Leggi il foglio "Palinsesto"
-                    const sheet = workbook.Sheets['Palinsesto'];
-                    if (!sheet) {
-                        alert('Foglio "Palinsesto" non trovato nel file Excel!');
-                        return;
-                    }
-
-                    const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-                    console.log('Dati caricati:', jsonData.length, 'righe');
-
-                    // Pulisci e mappa i dati
-                    allMatches = [];
-                    jsonData.forEach(row => {
-                        // Cerca le colonne necessarie
-                        const campionato = row['Campionato'] || row['Campionato '] || '';
-                        const giornata = row['Giornata'] || row['Giornata '] || '';
-                        const data = row['Data'] || row['Data '] || '';
-                        const ora = row['Ora'] || row['Ora '] || '';
-                        const home = row['Squadra'] || row['Squadra '] || '';
-                        const away = row['Avversario'] || row['Avversario '] || row['Squadra Ospite'] || '';
-
-                        // Salta righe vuote
-                        if (!campionato && !home && !away) return;
-
-                        // Cerca le percentuali e le giocate
-                        const percHome = parseFloat(row['% Home'] || row['% Casa'] || row['%']) || 50;
-                        const percAway = 100 - percHome;
-
-                        const under45 = parseFloat(row['12+U 4,5'] || row['12+under 4,5'] || row['Under 4,5'] || '0');
-                        const multigol = parseFloat(row['Multigol'] || row['Multigol %'] || '0');
-                        const multigolFasce = row['Multigol Fasce'] || row['Fasce'] || row['0-2 - 1-3'] || '0-2 - 1-3';
-                        const over15 = parseFloat(row['Over 1,5'] || row['Over 1,5 %'] || '0');
-
-                        // Stato forma (colonne Forma1-Forma5 o Last 5)
-                        let formHome = '';
-                        for (let i = 1; i <= 5; i++) {
-                            const f = row['Forma' + i] || row['Forma ' + i] || '';
-                            if (f) formHome += f;
-                        }
-                        if (!formHome) formHome = row['Last 5'] || row['Stato Forma'] || '-----';
-
-                        // Dati aggiuntivi
-                        const xGHome = parseFloat(row['xG Home'] || row['xG Casa'] || '1.5');
-                        const xGAway = parseFloat(row['xG Away'] || row['xG Ospite'] || '1.2');
-                        const goalsHome = parseFloat(row['Media Gol Home'] || row['Media Gol Casa'] || '1.3');
-                        const goalsAway = parseFloat(row['Media Gol Away'] || row['Media Gol Ospite'] || '1.1');
-
-                        allMatches.push({
-                            id: allMatches.length + 1,
-                            campionato: String(campionato).trim(),
-                            giornata: String(giornata).trim(),
-                            data: String(data).trim(),
-                            ora: String(ora).trim(),
-                            home: String(home).trim(),
-                            away: String(away).trim(),
-                            formHome: getFormLetters(String(formHome).trim()),
-                            formAway: getFormLetters(''), // da implementare con colonne separate
-                            percHome: percHome,
-                            percAway: percAway,
-                            under45: under45 || 50,
-                            multigol: multigol || 50,
-                            multigolFasce: multigolFasce || '0-2 - 1-3',
-                            over15: over15 || 50,
-                            homeStats: { xG: xGHome, goalsAvg: goalsHome, shots: Math.round(xGHome * 8) },
-                            awayStats: { xG: xGAway, goalsAvg: goalsAway, shots: Math.round(xGAway * 8) },
-                            venue: row['Stadio'] || row['Venue'] || 'Stadio',
-                            weather: { temp: 24, condition: 'Parzialmente nuvoloso', wind: 12, humidity: 65, icon: '⛅' }
-                        });
-                    });
-
-                    // Se non ci sono dati, usa i dati di esempio
-                    if (allMatches.length === 0) {
-                        console.log('Nessun dato trovato, uso dati di esempio');
-                        loadSampleData();
-                    } else {
-                        console.log('Caricate', allMatches.length, 'partite');
-                        dataLoaded = true;
-                        filterMatchesByDate(selectedDate);
-                    }
-
-                } catch (err) {
-                    console.error('Errore nel leggere il file:', err);
-                    alert('Errore nella lettura del file. Controlla che sia un file Excel valido.');
-                    loadSampleData();
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        });
-
-        // ============================================================
-        //  DATI DI ESEMPIO (fallback)
-        // ============================================================
-        function loadSampleData() {
-            allMatches = [{
-                id: 1,
-                campionato: "Allsvenskan",
-                giornata: "13",
-                data: "20/07/2026",
-                ora: "19:00",
-                home: "Kalmar",
-                away: "Västerås",
-                formHome: "WDLWD",
-                formAway: "DLWWL",
-                percHome: 55,
-                percAway: 45,
-                under45: 68,
-                multigol: 52,
-                multigolFasce: "1-3 - 2-5",
-                over15: 73,
-                homeStats: { xG: 1.4, goalsAvg: 1.2, shots: 10 },
-                awayStats: { xG: 1.1, goalsAvg: 0.9, shots: 8 },
-                venue: "Guldfågeln Arena",
-                weather: { temp: 22, condition: 'Sereno', wind: 8, humidity: 50, icon: '☀️' }
-            }, {
-                id: 2,
-                campionato: "Veikkausliiga",
-                giornata: "16",
-                data: "20/07/2026",
-                ora: "18:00",
-                home: "TPS",
-                away: "Ilves",
-                formHome: "WLLDW",
-                formAway: "WDWLL",
-                percHome: 48,
-                percAway: 52,
-                under45: 72,
-                multigol: 58,
-                multigolFasce: "0-2 - 1-3",
-                over15: 65,
-                homeStats: { xG: 1.2, goalsAvg: 1.0, shots: 9 },
-                awayStats: { xG: 1.3, goalsAvg: 1.4, shots: 11 },
-                venue: "Veritas Stadion",
-                weather: { temp: 19, condition: 'Nuvoloso', wind: 12, humidity: 70, icon: '☁️' }
-            }, {
-                id: 3,
-                campionato: "Veikkausliiga",
-                giornata: "16",
-                data: "20/07/2026",
-                ora: "19:00",
-                home: "IFK Mariehamn",
-                away: "Lahti",
-                formHome: "LDLWW",
-                formAway: "WDLWL",
-                percHome: 42,
-                percAway: 58,
-                under45: 78,
-                multigol: 44,
-                multigolFasce: "2-5 - 0-2",
-                over15: 55,
-                homeStats: { xG: 0.9, goalsAvg: 0.7, shots: 7 },
-                awayStats: { xG: 1.5, goalsAvg: 1.6, shots: 12 },
-                venue: "Wiklöf Holding Arena",
-                weather: { temp: 17, condition: 'Pioggia leggera', wind: 20, humidity: 85, icon: '🌧️' }
-            }];
-            dataLoaded = true;
-            filterMatchesByDate(selectedDate);
+    function renderCards() {
+        const container = document.getElementById('cardsContainer');
+        if (matches.length === 0) {
+            container.innerHTML = `<div class="no-match">📅 Nessuna partita in programma per oggi (${formatDate(todayStr)}).</div>`;
+            return;
         }
 
-        // ============================================================
-        //  FILTRA PARTITE PER DATA
-        // ============================================================
-        function filterMatchesByDate(date) {
-            const dateStr = date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            currentMatches = allMatches.filter(m => m.data === dateStr);
+        let html = '';
+        matches.forEach((match, idx) => {
+            const homeStats = getTeamStats(match.campionato, match.casa);
+            const awayStats = getTeamStats(match.campionato, match.ospite);
+            const homePerc = winPercentage(homeStats);
+            const awayPerc = winPercentage(awayStats);
+            const homeMulti = multiGoalValues(homeStats);
+            const awayMulti = multiGoalValues(awayStats);
+            const under45 = under45Percent(homeStats, awayStats);
+            const over15 = over15Percent(homeStats, awayStats);
+            const homeBoxes = formaBoxes(homeStats.forma);
+            const awayBoxes = formaBoxes(awayStats.forma);
+            const homeScore = calculateFormScore(homeStats.forma);
+            const awayScore = calculateFormScore(awayStats.forma);
+            const homeBest = Math.max(homeMulti.p02, homeMulti.p13, homeMulti.p25);
+            const awayBest = Math.max(awayMulti.p02, awayMulti.p13, awayMulti.p25);
+            const homeBestLabel = homeBest === homeMulti.p02 ? '(0-2)' : homeBest === homeMulti.p13 ? '(1-3)' : '(2-5)';
+            const awayBestLabel = awayBest === awayMulti.p02 ? '(0-2)' : awayBest === awayMulti.p13 ? '(1-3)' : '(2-5)';
+            const diff = homePerc.value - awayPerc.value;
+            const diffLabel = diff > 0 ? `+${diff}%` : `${diff}%`;
+            const diffColor = diff > 5 ? 'color: #22c55e;' : diff < -5 ? 'color: #ef4444;' : 'color: #eab308;';
+            const homeBestFlag = getFlag(homeBest);
+            const awayBestFlag = getFlag(awayBest);
 
-            // Se non ci sono partite per questa data, mostra tutte quelle disponibili
-            if (currentMatches.length === 0 && allMatches.length > 0) {
-                // Mostra un messaggio ma mantieni le partite
-                currentMatches = allMatches;
-            }
-
-            currentIndex = 0;
-            renderCards();
-            badge.textContent = currentMatches.length;
-            switchView('card');
-        }
-
-        // ============================================================
-        //  RENDER CARDS
-        // ============================================================
-        function renderCards() {
-            if (!currentMatches.length) {
-                cardsContainer.innerHTML = `
-                    <div class="empty-state">
-                        <span>📅</span>
-                        Nessuna partita per questa data<br>
-                        <small style="font-size:0.6rem;color:rgba(255,255,255,0.2);">
-                            Carica un file Excel o seleziona un'altra data
-                        </small>
-                        <br><br>
-                        <button class="upload-btn" onclick="document.getElementById('fileInput').click()" style="padding:6px 16px;font-size:0.7rem;">
-                            📂 Carica file Excel
-                        </button>
+            html += `
+                <div class="card" data-index="${idx}" data-tab="palinsesto">
+                    <div class="card-header">
+                        <span class="campionato">🏆 ${match.campionato}</span>
+                        <span class="giornata">Giornata ${match.giornata}</span>
                     </div>
-                `;
-                aiContainer.innerHTML = `<div class="empty-state"><span>🤖</span>Nessuna partita</div>`;
-                return;
-            }
-
-            let html = '';
-            currentMatches.forEach((m, idx) => {
-                const fh = m.formHome.split('').map(c =>
-                    `<span class="form-box-letter ${c === '-' ? '-' : c}">${c}</span>`
-                ).join('');
-
-                const fa = m.formAway.split('').map(c =>
-                    `<span class="form-box-letter ${c === '-' ? '-' : c}">${c}</span>`
-                ).join('');
-
-                const hc = getFlagClass(m.percHome);
-                const ac = getFlagClass(m.percAway);
-                const uc = getFlagClass(m.under45);
-                const mc = getFlagClass(m.multigol);
-                const oc = getFlagClass(m.over15);
-                const active = idx === currentIndex ? 'active-card' : '';
-
-                html += `
-                    <div class="match-card-swipe ${active}" data-index="${idx}" onclick="selectMatch(${idx})">
-                        <div class="card-header-swipe">
-                            <span>${m.campionato}</span>
-                            <span class="championship">Giornata ${m.giornata}</span>
-                        </div>
-                        <div class="match-row-swipe">
-                            <span class="team">${m.home}</span>
-                            <span class="vs">VS</span>
-                            <span class="team">${m.away}</span>
-                        </div>
-                        <div class="form-row-swipe">
-                            <div class="form-box">
-                                <span class="label">STATO FORMA</span>
-                                <div class="form-string">${fh}</div>
-                            </div>
-                            <div class="form-box">
-                                <span class="label">STATO FORMA</span>
-                                <div class="form-string">${fa}</div>
-                            </div>
-                        </div>
-                        <div class="perc-row-swipe">
-                            <div class="perc-box ${hc}">${m.percHome}% <small>${m.home}</small></div>
-                            <div class="perc-box ${ac}">${m.percAway}% <small>${m.away}</small></div>
-                        </div>
-                        <div class="stats-row-swipe">
-                            <div class="stat-chip ${uc}">📊 12+under 4,5 <span class="num">${m.under45}%</span></div>
-                            <div class="stat-chip ${mc}">🎯 Multigol <span class="num">${m.multigol}%</span> <span class="multigol-fasce">${m.multigolFasce}</span></div>
-                            <div class="stat-chip ${oc}">⚽ Over 1,5 <span class="num">${m.over15}%</span></div>
-                        </div>
-                        <div class="card-footer-swipe">
-                            <span>📅 ${m.data} • ${m.ora}</span>
-                            <span>#${m.id}</span>
-                        </div>
+                    <div class="data-ora">
+                        <span>📅 ${formatDate(match.data)}</span>
+                        <span>⏰ ${match.ora}</span>
                     </div>
-                `;
-            });
-
-            cardsContainer.innerHTML = html;
-            renderAI(currentMatches[currentIndex] || currentMatches[0]);
-        }
-
-        // ============================================================
-        //  RENDER AI
-        // ============================================================
-        function renderAI(match) {
-            if (!match) {
-                aiContainer.innerHTML = `<div class="empty-state"><span>🤖</span>Nessuna partita selezionata</div>`;
-                return;
-            }
-
-            const w = match.weather || { temp: 24, condition: 'Parzialmente nuvoloso', wind: 12, humidity: 65, icon: '⛅' };
-            const analysis = generateAnalysis(match);
-
-            aiContainer.innerHTML = `
-                <div class="ai-header">
-                    <h2>🤖 Analisi AI</h2>
-                    <span class="match-counter">${currentIndex+1}/${currentMatches.length}</span>
-                </div>
-                <div class="ai-grid-2">
-                    <div class="ai-box">
-                        <div class="ai-label">🏟️ Stadio</div>
-                        <div class="ai-value">${match.venue}</div>
-                        <div style="font-size:0.6rem;color:rgba(255,255,255,0.2);">${match.campionato} · G.${match.giornata}</div>
+                    <div class="squadre">
+                        <span class="home">${match.casa}</span>
+                        <span class="vs">vs</span>
+                        <span class="away">${match.ospite}</span>
                     </div>
-                    <div class="ai-box">
-                        <div class="ai-label">🌤️ Meteo</div>
-                        <div class="ai-weather">
-                            <span class="wi">${w.icon}</span>
-                            <div>
-                                <div class="temp">${w.temp}°C</div>
-                                <div class="cond">${w.condition}</div>
-                                <div class="details">💨 ${w.wind} km/h · 💧 ${w.humidity}%</div>
-                            </div>
-                        </div>
+                    <div class="forme">
+                        <div class="forma-badge">${homeBoxes}</div>
+                        <div class="forma-badge">${awayBoxes}</div>
+                    </div>
+                    <div class="forma-score">
+                        <div class="score">📊 <span class="num">${homeScore}</span></div>
+                        <div class="score">📊 <span class="num">${awayScore}</span></div>
+                    </div>
+                    <div class="diff-perc">
+                        <span>Diff: <span class="diff-value" style="${diffColor}">${diffLabel}</span></span>
+                    </div>
+                    <div class="stat-perc">
+                        <span class="label">Percentuale di Vittoria</span>
+                        <span class="perc ${homePerc.flag}">${homePerc.label}</span>
+                        <span style="color:var(--text-secondary);">|</span>
+                        <span class="perc ${awayPerc.flag}">${awayPerc.label}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">🏠 ${match.casa}</span>
+                        <span class="stat-value">Pts: ${homeStats.punti} | Pos: ${homeStats.pos}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">✈️ ${match.ospite}</span>
+                        <span class="stat-value">Pts: ${awayStats.punti} | Pos: ${awayStats.pos}</span>
+                    </div>
+                    <div class="multigol-row">
+                        <span class="label">🎯 Multigol Best</span>
+                        <span class="value">
+                            <span class="perc ${homeBestFlag}">${homeBestLabel} ${homeBest}%</span>
+                            <span style="color:var(--text-secondary);">|</span>
+                            <span class="perc ${awayBestFlag}">${awayBestLabel} ${awayBest}%</span>
+                        </span>
+                    </div>
+                    <div class="stat-footer">
+                        <span>📊 12+Under 4.5: <span class="perc ${under45.flag}" style="padding:0 6px;border-radius:12px;">${under45.label}</span></span>
+                        <span>⚽ Over 1.5: <span class="perc ${over15.flag}" style="padding:0 6px;border-radius:12px;">${over15.label}</span></span>
                     </div>
                 </div>
-                <div class="ai-grid-2">
-                    <div class="ai-box">
-                        <div class="ai-label">📊 ${match.home}</div>
-                        <div class="ai-value">xG: <strong>${match.homeStats.xG}</strong></div>
-                        <div style="color:rgba(255,255,255,0.4);font-size:0.7rem;">Media gol: ${match.homeStats.goalsAvg}</div>
-                        <div style="color:rgba(255,255,255,0.4);font-size:0.7rem;">Tiri: ${match.homeStats.shots}</div>
-                    </div>
-                    <div class="ai-box">
-                        <div class="ai-label">📊 ${match.away}</div>
-                        <div class="ai-value">xG: <strong>${match.awayStats.xG}</strong></div>
-                        <div style="color:rgba(255,255,255,0.4);font-size:0.7rem;">Media gol: ${match.awayStats.goalsAvg}</div>
-                        <div style="color:rgba(255,255,255,0.4);font-size:0.7rem;">Tiri: ${match.awayStats.shots}</div>
-                    </div>
-                </div>
-                <div class="ai-box" style="flex-shrink:0;">
-                    <div class="ai-label">🎯 Pronostici</div>
-                    <div class="ai-stats-grid">
-                        <div class="ai-stat-item ${getFlagClass(match.under45)}" style="background:${getFlagClass(match.under45) === 'flag-red' ? '#fde0e0' : getFlagClass(match.under45) === 'flag-neutral' ? '#f0f2f5' : getFlagClass(match.under45) === 'flag-green' ? '#d4edda' : getFlagClass(match.under45) === 'flag-gold' ? '#ffd966' : '#ffb347'};">
-                            <div class="stat-label" style="color:#1a1a1a;opacity:0.6;">12+under 4,5</div>
-                            <div class="stat-value" style="color:#1a1a1a;">${match.under45}%</div>
-                        </div>
-                        <div class="ai-stat-item ${getFlagClass(match.multigol)}" style="background:${getFlagClass(match.multigol) === 'flag-red' ? '#fde0e0' : getFlagClass(match.multigol) === 'flag-neutral' ? '#f0f2f5' : getFlagClass(match.multigol) === 'flag-green' ? '#d4edda' : getFlagClass(match.multigol) === 'flag-gold' ? '#ffd966' : '#ffb347'};">
-                            <div class="stat-label" style="color:#1a1a1a;opacity:0.6;">Multigol</div>
-                            <div class="stat-value" style="color:#1a1a1a;">${match.multigol}%</div>
-                            <div class="stat-sub" style="color:#1a1a1a;opacity:0.6;font-weight:700;">${match.multigolFasce}</div>
-                        </div>
-                        <div class="ai-stat-item ${getFlagClass(match.over15)}" style="background:${getFlagClass(match.over15) === 'flag-red' ? '#fde0e0' : getFlagClass(match.over15) === 'flag-neutral' ? '#f0f2f5' : getFlagClass(match.over15) === 'flag-green' ? '#d4edda' : getFlagClass(match.over15) === 'flag-gold' ? '#ffd966' : '#ffb347'};">
-                            <div class="stat-label" style="color:#1a1a1a;opacity:0.6;">Over 1,5</div>
-                            <div class="stat-value" style="color:#1a1a1a;">${match.over15}%</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="ai-analysis-box">${analysis}</div>
             `;
+        });
+        container.innerHTML = html;
+
+        document.querySelectorAll('.card[data-tab="palinsesto"]').forEach(el => {
+            el.addEventListener('click', function() {
+                const idx = parseInt(this.dataset.index);
+                if (!isNaN(idx)) {
+                    currentMatchIndex = idx;
+                    switchTab('analisi');
+                    renderAnalisiAI(idx);
+                }
+            });
+        });
+    }
+
+    // ================================================================
+    // GENERAZIONE PRONOSTICI STATISTICI (FALLBACK)
+    // ================================================================
+
+    function generateStatisticalTips(match) {
+        const homeStats = getTeamStats(match.campionato, match.casa);
+        const awayStats = getTeamStats(match.campionato, match.ospite);
+
+        const homePts = parseInt(homeStats.punti) || 0;
+        const awayPts = parseInt(awayStats.punti) || 0;
+        const homeGf = parseInt(homeStats.gf) || 0;
+        const homeGs = parseInt(homeStats.gs) || 0;
+        const awayGf = parseInt(awayStats.gf) || 0;
+        const awayGs = parseInt(awayStats.gs) || 0;
+
+        const homeDiff = homeGf - homeGs;
+        const awayDiff = awayGf - awayGs;
+        const totalGf = homeGf + awayGf;
+        const totalGs = homeGs + awayGs;
+        const totalGoals = totalGf + totalGs;
+
+        // Calcolo percentuali base
+        const homeWinPerc = Math.min(100, Math.round((homePts * 4.2) + (homeDiff * 1.5)));
+        const awayWinPerc = Math.min(100, Math.round((awayPts * 4.2) + (awayDiff * 1.5)));
+        const drawPerc = Math.max(0, 100 - homeWinPerc - awayWinPerc);
+
+        const homeWin = Math.min(100, Math.max(5, homeWinPerc));
+        const awayWin = Math.min(100, Math.max(5, awayWinPerc));
+        const draw = Math.min(100, Math.max(5, drawPerc));
+
+        // Pronostico 1X2
+        let pronostico = 'X';
+        if (homeWin > awayWin && homeWin > draw) pronostico = '1';
+        else if (awayWin > homeWin && awayWin > draw) pronostico = '2';
+
+        // Sicurezza (basata sul margine)
+        const maxPerc = Math.max(homeWin, awayWin, draw);
+        const sicurezza = Math.min(100, Math.round(maxPerc + 10));
+
+        // Giocate
+        const over15 = Math.min(100, Math.round((totalGoals / 20) * 100 + 20));
+        const under45 = Math.min(100, Math.round(100 - (totalGoals / 20) * 15));
+
+        // Multigol 1-3 media
+        const homeMulti = multiGoalValues(homeStats);
+        const awayMulti = multiGoalValues(awayStats);
+        const multi13 = Math.round((homeMulti.p13 + awayMulti.p13) / 2);
+
+        // Consigli
+        let tip1 = 'X';
+        if (homeWin > 60) tip1 = '1';
+        else if (awayWin > 60) tip1 = '2';
+        else if (homeWin > 40 && awayWin > 40) tip1 = '12';
+        else if (homeWin > 40) tip1 = '1X';
+        else if (awayWin > 40) tip1 = 'X2';
+
+        const tip2 = `${tip1} + Under 4.5`;
+
+        return {
+            pronostico,
+            sicurezza,
+            sicurezzaText: sicurezza > 60 ? `Si (${sicurezza}%)` : `No (${sicurezza}%)`,
+            tip1,
+            tip2,
+            homeWin: Math.round(homeWin),
+            awayWin: Math.round(awayWin),
+            draw: Math.round(draw),
+            over15,
+            under45,
+            multi13
+        };
+    }
+
+    // ================================================================
+    // RENDER ANALISI AI - CON GROQ E FALLBACK
+    // ================================================================
+
+    async function renderAnalisiAI(index) {
+        const container = document.getElementById('aiContent');
+        const match = matches[index];
+        if (!match) {
+            container.innerHTML = `<div class="ai-loading"><p>Nessuna partita selezionata</p></div>`;
+            return;
         }
 
-        // ============================================================
-        //  GENERA ANALISI
-        // ============================================================
-        function generateAnalysis(m) {
-            let a = `🔍 **Analisi tattica**:\n\n`;
-            a += `**${m.home}** (${m.percHome}%) - Ultime 5: ${m.formHome}\n`;
-            a += `**${m.away}** (${m.percAway}%) - Ultime 5: ${m.formAway}\n\n`;
-            a += `📊 **Punti di forza**:\n`;
-            if (m.homeStats.xG > m.awayStats.xG) {
-                a += `• ${m.home} ha xG più alto (${m.homeStats.xG} vs ${m.awayStats.xG})\n`;
+        const homeStats = getTeamStats(match.campionato, match.casa);
+        const awayStats = getTeamStats(match.campionato, match.ospite);
+        const homeCity = teamCityMap[match.casa] || match.casa;
+
+        // Mostra loading
+        container.innerHTML = `
+            <div class="ai-container">
+                <div class="ai-header">
+                    <span class="match-title">${match.casa} vs ${match.ospite}</span>
+                    <span class="match-league">${match.campionato}</span>
+                </div>
+                <div class="ai-weather" id="weatherDisplay">
+                    <span class="weather-icon">🌤️</span>
+                    <span class="temp" id="weatherTemp">⏳ Caricamento...</span>
+                    <span class="city">📍 ${homeCity}</span>
+                    <span class="desc" id="weatherDesc"></span>
+                </div>
+                <div class="ai-loading">
+                    <div class="spinner"></div>
+                    <p>🧠 Generando analisi dettagliata...</p>
+                </div>
+            </div>
+        `;
+
+        // Recupera meteo
+        const weatherKey = localStorage.getItem('weatherApiKey') || 'd8df501134ef44eab6515526262007';
+        let weatherTemp = '--°C', weatherDesc = '--', weatherIcon = '🌤️';
+        try {
+            const weatherUrl = `https://api.worldweatheronline.com/premium/v1/weather.ashx?key=${weatherKey}&q=${encodeURIComponent(homeCity)}&format=json&num_of_days=1&tp=24`;
+            const weatherRes = await fetch(weatherUrl);
+            const weatherData = await weatherRes.json();
+            if (weatherData.data && weatherData.data.current_condition) {
+                const current = weatherData.data.current_condition[0];
+                weatherTemp = current.temp_C ? `${current.temp_C}°C` : '--°C';
+                weatherDesc = current.weatherDesc ? current.weatherDesc[0].value : '--';
+                const code = current.weatherCode || '113';
+                weatherIcon = getWeatherIcon(code);
+            }
+        } catch (e) {}
+
+        document.getElementById('weatherTemp').textContent = weatherTemp;
+        document.getElementById('weatherDesc').textContent = weatherDesc;
+        document.querySelector('#weatherDisplay .weather-icon').textContent = weatherIcon;
+
+        // ================================================================
+        // PROMPT DETTAGLIATO PER GROQ
+        // ================================================================
+
+        const groqKey = localStorage.getItem('groqApiKey') || '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';
+
+        const homeForma = homeStats.forma || 'N/D';
+        const awayForma = awayStats.forma || 'N/D';
+        const homeScore = calculateFormScore(homeStats.forma);
+        const awayScore = calculateFormScore(awayStats.forma);
+
+        const prompt = `Sei un analista sportivo professionista specializzato in statistica calcistica e trading di scommesse. Analizza la partita:
+
+CAMPIONATO: ${match.campionato}
+SQUADRA DI CASA: ${match.casa}
+SQUADRA OSPITE: ${match.ospite}
+
+DATI STATISTICI:
+- ${match.casa}: Punti ${homeStats.punti}, Posizione ${homeStats.pos}, Gol Fatti ${homeStats.gf}, Gol Subiti ${homeStats.gs}, Forma: ${homeForma}, Punteggio forma: ${homeScore}
+- ${match.ospite}: Punti ${awayStats.punti}, Posizione ${awayStats.pos}, Gol Fatti ${awayStats.gf}, Gol Subiti ${awayStats.gs}, Forma: ${awayForma}, Punteggio forma: ${awayScore}
+
+Genera un report con queste sezioni:
+1. STATO DI FORMA - sequenza risultati e trend
+2. MEDIA GOL - fatti, subiti, totali
+3. RANGE GOL PIÙ FREQUENTE
+4. MULTIGOL - 0-1, 0-2, 1-3, Over 1.5
+5. UNDER/OVER - 1.5, 2.5, 3.5, 4.5
+6. POSIZIONE IN CLASSIFICA
+7. DETTAGLIO 3 GIOCATE - 12+U4.5, Combinata, Libera
+8. CONSIGLI DI TRADING
+9. VALUTAZIONE FINALE - Score, Rischio, Affidabilità
+
+Usa solo i dati forniti. Arrotonda le percentuali all'intero.`;
+
+        let groqSuccess = false;
+        let analysis = '';
+
+        try {
+            const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${groqKey}`
+                },
+                body: JSON.stringify({
+                    model: 'llama3-8b-8192',
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.3,
+                    max_tokens: 1000
+                })
+            });
+
+            const data = await groqRes.json();
+
+            if (data.choices && data.choices[0]) {
+                analysis = data.choices[0].message.content;
+                groqSuccess = true;
             } else {
-                a += `• ${m.away} ha xG più alto (${m.awayStats.xG} vs ${m.homeStats.xG})\n`;
+                console.error('GROQ risposta non valida:', data);
             }
-            if (m.percHome > 50) a += `• ${m.home} favorito del ${m.percHome - m.percAway}%\n`;
-            else if (m.percAway > 50) a += `• ${m.away} favorito del ${m.percAway - m.percHome}%\n`;
-            else a += `• Partita equilibrata\n`;
-            a += `\n⚠️ **Punti deboli**:\n`;
-            if (m.formHome.includes('L')) a += `• ${m.home} ha sconfitte recenti\n`;
-            if (m.formAway.includes('L')) a += `• ${m.away} ha sconfitte recenti\n`;
-            if (!m.formHome.includes('L') && !m.formAway.includes('L')) a += `• Entrambe in buona forma\n`;
-            a += `\n📈 **Previsione**:\n`;
-            a += `• Over 1,5: ${m.over15}% ${m.over15 > 70 ? '✅ Alta' : '⚠️ Bassa'}\n`;
-            a += `• Multigol: ${m.multigol}% (fasce ${m.multigolFasce})\n`;
-            a += `\n💡 **Consiglio**: ${m.percHome > m.percAway ? m.home : m.away} favorito. `;
-            const best = Math.max(m.under45, m.multigol, m.over15);
-            a += `Mercato: ${best === m.under45 ? '12+under 4,5' : best === m.multigol ? 'Multigol' : 'Over 1,5'} (${best}%)`;
-            return a;
+        } catch (error) {
+            console.error('Errore GROQ:', error);
         }
 
-        // ============================================================
-        //  NAVIGAZIONE
-        // ============================================================
-        window.selectMatch = function(idx) {
-            if (idx < 0 || idx >= currentMatches.length) return;
-            currentIndex = idx;
-            renderCards();
-            const cards = cardsContainer.querySelectorAll('.match-card-swipe');
-            if (cards[idx]) cards[idx].scrollIntoView({ behavior: 'smooth', block: 'center' });
-            renderAI(currentMatches[idx]);
+        // Se GROQ fallisce, usa il fallback statistico
+        if (!groqSuccess || !analysis || analysis.length < 50) {
+            const tips = generateStatisticalTips(match);
+
+            const homePerc = winPercentage(homeStats);
+            const awayPerc = winPercentage(awayStats);
+            const under45 = under45Percent(homeStats, awayStats);
+            const over15 = over15Percent(homeStats, awayStats);
+            const homeMulti = multiGoalValues(homeStats);
+            const awayMulti = multiGoalValues(awayStats);
+            const multiAvg13 = Math.round((homeMulti.p13 + awayMulti.p13) / 2);
+
+            container.innerHTML = `
+                <div class="ai-container">
+                    <div class="ai-header">
+                        <span class="match-title">${match.casa} vs ${match.ospite}</span>
+                        <span class="match-league">${match.campionato}</span>
+                    </div>
+                    <div class="ai-weather">
+                        <span class="weather-icon">${weatherIcon}</span>
+                        <span class="temp">${weatherTemp}</span>
+                        <span class="city">📍 ${homeCity}</span>
+                        <span class="desc">${weatherDesc}</span>
+                    </div>
+
+                    <div class="ai-section" style="border-left-color: #f59e0b;">
+                        <div class="section-title">📊 STATO DI FORMA</div>
+                        <div class="section-content">
+                            <strong>${match.casa}:</strong> ${homeStats.forma || 'N/D'} (Punteggio: ${homeScore})<br>
+                            <strong>${match.ospite}:</strong> ${awayStats.forma || 'N/D'} (Punteggio: ${awayScore})<br>
+                            <strong>Trend:</strong> ${homeScore > awayScore ? '📈 ${match.casa} in crescita' : awayScore > homeScore ? '📈 ${match.ospite} in crescita' : '⚖️ Equilibrato'}
+                        </div>
+                    </div>
+
+                    <div class="ai-section">
+                        <div class="section-title">📊 STATISTICHE CHIAVE</div>
+                        <div class="section-content">
+                            <strong>${match.casa}:</strong> Punti ${homeStats.punti} | Pos. ${homeStats.pos} | Gol Fatti ${homeStats.gf} | Subiti ${homeStats.gs} | Diff ${homeStats.gf - homeStats.gs}<br>
+                            <strong>${match.ospite}:</strong> Punti ${awayStats.punti} | Pos. ${awayStats.pos} | Gol Fatti ${awayStats.gf} | Subiti ${awayStats.gs} | Diff ${awayStats.gf - awayStats.gs}<br>
+                            <strong>Multigol 1-3 Media:</strong> ${multiAvg13}%
+                        </div>
+                    </div>
+
+                    <div class="ai-section">
+                        <div class="section-title">📊 UNDER/OVER</div>
+                        <div class="section-content">
+                            <strong>Over 1.5:</strong> ${over15.label} | <strong>12+Under 4.5:</strong> ${under45.label}
+                        </div>
+                    </div>
+
+                    <div class="ai-pronostico">
+                        <div class="pron-box">
+                            <div class="label">🎯 PRONOSTICO 1X2</div>
+                            <div class="value">${tips.pronostico}</div>
+                            <div class="sub">${match.casa} ${tips.homeWin}% | X ${tips.draw}% | ${match.ospite} ${tips.awayWin}%</div>
+                        </div>
+                        <div class="pron-box">
+                            <div class="label">🎯 SICUREZZA</div>
+                            <div class="value">${tips.sicurezza}%</div>
+                            <div class="sub">${tips.sicurezza >= 60 ? '✅ Alta' : tips.sicurezza >= 40 ? '⚠️ Media' : '❌ Bassa'}</div>
+                        </div>
+                        <div class="pron-box">
+                            <div class="label">🎯 SICUREZZA</div>
+                            <div class="value" style="font-size:18px;">${tips.sicurezzaText}</div>
+                        </div>
+                    </div>
+
+                    <div class="ai-tips">
+                        <div class="tip-box">
+                            <div class="tip-label">🎯 Consiglio Singola</div>
+                            <div class="tip-value">${tips.tip1}</div>
+                        </div>
+                        <div class="tip-box">
+                            <div class="tip-label">🎯 Consiglio Combo</div>
+                            <div class="tip-value">${tips.tip2}</div>
+                        </div>
+                    </div>
+
+                    <div style="text-align:center;padding:12px;color:var(--text-secondary);font-size:12px;margin-top:10px;border-top:1px solid var(--card-border);">
+                        ℹ️ Analisi basata su dati statistici reali (GROQ non disponibile)
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        // ================================================================
+        // PARSER DEL REPORT GROQ
+        // ================================================================
+
+        const sections = parseReportSections(analysis, match);
+
+        // Se il parser non ha trovato sezioni, mostra tutto il testo
+        const hasSections = Object.values(sections).some(v => v && v.length > 10);
+
+        if (!hasSections) {
+            container.innerHTML = `
+                <div class="ai-container">
+                    <div class="ai-header">
+                        <span class="match-title">${match.casa} vs ${match.ospite}</span>
+                        <span class="match-league">${match.campionato}</span>
+                    </div>
+                    <div class="ai-weather">
+                        <span class="weather-icon">${weatherIcon}</span>
+                        <span class="temp">${weatherTemp}</span>
+                        <span class="city">📍 ${homeCity}</span>
+                        <span class="desc">${weatherDesc}</span>
+                    </div>
+                    <div class="ai-section">
+                        <div class="section-title">📋 Report Completo</div>
+                        <div class="section-content" style="white-space:pre-wrap;">${analysis}</div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        // Costruisci la visualizzazione con le sezioni trovate
+        let html = `
+            <div class="ai-container">
+                <div class="ai-header">
+                    <span class="match-title">${match.casa} vs ${match.ospite}</span>
+                    <span class="match-league">${match.campionato}</span>
+                </div>
+                <div class="ai-weather">
+                    <span class="weather-icon">${weatherIcon}</span>
+                    <span class="temp">${weatherTemp}</span>
+                    <span class="city">📍 ${homeCity}</span>
+                    <span class="desc">${weatherDesc}</span>
+                </div>
+        `;
+
+        const sectionMap = {
+            'forma': '📊 STATO DI FORMA',
+            'mediaGol': '📊 MEDIA GOL',
+            'rangeGol': '📊 RANGE GOL PIÙ FREQUENTE',
+            'multigol': '📊 MULTIGOL',
+            'underOver': '📊 UNDER/OVER',
+            'posizione': '📊 POSIZIONE IN CLASSIFICA',
+            'giocate': '🎯 DETTAGLIO 3 GIOCATE',
+            'trading': '🎯 CONSIGLI DI TRADING',
+            'valutazione': '⭐ VALUTAZIONE FINALE'
         };
 
-        window.switchView = function(view) {
-            if (view === currentView) return;
-            currentView = view;
-            swipeContainer.classList.remove('view-card', 'view-ai');
-            swipeContainer.classList.add(view === 'card' ? 'view-card' : 'view-ai');
-            dots.forEach(d => d.classList.toggle('active', d.dataset.view === view));
+        for (const [key, title] of Object.entries(sectionMap)) {
+            if (sections[key] && sections[key].length > 5) {
+                const borderColor = key === 'valutazione' ? '#f59e0b' : 'var(--tab-active)';
+                html += `
+                    <div class="ai-section" style="border-left-color: ${borderColor};">
+                        <div class="section-title">${title}</div>
+                        <div class="section-content">${sections[key]}</div>
+                    </div>
+                `;
+            }
+        }
+
+        html += `</div>`;
+        container.innerHTML = html;
+    }
+
+    // ================================================================
+    // PARSER DEL REPORT GROQ
+    // ================================================================
+
+    function parseReportSections(text, match) {
+        const sections = {};
+
+        const patterns = [
+            { key: 'forma', titles: ['STATO DI FORMA', 'STATO FORMA'] },
+            { key: 'mediaGol', titles: ['MEDIA GOL'] },
+            { key: 'rangeGol', titles: ['RANGE GOL PIÙ FREQUENTE', 'RANGE GOL'] },
+            { key: 'multigol', titles: ['MULTIGOL'] },
+            { key: 'underOver', titles: ['UNDER/OVER'] },
+            { key: 'posizione', titles: ['POSIZIONE IN CLASSIFICA', 'POSIZIONE CLASSIFICA'] },
+            { key: 'giocate', titles: ['DETTAGLIO 3 GIOCATE', '3 GIOCATE', 'GIOCATE'] },
+            { key: 'trading', titles: ['CONSIGLI DI TRADING', 'CONSIGLI TRADING', 'TRADING'] },
+            { key: 'valutazione', titles: ['VALUTAZIONE FINALE', 'VALUTAZIONE'] }
+        ];
+
+        let remainingText = text;
+
+        for (const pattern of patterns) {
+            for (const title of pattern.titles) {
+                const regex = new RegExp(`[\\*]*${title}[\\*]*\\s*[\\n\\r]+([\\s\\S]*?)(?=\\n\\s*[\\*]*[A-Z][A-Z\\s]+[\\*]*\\s*[\\n\\r]|$)`, 'i');
+                const matchResult = remainingText.match(regex);
+                if (matchResult && matchResult[1]) {
+                    let content = matchResult[1].trim();
+                    content = content.replace(/^[\d\.]+\s*/, '');
+                    content = content.replace(/^[\s]*[-•*]\s*/gm, '• ');
+                    sections[pattern.key] = content;
+                    remainingText = remainingText.replace(matchResult[0], '');
+                    break;
+                }
+            }
+        }
+
+        return sections;
+    }
+
+    // ================================================================
+    // ICONE METEO
+    // ================================================================
+
+    function getWeatherIcon(code) {
+        const icons = {
+            '113': '☀️', '116': '⛅', '119': '☁️', '122': '☁️',
+            '143': '🌫️', '176': '🌦️', '179': '🌨️', '182': '🌧️',
+            '185': '🌧️', '200': '⛈️', '227': '❄️', '230': '❄️',
+            '248': '🌫️', '260': '🌫️', '263': '🌦️', '266': '🌧️',
+            '281': '🌧️', '284': '🌧️', '293': '🌧️', '296': '🌧️',
+            '299': '🌧️', '302': '🌧️', '305': '🌧️', '308': '🌧️',
+            '311': '🌧️', '314': '🌧️', '317': '🌧️', '320': '🌨️',
+            '323': '❄️', '326': '❄️', '329': '❄️', '332': '❄️',
+            '335': '❄️', '338': '❄️', '350': '🌧️', '353': '🌦️',
+            '356': '🌧️', '359': '🌧️', '362': '🌨️', '365': '🌨️',
+            '368': '❄️', '371': '❄️', '374': '🌧️', '377': '🌧️',
+            '386': '⛈️', '389': '⛈️', '392': '⛈️', '395': '❄️'
         };
+        return icons[code] || '🌤️';
+    }
 
-        // ============================================================
-        //  SWIPE
-        // ============================================================
-        let ty = 0,
-            tx = 0,
-            dy = 0,
-            dx = 0,
-            swiping = false;
-        const mc = document.getElementById('mainContent');
+    // ================================================================
+    // TAB MANAGEMENT
+    // ================================================================
 
-        mc.addEventListener('touchstart', (e) => {
-            const t = e.touches[0];
-            ty = t.clientY;
-            tx = t.clientX;
-            dy = 0;
-            dx = 0;
-            swiping = true;
-        }, { passive: true });
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tab);
+        });
+        document.querySelectorAll('.tab-content').forEach(el => {
+            el.classList.toggle('active', el.id === `tab-${tab}`);
+        });
+    }
 
-        mc.addEventListener('touchmove', (e) => {
-            if (!swiping) return;
-            const t = e.touches[0];
-            dy = t.clientY - ty;
-            dx = t.clientX - tx;
+    // ================================================================
+    // SWIPE
+    // ================================================================
 
-            if (Math.abs(dx) > 20 && Math.abs(dx) > Math.abs(dy) * 1.2) {
-                e.preventDefault();
-                if (dx < -20 && currentView === 'card') switchView('ai');
-                else if (dx > 20 && currentView === 'ai') switchView('card');
-                swiping = false;
-                return;
+    let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
+
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
+            const tabs = ['palinsesto', 'analisi', 'impostazioni'];
+            const currentIdx = tabs.indexOf(currentTab);
+            if (diffX < 0 && currentIdx < tabs.length - 1) {
+                switchTab(tabs[currentIdx + 1]);
+                if (tabs[currentIdx + 1] === 'analisi' && matches.length > 0) {
+                    renderAnalisiAI(currentMatchIndex);
+                }
+            } else if (diffX > 0 && currentIdx > 0) {
+                switchTab(tabs[currentIdx - 1]);
             }
-
-            if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.2) {
-                e.preventDefault();
-                if (dy < -50 && currentIndex < currentMatches.length - 1) selectMatch(currentIndex + 1);
-                else if (dy > 50 && currentIndex > 0) selectMatch(currentIndex - 1);
-                swiping = false;
+        } else if (currentTab === 'palinsesto' && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 30) {
+            if (diffY < 0 && currentMatchIndex < matches.length - 1) {
+                currentMatchIndex++;
+                scrollToCard(currentMatchIndex);
+            } else if (diffY > 0 && currentMatchIndex > 0) {
+                currentMatchIndex--;
+                scrollToCard(currentMatchIndex);
             }
-        }, { passive: false });
+        }
+    }, { passive: true });
 
-        mc.addEventListener('touchend', () => { swiping = false; }, { passive: true });
+    function scrollToCard(index) {
+        const cards = document.querySelectorAll('.card[data-tab="palinsesto"]');
+        if (cards[index]) {
+            cards[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            cards.forEach((c, i) => {
+                c.style.borderColor = i === index ? '#3b82f6' : 'var(--card-border)';
+                c.style.transform = i === index ? 'scale(1.02)' : 'scale(1)';
+            });
+            setTimeout(() => {
+                cards.forEach(c => {
+                    c.style.borderColor = 'var(--card-border)';
+                    c.style.transform = 'scale(1)';
+                });
+            }, 1000);
+        }
+    }
 
-        // Mouse drag
-        let mdX = 0,
-            mdY = 0,
-            dragging = false;
-        mc.addEventListener('mousedown', (e) => { mdX = e.clientX;
-            mdY = e.clientY;
-            dragging = true; });
-        mc.addEventListener('mousemove', (e) => {
-            if (!dragging) return;
-            const dX = e.clientX - mdX,
-                dY = e.clientY - mdY;
-            if (Math.abs(dX) > 30 && Math.abs(dX) > Math.abs(dY) * 1.2) {
-                if (dX < -30 && currentView === 'card') switchView('ai');
-                else if (dX > 30 && currentView === 'ai') switchView('card');
-                dragging = false;
+    // ================================================================
+    // CLOCK, TEMA, IMPOSTAZIONI
+    // ================================================================
+
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('currentDate').textContent = now.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    let currentTheme = localStorage.getItem('theme') || 'dark';
+
+    function applyTheme(theme) {
+        document.body.classList.toggle('light', theme === 'light');
+        currentTheme = theme;
+        localStorage.setItem('theme', theme);
+        document.getElementById('themeDark').className = theme === 'dark' ? 'tab-btn active' : 'tab-btn';
+        document.getElementById('themeLight').className = theme === 'light' ? 'tab-btn active' : 'tab-btn';
+    }
+
+    document.getElementById('themeDark').addEventListener('click', () => applyTheme('dark'));
+    document.getElementById('themeLight').addEventListener('click', () => applyTheme('light'));
+
+    document.getElementById('saveSettings').addEventListener('click', () => {
+        const groq = document.getElementById('groqKey').value.trim();
+        const weather = document.getElementById('weatherKey').value.trim();
+        if (groq) localStorage.setItem('groqApiKey', groq);
+        if (weather) localStorage.setItem('weatherApiKey', weather);
+        alert('✅ Impostazioni salvate!');
+    });
+
+    document.getElementById('groqKey').value = localStorage.getItem('groqApiKey') || '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';
+    document.getElementById('weatherKey').value = localStorage.getItem('weatherApiKey') || 'd8df501134ef44eab6515526262007';
+
+    // ================================================================
+    // TAB BUTTONS
+    // ================================================================
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+            switchTab(tab);
+            if (tab === 'analisi' && matches.length > 0) {
+                renderAnalisiAI(currentMatchIndex);
             }
         });
-        mc.addEventListener('mouseup', () => { dragging = false; });
+    });
 
-        // ============================================================
-        //  KEYBOARD
-        // ============================================================
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp' && currentIndex > 0) { e.preventDefault();
-                selectMatch(currentIndex - 1); } else if (e.key === 'ArrowDown' && currentIndex < currentMatches.length - 1) { e
-                    .preventDefault();
-                selectMatch(currentIndex + 1); } else if (e.key === 'ArrowRight' && currentView === 'card') { e
-                    .preventDefault();
-                switchView('ai'); } else if (e.key === 'ArrowLeft' && currentView === 'ai') { e.preventDefault();
-                switchView('card'); }
-        });
+    // ================================================================
+    // HOME BUTTON
+    // ================================================================
 
-        // ============================================================
-        //  SALVA CHIAVI
-        // ============================================================
-        document.querySelectorAll('#groqKey, #weatherKey').forEach(inp => {
-            inp.addEventListener('change', function() { localStorage.setItem(this.id, this.value); });
-            const saved = localStorage.getItem(inp.id);
-            if (saved) inp.value = saved;
-        });
+    document.getElementById('homeBtn').addEventListener('click', () => {
+        currentMatchIndex = 0;
+        switchTab('palinsesto');
+        if (matches.length > 0) {
+            setTimeout(() => scrollToCard(0), 300);
+        }
+    });
 
-        // ============================================================
-        //  INIT - Carica dati di esempio in attesa del file
-        // ============================================================
-        // Carica i dati di esempio subito
-        loadSampleData();
+    // ================================================================
+    // AVVIO
+    // ================================================================
 
-        // Se l'utente ha già un file, può caricarlo
-        console.log('GesssAI-Prono · in attesa di file Excel');
-        console.log('Carica il file Prono.xlsx per vedere le partite reali');
-    })();
+    applyTheme(currentTheme);
+    updateClock();
+    renderCards();
+    setInterval(updateClock, 1000);
+    setInterval(renderCards, 60000);
+
+    if (matches.length > 0 && currentTab === 'analisi') {
+        renderAnalisiAI(0);
+    }
 </script>
 </body>
 </html>
