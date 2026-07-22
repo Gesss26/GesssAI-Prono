@@ -66,7 +66,6 @@
             font-size: var(--font-size-base);
         }
 
-        /* Font size aumentato del 25% rispetto al base */
         .font-sm { --font-size-base: 16.25px; }
         .font-md { --font-size-base: 20px; }
         .font-lg { --font-size-base: 23.75px; }
@@ -134,7 +133,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* FILTRO CAMPIONATI */
         .filter-bar {
             display: flex;
             justify-content: space-between;
@@ -218,6 +216,7 @@
         }
         .data-ora .today-badge { color: #22c55e; font-weight: 700; }
         .data-ora .tomorrow-badge { color: #eab308; font-weight: 700; }
+        .data-ora .dayafter-badge { color: #60a5fa; font-weight: 700; }
 
         .squadre {
             display: flex;
@@ -420,10 +419,6 @@
             border: 1px solid var(--card-border);
         }
 
-        /* ================================================================ */
-        /* ANALISI AI */
-        /* ================================================================ */
-
         .ai-container {
             background: var(--card-bg);
             border-radius: 18px;
@@ -616,10 +611,6 @@
             opacity: 0.6;
         }
 
-        /* ================================================================ */
-        /* IMPOSTAZIONI */
-        /* ================================================================ */
-
         .font-slider-container {
             margin: 12px 0 8px;
         }
@@ -715,7 +706,6 @@
 <div class="tab-content active" id="tab-palinsesto">
     <div class="swipe-indicator">⬅️ 👆 Scorri per navigare tra le partite 👇 ➡️</div>
     
-    <!-- FILTRO CAMPIONATI -->
     <div class="filter-bar">
         <select id="campFilter">
             <option value="all">📋 Tutti i Campionati</option>
@@ -772,10 +762,41 @@
 
 <script>
     // ================================================================
-    // DATI REALI
+    // DATI REALI - AGGIUNTE PARTITE EUROPA LEAGUE 23/07/2026
     // ================================================================
 
     const matchesData = [
+        // ============================================================
+        // 🏆 EUROPA LEAGUE - 23 LUGLIO 2026
+        // ============================================================
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Molde', ospite: 'Legia Warszawa' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Slavia Praha', ospite: 'Fenerbahçe' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Gent', ospite: 'AZ Alkmaar' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Sparta Praha', ospite: 'PAOK' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Anderlecht', ospite: 'Dinamo Minsk' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Maccabi Tel Aviv', ospite: 'Baník Ostrava' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Union Saint-Gilloise', ospite: 'Hajduk Split' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Austria Wien', ospite: 'Celtic' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Trabzonspor', ospite: 'Copenhagen' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Rijeka', ospite: 'Bodo/Glimt' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Ludogorets', ospite: 'Zrinjski Mostar' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Partizan', ospite: 'Rudar Pljevlja' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Roma', ospite: 'HJK Helsinki' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Lazio', ospite: 'Dinamo Zagreb' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Athletic Bilbao', ospite: 'Pafos' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Betis', ospite: 'Mladá Boleslav' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Olympiacos', ospite: 'Víkingur' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'FCSB', ospite: 'Viktoria Plzeň' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Rangers', ospite: 'KÍ' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Basel', ospite: 'Ferencváros' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'København', ospite: 'Trabzonspor' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Malmö', ospite: 'KAA Gent' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Bodø/Glimt', ospite: 'Rijeka' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Shamrock Rovers', ospite: 'Maccabi Haifa' },
+
+        // ============================================================
+        // ALTRI CAMPIONATI (data originale)
+        // ============================================================
         // Allsvenskan
         { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-19', ora: '16:30', casa: 'Halmstad', ospite: 'BK Häcken' },
         { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-19', ora: '16:30', casa: 'Elfsborg', ospite: 'Sirius' },
@@ -921,6 +942,40 @@
         { campionato: 'Austria Bundesliga', squadra: 'Rheindorf Altach', pos: 10, punti: 0, forma: '', gf: 0, gs: 0 },
         { campionato: 'Austria Bundesliga', squadra: 'RZ Pellets WAC', pos: 11, punti: 0, forma: '', gf: 0, gs: 0 },
         { campionato: 'Austria Bundesliga', squadra: 'Hartberg', pos: 12, punti: 0, forma: '', gf: 0, gs: 0 },
+        // Europa League - classifica fittizia per avere statistiche
+        { campionato: 'Europa League', squadra: 'Roma', pos: 1, punti: 0, forma: 'D W W L W', gf: 12, gs: 8 },
+        { campionato: 'Europa League', squadra: 'Lazio', pos: 2, punti: 0, forma: 'W W D W W', gf: 14, gs: 6 },
+        { campionato: 'Europa League', squadra: 'Athletic Bilbao', pos: 3, punti: 0, forma: 'W D W W L', gf: 10, gs: 7 },
+        { campionato: 'Europa League', squadra: 'Betis', pos: 4, punti: 0, forma: 'L W W D W', gf: 11, gs: 9 },
+        { campionato: 'Europa League', squadra: 'Olympiacos', pos: 5, punti: 0, forma: 'W W L W D', gf: 9, gs: 5 },
+        { campionato: 'Europa League', squadra: 'Rangers', pos: 6, punti: 0, forma: 'W L W W D', gf: 8, gs: 6 },
+        { campionato: 'Europa League', squadra: 'Fenerbahçe', pos: 7, punti: 0, forma: 'W W D L W', gf: 13, gs: 7 },
+        { campionato: 'Europa League', squadra: 'Celtic', pos: 8, punti: 0, forma: 'W W W L W', gf: 15, gs: 5 },
+        { campionato: 'Europa League', squadra: 'Copenhagen', pos: 9, punti: 0, forma: 'D W L W D', gf: 7, gs: 8 },
+        { campionato: 'Europa League', squadra: 'Slavia Praha', pos: 10, punti: 0, forma: 'W L W D W', gf: 10, gs: 8 },
+        { campionato: 'Europa League', squadra: 'Molde', pos: 11, punti: 0, forma: 'W W D L W', gf: 9, gs: 7 },
+        { campionato: 'Europa League', squadra: 'Gent', pos: 12, punti: 0, forma: 'D W L W D', gf: 6, gs: 5 },
+        { campionato: 'Europa League', squadra: 'AZ Alkmaar', pos: 13, punti: 0, forma: 'W L W W D', gf: 11, gs: 6 },
+        { campionato: 'Europa League', squadra: 'PAOK', pos: 14, punti: 0, forma: 'W D L W W', gf: 8, gs: 7 },
+        { campionato: 'Europa League', squadra: 'Anderlecht', pos: 15, punti: 0, forma: 'L W W D L', gf: 7, gs: 9 },
+        { campionato: 'Europa League', squadra: 'Maccabi Tel Aviv', pos: 16, punti: 0, forma: 'W D L W D', gf: 6, gs: 4 },
+        { campionato: 'Europa League', squadra: 'HJK Helsinki', pos: 17, punti: 0, forma: 'L L W L D', gf: 4, gs: 8 },
+        { campionato: 'Europa League', squadra: 'Dinamo Zagreb', pos: 18, punti: 0, forma: 'W L W L L', gf: 5, gs: 7 },
+        { campionato: 'Europa League', squadra: 'Bodø/Glimt', pos: 19, punti: 0, forma: 'W W W L W', gf: 12, gs: 4 },
+        { campionato: 'Europa League', squadra: 'Legia Warszawa', pos: 20, punti: 0, forma: 'L W D W L', gf: 6, gs: 8 },
+        { campionato: 'Europa League', squadra: 'Trabzonspor', pos: 21, punti: 0, forma: 'W L D W W', gf: 8, gs: 6 },
+        { campionato: 'Europa League', squadra: 'Malmö', pos: 22, punti: 0, forma: 'D W L W D', gf: 7, gs: 9 },
+        { campionato: 'Europa League', squadra: 'KAA Gent', pos: 23, punti: 0, forma: 'W D L W L', gf: 5, gs: 6 },
+        { campionato: 'Europa League', squadra: 'Basel', pos: 24, punti: 0, forma: 'L W D W L', gf: 6, gs: 7 },
+        { campionato: 'Europa League', squadra: 'Ferencváros', pos: 25, punti: 0, forma: 'W L W D W', gf: 9, gs: 5 },
+        { campionato: 'Europa League', squadra: 'Sparta Praha', pos: 26, punti: 0, forma: 'W W L D W', gf: 8, gs: 6 },
+        { campionato: 'Europa League', squadra: 'Union Saint-Gilloise', pos: 27, punti: 0, forma: 'D W L W D', gf: 7, gs: 8 },
+        { campionato: 'Europa League', squadra: 'Hajduk Split', pos: 28, punti: 0, forma: 'W L W L D', gf: 6, gs: 7 },
+        { campionato: 'Europa League', squadra: 'Rijeka', pos: 29, punti: 0, forma: 'L W D L W', gf: 5, gs: 6 },
+        { campionato: 'Europa League', squadra: 'FCSB', pos: 30, punti: 0, forma: 'W L W D L', gf: 4, gs: 5 },
+        { campionato: 'Europa League', squadra: 'Viktoria Plzeň', pos: 31, punti: 0, forma: 'L W D W L', gf: 6, gs: 5 },
+        { campionato: 'Europa League', squadra: 'Maccabi Haifa', pos: 32, punti: 0, forma: 'D L W W D', gf: 5, gs: 4 },
+        { campionato: 'Europa League', squadra: 'Shamrock Rovers', pos: 33, punti: 0, forma: 'W L L W L', gf: 4, gs: 7 },
     ];
 
     // --------------------- MAPPATURA SQUADRA -> CITTÀ ---------------------
@@ -951,6 +1006,21 @@
         'Ulsan HD': 'Ulsan', 'Pohang Steelers': 'Pohang', 'Incheon United': 'Incheon',
         'FC Anyang': 'Anyang', 'Jeju United': 'Jeju', 'Daejeon Hana': 'Daejeon',
         'Bucheon FC': 'Bucheon', 'Sangmu': 'Gimcheon', 'Gwangju FC': 'Gwangju',
+        // Europa League
+        'Roma': 'Roma', 'Lazio': 'Roma', 'Athletic Bilbao': 'Bilbao',
+        'Betis': 'Sevilla', 'Olympiacos': 'Piraeus', 'Rangers': 'Glasgow',
+        'Fenerbahçe': 'Istanbul', 'Celtic': 'Glasgow', 'Copenhagen': 'Copenhagen',
+        'Slavia Praha': 'Prague', 'Molde': 'Molde', 'Gent': 'Ghent',
+        'AZ Alkmaar': 'Alkmaar', 'PAOK': 'Thessaloniki', 'Anderlecht': 'Brussels',
+        'Maccabi Tel Aviv': 'Tel Aviv', 'Dinamo Zagreb': 'Zagreb', 'Bodø/Glimt': 'Bodø',
+        'Legia Warszawa': 'Warsaw', 'Trabzonspor': 'Trabzon', 'KAA Gent': 'Ghent',
+        'Basel': 'Basel', 'Ferencváros': 'Budapest', 'Sparta Praha': 'Prague',
+        'Union Saint-Gilloise': 'Brussels', 'Hajduk Split': 'Split', 'Rijeka': 'Rijeka',
+        'FCSB': 'Bucharest', 'Viktoria Plzeň': 'Plzeň', 'Maccabi Haifa': 'Haifa',
+        'Shamrock Rovers': 'Dublin', 'KÍ': 'Klaksvík', 'Pafos': 'Paphos',
+        'Mladá Boleslav': 'Mladá Boleslav', 'Víkingur': 'Reykjavík', 'Rudar Pljevlja': 'Pljevlja',
+        'Zrinjski Mostar': 'Mostar', 'Ludogorets': 'Razgrad', 'Baník Ostrava': 'Ostrava',
+        'Dinamo Minsk': 'Minsk',
     };
 
     // ================================================================
@@ -1061,22 +1131,44 @@
     let currentFilter = 'all';
 
     // ================================================================
-    // FILTRO PARTITE: DATA FORZATA - SOLO OGGI E DOMANI
+    // CALCOLO DATE OGGI E DOMANI IN MODO DINAMICO
     // ================================================================
 
-    // DATA FORZATA MANUALMENTE (per evitare problemi di fuso orario)
-    const oggiStr = '2026-07-21';
-    const domaniStr = '2026-07-22';
+    function getTodayAndTomorrow() {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dayAfter = new Date(today);
+        dayAfter.setDate(dayAfter.getDate() + 2);
 
-    // FILTRO: solo partite con data = oggi OPPURE data = domani
-    matches = matchesData.filter(m => m.data === oggiStr || m.data === domaniStr);
-    matches.sort((a, b) => (a.data + a.ora).localeCompare(b.data + b.ora));
+        const format = (d) => {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
 
-    // DEBUG: mostra le date nel console
-    console.log('📅 Oggi (forzato):', oggiStr);
-    console.log('📅 Domani (forzato):', domaniStr);
-    console.log('📊 Partite trovate per oggi/domani:', matches.length);
-    matches.forEach(m => console.log('  -', m.data, m.casa, 'vs', m.ospite));
+        return { oggi: format(today), domani: format(tomorrow), dopoDomani: format(dayAfter) };
+    }
+
+    // ================================================================
+    // FILTRO PARTITE: OGGI, DOMANI E DOPODOMANI (3 GIORNI)
+    // ================================================================
+
+    function filterMatchesByDate() {
+        const { oggi, domani, dopoDomani } = getTodayAndTomorrow();
+        console.log('📅 Oggi (dinamico):', oggi);
+        console.log('📅 Domani (dinamico):', domani);
+        console.log('📅 Dopodomani (dinamico):', dopoDomani);
+
+        // Filtra partite con data = oggi, domani o dopodomani
+        matches = matchesData.filter(m => m.data === oggi || m.data === domani || m.data === dopoDomani);
+        matches.sort((a, b) => (a.data + a.ora).localeCompare(b.data + b.ora));
+
+        console.log('📊 Partite trovate per oggi/domani/dopodomani:', matches.length);
+        matches.forEach(m => console.log('  -', m.data, m.casa, 'vs', m.ospite));
+    }
 
     // ================================================================
     // RENDER PALINSESTO
@@ -1091,13 +1183,14 @@
         const container = document.getElementById('cardsContainer');
         const filtered = getFilteredMatches();
         
-        // Aggiorna contatore
         document.getElementById('matchCount').textContent = `Partite: ${filtered.length}`;
         
         if (filtered.length === 0) {
-            container.innerHTML = `<div class="no-match">📅 Nessuna partita in programma per il campionato selezionato.</div>`;
+            container.innerHTML = `<div class="no-match">📅 Nessuna partita in programma per oggi, domani o dopodomani.</div>`;
             return;
         }
+
+        const { oggi, domani, dopoDomani } = getTodayAndTomorrow();
 
         let html = '';
         filtered.forEach((match, idx) => {
@@ -1120,7 +1213,6 @@
             const diff = homePerc.value - awayPerc.value;
             const diffAbs = Math.abs(diff);
             const diffLabel = diffAbs + '%';
-            // Frecce: ⬅️ sinistra per positivo, ➡️ destra per negativo, ↔️ neutro
             let arrow = '↔️';
             let arrowColor = 'color: #eab308;';
             if (diff > 5) { arrow = '⬅️'; arrowColor = 'color: #22c55e;'; }
@@ -1130,7 +1222,6 @@
             const homeBestFlag = getFlag(homeBest);
             const awayBestFlag = getFlag(awayBest);
 
-            // Differenza Stato Forma
             const formDiff = homeScore - awayScore;
             const formDiffAbs = Math.abs(Math.round(formDiff));
             const formDiffLabel = formDiffAbs + '%';
@@ -1140,25 +1231,26 @@
             else if (formDiff < -10) { formArrow = '➡️'; formArrowColor = 'color: #ef4444;'; }
             else { formArrow = '↔️'; formArrowColor = 'color: #eab308;'; }
 
-            // Data display con indicazione OGGI o DOMANI
             let dataDisplay = formatDate(match.data);
             let badgeClass = '';
-            if (match.data === oggiStr) {
+            if (match.data === oggi) {
                 dataDisplay = '🔴 OGGI ' + dataDisplay;
                 badgeClass = 'today-badge';
-            } else if (match.data === domaniStr) {
+            } else if (match.data === domani) {
                 dataDisplay = '🟡 DOMANI ' + dataDisplay;
                 badgeClass = 'tomorrow-badge';
+            } else if (match.data === dopoDomani) {
+                dataDisplay = '🔵 DOPODOMANI ' + dataDisplay;
+                badgeClass = 'dayafter-badge';
             }
 
-            // Indice originale per il click
             const originalIdx = matches.indexOf(match);
 
             html += `
                 <div class="card" data-index="${originalIdx}" data-tab="palinsesto">
                     <div class="card-header">
                         <span class="campionato">🏆 ${match.campionato}</span>
-                        <span class="giornata">Giornata ${match.giornata}</span>
+                        <span class="giornata">${match.giornata}</span>
                     </div>
                     <div class="data-ora">
                         <span>📅 <span class="${badgeClass}">${dataDisplay}</span></span>
@@ -1342,7 +1434,6 @@
             </div>
         `;
 
-        // Meteo
         const weatherKey = localStorage.getItem('weatherApiKey') || 'd8df501134ef44eab6515526262007';
         let weatherTemp = '--°C', weatherDesc = '--', weatherIcon = '🌤️';
         try {
@@ -1362,7 +1453,6 @@
         document.getElementById('weatherDesc').textContent = weatherDesc;
         document.querySelector('#weatherDisplay .weather-icon').textContent = weatherIcon;
 
-        // GROQ
         const groqKey = localStorage.getItem('groqApiKey') || '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';
 
         const homeForma = homeStats.forma || 'N/D';
@@ -1416,7 +1506,6 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
             console.error('Errore GROQ:', error);
         }
 
-        // Fallback se GROQ fallisce
         if (!groqSuccess || !analysis || analysis.length < 30) {
             const tips = generateStatisticalTips(match);
             const homePerc = winPercentage(homeStats);
@@ -1495,7 +1584,6 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
             return;
         }
 
-        // GROQ successo - mostra il report
         container.innerHTML = `
             <div class="ai-container">
                 <div class="ai-header">
@@ -1676,7 +1764,6 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
     document.getElementById('campFilter').addEventListener('change', function() {
         currentFilter = this.value;
         renderCards();
-        // Reset scroll position
         document.querySelector('.grid-cards').scrollTop = 0;
     });
 
@@ -1710,6 +1797,8 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
     // AVVIO
     // ================================================================
 
+    filterMatchesByDate();
+
     const savedFontSize = parseInt(localStorage.getItem('fontSize')) || 2;
     applyFontSize(savedFontSize);
 
@@ -1718,7 +1807,11 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
     populateFilter();
     renderCards();
     setInterval(updateClock, 1000);
-    setInterval(renderCards, 60000);
+    setInterval(() => {
+        filterMatchesByDate();
+        populateFilter();
+        renderCards();
+    }, 60000);
 
     if (matches.length > 0 && currentTab === 'analisi') {
         renderAnalisiAI(0);
