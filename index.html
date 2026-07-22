@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>⚽ Calcio Card - Statistiche Partite</title>
+    <title>Calcio Card - Statistiche Partite</title>
     <style>
         * {
             box-sizing: border-box;
@@ -410,13 +410,6 @@
             animation: bombPulse 0.8s infinite alternate;
         }
         .stat-footer .footer-tag.flag-neutral { background: #6b7280; color: #fff; }
-        .stat-footer .data-source {
-            color: var(--text-secondary);
-            font-size: 0.65rem;
-        }
-        .stat-footer .data-source strong {
-            color: var(--text-primary);
-        }
 
         .no-match {
             text-align: center;
@@ -493,6 +486,7 @@
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .ai-weather {
             display: flex;
@@ -763,6 +757,30 @@
             font-weight: 600;
         }
 
+        /* Pulsante Simula Telefono */
+        .simulate-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            color: #fff;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 99;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .simulate-btn:hover { transform: scale(1.1); }
+        .simulate-btn:active { transform: scale(0.9); }
+
+        /* MODAL SIMULAZIONE TELEFONO */
         .phone-simulator-overlay {
             display: none;
             position: fixed;
@@ -812,6 +830,16 @@
             padding: 10px 8px 20px;
             scroll-behavior: smooth;
         }
+        .phone-frame .phone-content::-webkit-scrollbar {
+            width: 3px;
+        }
+        .phone-frame .phone-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .phone-frame .phone-content::-webkit-scrollbar-thumb {
+            background: var(--tab-active);
+            border-radius: 10px;
+        }
         .phone-close-btn {
             position: absolute;
             top: 30px;
@@ -832,62 +860,6 @@
         }
         .phone-close-btn:hover {
             background: rgba(255,255,255,0.3);
-        }
-        .simulate-btn {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #8b5cf6;
-            color: #fff;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 99;
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .simulate-btn:hover { transform: scale(1.1); }
-        .simulate-btn:active { transform: scale(0.9); }
-
-        .settings-info {
-            background: var(--section-bg);
-            border-radius: 12px;
-            padding: 12px 16px;
-            border-left: 3px solid var(--tab-active);
-            margin-top: 12px;
-        }
-        .settings-info p {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-        .settings-info strong {
-            color: var(--text-primary);
-        }
-        .refresh-btn {
-            width: 100%;
-            margin-top: 12px;
-            padding: 12px;
-            border-radius: 30px;
-            border: none;
-            background: var(--tab-active);
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .refresh-btn:hover { opacity: 0.9; transform: scale(1.01); }
-        .refresh-btn:active { transform: scale(0.98); }
-        .refresh-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
         }
 
         @media (max-width: 480px) {
@@ -927,7 +899,9 @@
     <div class="phone-frame">
         <div class="notch"></div>
         <button class="phone-close-btn" onclick="closePhoneSimulator()">✕</button>
-        <div class="phone-content" id="phoneContent"></div>
+        <div class="phone-content" id="phoneContent">
+            <!-- Il contenuto viene clonato qui -->
+        </div>
     </div>
 </div>
 
@@ -943,6 +917,7 @@
     </div>
 </div>
 
+<!-- Pulsante Simula Telefono -->
 <button class="simulate-btn" id="simulateBtn" title="Simula schermo telefono">📱</button>
 
 <div class="tab-content active" id="tab-palinsesto">
@@ -1009,17 +984,7 @@
         <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:16px;">✅ API Key salvata localmente</div>
 
         <button id="testGroqBtn" style="width:100%;padding:12px;border-radius:30px;border:none;background:#f59e0b;color:#000;font-weight:600;font-size:0.95rem;cursor:pointer;margin-bottom:8px;">🔍 Test Connessione GROQ</button>
-        <button id="saveSettings" style="width:100%;padding:12px;border-radius:30px;border:none;background:#3b82f6;color:#fff;font-weight:600;font-size:0.95rem;cursor:pointer;margin-bottom:8px;">💾 Salva Impostazioni</button>
-        
-        <div class="settings-info">
-            <p>
-                📊 <strong>Fonte dati:</strong> prono.xlsx (via server Node.js)<br>
-                📁 <strong>Cartella:</strong> C:\Scaricati\AI\GesssAI-Excel<br>
-                🔄 <strong>Aggiornamento:</strong> Ogni 5 minuti automatico
-            </p>
-            <button class="refresh-btn" id="refreshBtn">🔄 Aggiorna Dati Ora</button>
-            <div id="lastUpdate" style="text-align:center;font-size:0.75rem;color:var(--text-secondary);margin-top:8px;"></div>
-        </div>
+        <button id="saveSettings" style="width:100%;padding:12px;border-radius:30px;border:none;background:#3b82f6;color:#fff;font-weight:600;font-size:0.95rem;cursor:pointer;">💾 Salva Impostazioni</button>
     </div>
 </div>
 
@@ -1027,22 +992,216 @@
 
 <script>
     // ================================================================
-    // DATI REALI DAL SERVER
+    // DATI REALI
     // ================================================================
-    const API_BASE = 'https://gesssai-excel.onrender.com';
-    let allMatches = [];
-    let currentFilter = 'all';
-    let currentMatchIndex = 0;
-    let isGenerating = false;
 
-    // ================================================================
-    // CLASSIFICA COMPLETA (dal server)
-    // ================================================================
-    let standingsData = [];
+    const matchesData = [
+        // Europa League - 23 LUGLIO 2026
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Molde', ospite: 'Legia Warszawa' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Slavia Praha', ospite: 'Fenerbahçe' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Gent', ospite: 'AZ Alkmaar' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Sparta Praha', ospite: 'PAOK' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Anderlecht', ospite: 'Dinamo Minsk' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Maccabi Tel Aviv', ospite: 'Baník Ostrava' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Union Saint-Gilloise', ospite: 'Hajduk Split' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Austria Wien', ospite: 'Celtic' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Trabzonspor', ospite: 'Copenhagen' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Rijeka', ospite: 'Bodo/Glimt' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Ludogorets', ospite: 'Zrinjski Mostar' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Partizan', ospite: 'Rudar Pljevlja' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Roma', ospite: 'HJK Helsinki' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Lazio', ospite: 'Dinamo Zagreb' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Athletic Bilbao', ospite: 'Pafos' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Betis', ospite: 'Mladá Boleslav' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Olympiacos', ospite: 'Víkingur' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'FCSB', ospite: 'Viktoria Plzeň' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Rangers', ospite: 'KÍ' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Basel', ospite: 'Ferencváros' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Malmö', ospite: 'KAA Gent' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Bodø/Glimt', ospite: 'Rijeka' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Shamrock Rovers', ospite: 'Maccabi Haifa' },
+        // Allsvenskan
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-19', ora: '16:30', casa: 'Halmstad', ospite: 'BK Häcken' },
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-19', ora: '16:30', casa: 'Elfsborg', ospite: 'Sirius' },
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-19', ora: '16:30', casa: 'Hammarby', ospite: 'Degerfors' },
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-20', ora: '19:00', casa: 'Kalmar', ospite: 'Malmö' },
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-20', ora: '20:00', casa: 'Örgryte', ospite: 'Djurgården' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-24', ora: '19:00', casa: 'Västerås', ospite: 'Örgryte' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-25', ora: '15:00', casa: 'Degerfors', ospite: 'Djurgården' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-25', ora: '17:30', casa: 'Kalmar', ospite: 'Mjällby' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-26', ora: '14:00', casa: 'Sirius', ospite: 'Göteborg' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-26', ora: '14:00', casa: 'Brommapojkarna', ospite: 'Hammarby' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-26', ora: '16:30', casa: 'Malmö', ospite: 'Elfsborg' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-26', ora: '17:30', casa: 'GAIS', ospite: 'Halmstad' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-27', ora: '19:00', casa: 'BK Häcken', ospite: 'AIK Stockholm' },
+        // Austria Bundesliga
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-07-31', ora: '19:30', casa: 'LASK', ospite: 'Grazer AK' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-01', ora: '17:00', casa: 'WSG Tirol', ospite: 'Sturm Graz' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-01', ora: '19:30', casa: 'RB Salzburg', ospite: 'Hartberg' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-02', ora: '17:00', casa: 'Austria Lustenau', ospite: 'Ried' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-02', ora: '17:00', casa: 'RZ Pellets WAC', ospite: 'Austria Wien' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-02', ora: '19:00', casa: 'Rapid Wien', ospite: 'Rheindorf Altach' },
+        // Chinese Super League
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-25', ora: '17:30', casa: 'Qingdao Hainiu', ospite: 'Jinmen Tiger' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-25', ora: '19:35', casa: 'Shanghai Port', ospite: 'Shanghai Shen' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-25', ora: '19:35', casa: 'Shenyang Urban', ospite: 'Q. West Coast' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-26', ora: '19:00', casa: 'Yunnan Yukun', ospite: 'SZ Peng City' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-26', ora: '19:35', casa: 'SD Taishan', ospite: 'Henan' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-26', ora: '19:35', casa: 'Rongcheng', ospite: 'Beijing Guoan' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-26', ora: '20:00', casa: 'Zhejiang', ospite: 'Dalian Yingbo' },
+        // Veikkausliiga
+        { campionato: 'Veikkausliiga', giornata: 16, data: '2026-07-19', ora: '18:30', casa: 'FF Jaro', ospite: 'Inter Turku' },
+        { campionato: 'Veikkausliiga', giornata: 16, data: '2026-07-20', ora: '18:00', casa: 'TPS', ospite: 'Ilves' },
+        { campionato: 'Veikkausliiga', giornata: 16, data: '2026-07-20', ora: '19:00', casa: 'IFK Mariehamn', ospite: 'Lahti' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-24', ora: '19:00', casa: 'FF Jaro', ospite: 'SJK' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-25', ora: '16:30', casa: 'IFK Mariehamn', ospite: 'AC Oulu' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-25', ora: '17:00', casa: 'KuPS', ospite: 'VPS' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-26', ora: '15:00', casa: 'Ilves', ospite: 'Lahti' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-26', ora: '15:00', casa: 'Inter Turku', ospite: 'IF Gnistan' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-26', ora: '17:00', casa: 'HJK Helsinki', ospite: 'TPS' },
+        // Ireland Premier Division
+        { campionato: 'Ireland Premier Division', giornata: 25, data: '2026-07-24', ora: '20:00', casa: 'St Patrick\'s', ospite: 'Dundalk FC' },
+        { campionato: 'Ireland Premier Division', giornata: 25, data: '2026-07-25', ora: '17:00', casa: 'Galway United', ospite: 'Waterford United' },
+        { campionato: 'Ireland Premier Division', giornata: 25, data: '2026-07-25', ora: '19:45', casa: 'Sligo Rovers', ospite: 'Drogheda United' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-07-31', ora: '19:45', casa: 'Dundalk FC', ospite: 'Sligo Rovers' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-07-31', ora: '20:00', casa: 'Drogheda United', ospite: 'Shamrock' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-08-02', ora: '15:00', casa: 'Waterford United', ospite: 'Shelbourne FC' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-08-02', ora: '17:00', casa: 'St Patrick\'s', ospite: 'Derry City' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-08-02', ora: '19:00', casa: 'Bohemian FC', ospite: 'Galway United' },
+        // K League 1
+        { campionato: 'K League 1', giornata: 18, data: '2026-07-19', ora: '19:30', casa: 'FC Anyang', ospite: 'Gwangju FC' },
+        { campionato: 'K League 1', giornata: 18, data: '2026-07-19', ora: '19:30', casa: 'Bucheon FC', ospite: 'FC Seoul' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-21', ora: '19:30', casa: 'Jeju United', ospite: 'Gangwon FC' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-21', ora: '19:30', casa: 'Ulsan HD', ospite: 'Incheon United' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-21', ora: '19:30', casa: 'Jeonbuk', ospite: 'Daejeon Hana' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-22', ora: '19:30', casa: 'FC Seoul', ospite: 'Pohang Steelers' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-22', ora: '19:30', casa: 'Gwangju FC', ospite: 'Sangmu' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-22', ora: '19:30', casa: 'Bucheon FC', ospite: 'FC Anyang' },
+    ];
 
-    // ================================================================
-    // MAPPATURA SQUADRA -> CITTÀ
-    // ================================================================
+    // --------------------- CLASSIFICA COMPLETA ---------------------
+    const standings = [
+        // Allsvenskan
+        { campionato: 'Allsvenskan', squadra: 'Sirius', pos: 1, punti: 32, pg: 12, v: 10, p: 2, s: 0, gf: 33, gs: 15, diff: 18, xg: 28.5, forma: 'W W W D W' },
+        { campionato: 'Allsvenskan', squadra: 'Hammarby', pos: 2, punti: 23, pg: 12, v: 7, p: 2, s: 3, gf: 28, gs: 14, diff: 14, xg: 24.2, forma: 'L L L W W' },
+        { campionato: 'Allsvenskan', squadra: 'AIK Stockholm', pos: 3, punti: 21, pg: 12, v: 6, p: 3, s: 3, gf: 18, gs: 18, diff: 0, xg: 16.8, forma: 'W L W W W' },
+        { campionato: 'Allsvenskan', squadra: 'BK Häcken', pos: 4, punti: 20, pg: 12, v: 6, p: 2, s: 4, gf: 25, gs: 22, diff: 3, xg: 22.1, forma: 'W D W L L' },
+        { campionato: 'Allsvenskan', squadra: 'Djurgården', pos: 5, punti: 19, pg: 12, v: 6, p: 1, s: 5, gf: 26, gs: 15, diff: 11, xg: 23.4, forma: 'W L L W W' },
+        { campionato: 'Allsvenskan', squadra: 'Malmö', pos: 6, punti: 19, pg: 12, v: 6, p: 1, s: 5, gf: 25, gs: 20, diff: 5, xg: 21.9, forma: 'L L W W W' },
+        { campionato: 'Allsvenskan', squadra: 'GAIS', pos: 7, punti: 19, pg: 12, v: 5, p: 4, s: 3, gf: 18, gs: 14, diff: 4, xg: 16.3, forma: 'L W D W L' },
+        { campionato: 'Allsvenskan', squadra: 'Västerås', pos: 8, punti: 19, pg: 12, v: 5, p: 4, s: 3, gf: 22, gs: 23, diff: -1, xg: 19.7, forma: 'W L W W D' },
+        { campionato: 'Allsvenskan', squadra: 'Elfsborg', pos: 9, punti: 18, pg: 12, v: 4, p: 6, s: 2, gf: 17, gs: 14, diff: 3, xg: 15.4, forma: 'D D D L L' },
+        { campionato: 'Allsvenskan', squadra: 'Mjällby', pos: 10, punti: 17, pg: 12, v: 4, p: 5, s: 3, gf: 19, gs: 17, diff: 2, xg: 17.2, forma: 'D D D L D' },
+        { campionato: 'Allsvenskan', squadra: 'Brommapojkarna', pos: 11, punti: 16, pg: 12, v: 4, p: 4, s: 4, gf: 18, gs: 21, diff: -3, xg: 15.9, forma: 'W D D L L' },
+        { campionato: 'Allsvenskan', squadra: 'Kalmar', pos: 12, punti: 13, pg: 12, v: 4, p: 1, s: 7, gf: 14, gs: 17, diff: -3, xg: 13.1, forma: 'L W L W L' },
+        { campionato: 'Allsvenskan', squadra: 'Göteborg', pos: 13, punti: 13, pg: 12, v: 3, p: 4, s: 5, gf: 16, gs: 29, diff: -13, xg: 14.2, forma: 'D W L L W' },
+        { campionato: 'Allsvenskan', squadra: 'Degerfors', pos: 14, punti: 10, pg: 12, v: 2, p: 4, s: 6, gf: 12, gs: 19, diff: -7, xg: 11.8, forma: 'D L D L L' },
+        { campionato: 'Allsvenskan', squadra: 'Örgryte', pos: 15, punti: 9, pg: 12, v: 2, p: 3, s: 7, gf: 14, gs: 31, diff: -17, xg: 12.7, forma: 'L L D L W' },
+        { campionato: 'Allsvenskan', squadra: 'Halmstad', pos: 16, punti: 6, pg: 12, v: 1, p: 3, s: 8, gf: 10, gs: 26, diff: -16, xg: 9.8, forma: 'D W L L L' },
+        // Chinese Super League
+        { campionato: 'Chinese Super League', squadra: 'Rongcheng', pos: 1, punti: 43, pg: 20, v: 12, p: 7, s: 1, gf: 39, gs: 18, diff: 21, xg: 35.6, forma: 'W W D D D' },
+        { campionato: 'Chinese Super League', squadra: 'SD Taishan', pos: 2, punti: 30, pg: 20, v: 9, p: 3, s: 8, gf: 35, gs: 34, diff: 1, xg: 31.2, forma: 'L W L W L' },
+        { campionato: 'Chinese Super League', squadra: 'Shanghai Shen', pos: 3, punti: 29, pg: 20, v: 8, p: 5, s: 7, gf: 36, gs: 29, diff: 7, xg: 32.8, forma: 'L D W W L' },
+        { campionato: 'Chinese Super League', squadra: 'Chongqing', pos: 4, punti: 29, pg: 20, v: 8, p: 5, s: 7, gf: 23, gs: 21, diff: 2, xg: 21.4, forma: 'L W L D D' },
+        { campionato: 'Chinese Super League', squadra: 'Dalian Yingbo', pos: 5, punti: 28, pg: 20, v: 8, p: 4, s: 8, gf: 28, gs: 32, diff: -4, xg: 25.9, forma: 'W L L W W' },
+        { campionato: 'Chinese Super League', squadra: 'Beijing Guoan', pos: 6, punti: 27, pg: 20, v: 8, p: 3, s: 9, gf: 30, gs: 24, diff: 6, xg: 27.5, forma: 'L W W W D' },
+        { campionato: 'Chinese Super League', squadra: 'Zhejiang', pos: 7, punti: 26, pg: 20, v: 7, p: 5, s: 8, gf: 27, gs: 32, diff: -5, xg: 24.8, forma: 'W L L W D' },
+        { campionato: 'Chinese Super League', squadra: 'Q. West Coast', pos: 8, punti: 25, pg: 20, v: 6, p: 7, s: 7, gf: 23, gs: 29, diff: -6, xg: 21.7, forma: 'D W W L D' },
+        { campionato: 'Chinese Super League', squadra: 'Yunnan Yukun', pos: 9, punti: 25, pg: 20, v: 6, p: 7, s: 7, gf: 36, gs: 35, diff: 1, xg: 32.4, forma: 'D L W L D' },
+        { campionato: 'Chinese Super League', squadra: 'Henan', pos: 10, punti: 24, pg: 20, v: 7, p: 3, s: 10, gf: 23, gs: 23, diff: 0, xg: 21.3, forma: 'W L L L W' },
+        { campionato: 'Chinese Super League', squadra: 'Shenyang Urban', pos: 11, punti: 21, pg: 20, v: 5, p: 6, s: 9, gf: 25, gs: 30, diff: -5, xg: 22.8, forma: 'W W L W D' },
+        { campionato: 'Chinese Super League', squadra: 'Shanghai Port', pos: 12, punti: 21, pg: 20, v: 5, p: 6, s: 9, gf: 28, gs: 26, diff: 2, xg: 25.1, forma: 'D L W L D' },
+        { campionato: 'Chinese Super League', squadra: 'Qingdao Hainiu', pos: 13, punti: 21, pg: 20, v: 6, p: 3, s: 11, gf: 30, gs: 36, diff: -6, xg: 27.3, forma: 'L W D L L' },
+        { campionato: 'Chinese Super League', squadra: 'Jinmen Tiger', pos: 14, punti: 21, pg: 20, v: 6, p: 3, s: 11, gf: 24, gs: 22, diff: 2, xg: 22.1, forma: 'D W L W W' },
+        { campionato: 'Chinese Super League', squadra: 'SZ Peng City', pos: 15, punti: 20, pg: 20, v: 5, p: 5, s: 10, gf: 25, gs: 33, diff: -8, xg: 22.6, forma: 'W L L W L' },
+        { campionato: 'Chinese Super League', squadra: 'Wuhan 3 Towns', pos: 16, punti: 16, pg: 20, v: 4, p: 4, s: 12, gf: 26, gs: 34, diff: -8, xg: 23.5, forma: 'D D L L W' },
+        // Veikkausliiga
+        { campionato: 'Veikkausliiga', squadra: 'KuPS', pos: 1, punti: 33, pg: 15, v: 10, p: 3, s: 2, gf: 29, gs: 15, diff: 14, xg: 26.3, forma: 'D W W W W' },
+        { campionato: 'Veikkausliiga', squadra: 'Inter Turku', pos: 2, punti: 30, pg: 15, v: 8, p: 6, s: 1, gf: 23, gs: 12, diff: 11, xg: 21.1, forma: 'D D D D W' },
+        { campionato: 'Veikkausliiga', squadra: 'VPS', pos: 3, punti: 27, pg: 15, v: 8, p: 3, s: 4, gf: 23, gs: 13, diff: 10, xg: 20.8, forma: 'W D W W L' },
+        { campionato: 'Veikkausliiga', squadra: 'AC Oulu', pos: 4, punti: 26, pg: 15, v: 7, p: 5, s: 3, gf: 20, gs: 20, diff: 0, xg: 18.4, forma: 'W L D L L' },
+        { campionato: 'Veikkausliiga', squadra: 'HJK Helsinki', pos: 5, punti: 25, pg: 15, v: 7, p: 4, s: 4, gf: 27, gs: 20, diff: 7, xg: 24.5, forma: 'D W L L W' },
+        { campionato: 'Veikkausliiga', squadra: 'IF Gnistan', pos: 6, punti: 25, pg: 15, v: 7, p: 4, s: 4, gf: 25, gs: 20, diff: 5, xg: 22.7, forma: 'D D L W W' },
+        { campionato: 'Veikkausliiga', squadra: 'TPS', pos: 7, punti: 22, pg: 15, v: 6, p: 4, s: 5, gf: 19, gs: 16, diff: 3, xg: 17.4, forma: 'L D W L W' },
+        { campionato: 'Veikkausliiga', squadra: 'Lahti', pos: 8, punti: 19, pg: 15, v: 5, p: 4, s: 6, gf: 18, gs: 15, diff: 3, xg: 16.5, forma: 'L D D W W' },
+        { campionato: 'Veikkausliiga', squadra: 'Ilves', pos: 9, punti: 16, pg: 15, v: 4, p: 4, s: 7, gf: 25, gs: 29, diff: -4, xg: 22.8, forma: 'W W L D L' },
+        { campionato: 'Veikkausliiga', squadra: 'SJK', pos: 10, punti: 14, pg: 15, v: 3, p: 5, s: 7, gf: 18, gs: 25, diff: -7, xg: 16.3, forma: 'D D W L L' },
+        { campionato: 'Veikkausliiga', squadra: 'FF Jaro', pos: 11, punti: 11, pg: 15, v: 3, p: 2, s: 10, gf: 15, gs: 32, diff: -17, xg: 13.8, forma: 'L L D L W' },
+        { campionato: 'Veikkausliiga', squadra: 'IFK Mariehamn', pos: 12, punti: 4, pg: 15, v: 1, p: 1, s: 13, gf: 8, gs: 33, diff: -25, xg: 7.8, forma: 'L L L L L' },
+        // Ireland Premier Division
+        { campionato: 'Ireland Premier Division', squadra: 'Shamrock', pos: 1, punti: 50, pg: 24, v: 15, p: 5, s: 4, gf: 40, gs: 22, diff: 18, xg: 36.7, forma: 'L W D W W' },
+        { campionato: 'Ireland Premier Division', squadra: 'Bohemian FC', pos: 2, punti: 43, pg: 24, v: 13, p: 4, s: 7, gf: 40, gs: 27, diff: 13, xg: 36.2, forma: 'L L W W W' },
+        { campionato: 'Ireland Premier Division', squadra: 'St Patrick\'s', pos: 3, punti: 42, pg: 24, v: 12, p: 6, s: 6, gf: 39, gs: 20, diff: 19, xg: 35.8, forma: 'W W L W D' },
+        { campionato: 'Ireland Premier Division', squadra: 'Dundalk FC', pos: 4, punti: 35, pg: 24, v: 10, p: 5, s: 9, gf: 38, gs: 36, diff: 2, xg: 34.5, forma: 'W W L L L' },
+        { campionato: 'Ireland Premier Division', squadra: 'Shelbourne FC', pos: 5, punti: 34, pg: 24, v: 9, p: 7, s: 8, gf: 35, gs: 35, diff: 0, xg: 32.1, forma: 'W D L D W' },
+        { campionato: 'Ireland Premier Division', squadra: 'Derry City', pos: 6, punti: 29, pg: 24, v: 8, p: 5, s: 11, gf: 32, gs: 31, diff: 1, xg: 29.4, forma: 'W L D W L' },
+        { campionato: 'Ireland Premier Division', squadra: 'Galway United', pos: 7, punti: 27, pg: 24, v: 8, p: 3, s: 13, gf: 32, gs: 39, diff: -7, xg: 29.1, forma: 'L W L L W' },
+        { campionato: 'Ireland Premier Division', squadra: 'Drogheda United', pos: 8, punti: 25, pg: 24, v: 7, p: 4, s: 13, gf: 29, gs: 41, diff: -12, xg: 26.4, forma: 'L D L L W' },
+        { campionato: 'Ireland Premier Division', squadra: 'Waterford United', pos: 9, punti: 21, pg: 24, v: 6, p: 3, s: 15, gf: 33, gs: 47, diff: -14, xg: 29.8, forma: 'W L W W D' },
+        { campionato: 'Ireland Premier Division', squadra: 'Sligo Rovers', pos: 10, punti: 20, pg: 24, v: 5, p: 5, s: 14, gf: 20, gs: 40, diff: -20, xg: 18.5, forma: 'L L D L L' },
+        // K League 1
+        { campionato: 'K League 1', squadra: 'FC Seoul', pos: 1, punti: 36, pg: 18, v: 10, p: 6, s: 2, gf: 28, gs: 12, diff: 16, xg: 25.8, forma: 'L W W W D' },
+        { campionato: 'K League 1', squadra: 'Gangwon FC', pos: 2, punti: 31, pg: 18, v: 9, p: 4, s: 5, gf: 23, gs: 11, diff: 12, xg: 21.3, forma: 'W W W D W' },
+        { campionato: 'K League 1', squadra: 'Jeonbuk', pos: 3, punti: 29, pg: 18, v: 8, p: 5, s: 5, gf: 25, gs: 16, diff: 9, xg: 22.9, forma: 'D W L W L' },
+        { campionato: 'K League 1', squadra: 'Ulsan HD', pos: 4, punti: 28, pg: 18, v: 8, p: 4, s: 6, gf: 26, gs: 26, diff: 0, xg: 23.7, forma: 'W L D L D' },
+        { campionato: 'K League 1', squadra: 'Pohang Steelers', pos: 5, punti: 28, pg: 18, v: 8, p: 4, s: 6, gf: 19, gs: 16, diff: 3, xg: 17.5, forma: 'W L W W L' },
+        { campionato: 'K League 1', squadra: 'Incheon United', pos: 6, punti: 24, pg: 18, v: 7, p: 3, s: 8, gf: 22, gs: 19, diff: 3, xg: 20.2, forma: 'L W L L W' },
+        { campionato: 'K League 1', squadra: 'FC Anyang', pos: 7, punti: 23, pg: 18, v: 6, p: 5, s: 7, gf: 22, gs: 19, diff: 3, xg: 20.1, forma: 'D D W L W' },
+        { campionato: 'K League 1', squadra: 'Jeju United', pos: 8, punti: 23, pg: 18, v: 6, p: 5, s: 7, gf: 16, gs: 18, diff: -2, xg: 14.8, forma: 'L L D D W' },
+        { campionato: 'K League 1', squadra: 'Daejeon Hana', pos: 9, punti: 19, pg: 18, v: 4, p: 7, s: 7, gf: 21, gs: 20, diff: 1, xg: 19.3, forma: 'L L D D D' },
+        { campionato: 'K League 1', squadra: 'Bucheon FC', pos: 10, punti: 19, pg: 18, v: 5, p: 4, s: 9, gf: 14, gs: 18, diff: -4, xg: 13.1, forma: 'L D W D D' },
+        { campionato: 'K League 1', squadra: 'Sangmu', pos: 11, punti: 16, pg: 18, v: 3, p: 7, s: 8, gf: 17, gs: 25, diff: -8, xg: 15.6, forma: 'D L D D L' },
+        { campionato: 'K League 1', squadra: 'Gwangju FC', pos: 12, punti: 8, pg: 18, v: 1, p: 5, s: 12, gf: 8, gs: 41, diff: -33, xg: 7.2, forma: 'D L L D L' },
+        // Austria Bundesliga
+        { campionato: 'Austria Bundesliga', squadra: 'LASK', pos: 1, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Sturm Graz', pos: 2, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Rapid Wien', pos: 3, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Austria Wien', pos: 4, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'RB Salzburg', pos: 5, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Grazer AK', pos: 6, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Ried', pos: 7, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'WSG Tirol', pos: 8, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Austria Lustenau', pos: 9, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Rheindorf Altach', pos: 10, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'RZ Pellets WAC', pos: 11, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Hartberg', pos: 12, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        // Europa League
+        { campionato: 'Europa League', squadra: 'Roma', pos: 1, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Lazio', pos: 2, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Athletic Bilbao', pos: 3, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Betis', pos: 4, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Olympiacos', pos: 5, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Rangers', pos: 6, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Fenerbahçe', pos: 7, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Celtic', pos: 8, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Copenhagen', pos: 9, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Slavia Praha', pos: 10, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Molde', pos: 11, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Gent', pos: 12, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'AZ Alkmaar', pos: 13, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'PAOK', pos: 14, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Anderlecht', pos: 15, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Maccabi Tel Aviv', pos: 16, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'HJK Helsinki', pos: 17, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Dinamo Zagreb', pos: 18, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Bodø/Glimt', pos: 19, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Legia Warszawa', pos: 20, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Trabzonspor', pos: 21, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Malmö', pos: 22, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'KAA Gent', pos: 23, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Basel', pos: 24, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Ferencváros', pos: 25, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Sparta Praha', pos: 26, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Union Saint-Gilloise', pos: 27, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Hajduk Split', pos: 28, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Rijeka', pos: 29, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'FCSB', pos: 30, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Viktoria Plzeň', pos: 31, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Maccabi Haifa', pos: 32, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Shamrock Rovers', pos: 33, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+    ];
+
+    // --------------------- MAPPATURA SQUADRA -> CITTÀ ---------------------
     const teamCityMap = {
         'AIK Stockholm': 'Stockholm', 'BK Häcken': 'Gothenburg', 'Brommapojkarna': 'Stockholm',
         'Degerfors': 'Degerfors', 'Djurgården': 'Stockholm', 'Elfsborg': 'Borås',
@@ -1084,12 +1243,6 @@
         'Mladá Boleslav': 'Mladá Boleslav', 'Víkingur': 'Reykjavík', 'Rudar Pljevlja': 'Pljevlja',
         'Zrinjski Mostar': 'Mostar', 'Ludogorets': 'Razgrad', 'Baník Ostrava': 'Ostrava',
         'Dinamo Minsk': 'Minsk',
-        'Bodø/Glimt': 'Bodø', 'Viking': 'Stavanger', 'Rosenborg': 'Trondheim',
-        'Brann': 'Bergen', 'Vålerenga': 'Oslo', 'Tromsø': 'Tromsø',
-        'Lillestrøm': 'Lillestrøm', 'Molde': 'Molde', 'Start': 'Kristiansand',
-        'KFUM Oslo': 'Oslo', 'Sandefjord': 'Sandefjord', 'Sarpsborg 08': 'Sarpsborg',
-        'Fredrikstad': 'Fredrikstad', 'Aalesund': 'Ålesund', 'Kristiansund': 'Kristiansund',
-        'HamKam': 'Hamar'
     };
 
     // ================================================================
@@ -1097,29 +1250,8 @@
     // ================================================================
 
     function getTeamStats(campionato, squadra) {
-        if (!standingsData || standingsData.length === 0) {
-            return { pos: '-', punti: '-', pg: '-', v: '-', p: '-', s: '-', gf: 0, gs: 0, diff: '-', xg: 0, forma: '' };
-        }
-        const found = standingsData.find(s => {
-            const sCampionato = String(s.Campionato || s['Campionato'] || '').trim();
-            const sSquadra = String(s.Squad || s['Squad'] || s['Squadra'] || '').trim();
-            return sCampionato === campionato && sSquadra === squadra;
-        });
-        if (found) {
-            return {
-                pos: found.Rk || found['Rk'] || found.Pos || '-',
-                punti: found.Pts || found['Pts'] || found.Punti || '-',
-                pg: found.MP || found['MP'] || found.PG || '-',
-                v: found.W || found['W'] || found.V || '-',
-                p: found.D || found['D'] || found.P || '-',
-                s: found.L || found['L'] || found.S || '-',
-                gf: found.GF || found['GF'] || 0,
-                gs: found.GA || found['GA'] || 0,
-                diff: found.GD || found['GD'] || found.Diff || '-',
-                xg: found.xG || found['xG'] || 0,
-                forma: found['Last 5'] || found.Last5 || found.Forma || ''
-            };
-        }
+        const found = standings.find(s => s.campionato === campionato && s.squadra === squadra);
+        if (found) return found;
         return { pos: '-', punti: '-', pg: '-', v: '-', p: '-', s: '-', gf: 0, gs: 0, diff: '-', xg: 0, forma: '' };
     }
 
@@ -1134,7 +1266,6 @@
     }
 
     function formatDate(dateStr) {
-        if (!dateStr) return '';
         const parts = dateStr.split('-');
         if (parts.length !== 3) return dateStr;
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
@@ -1147,9 +1278,13 @@
         return total;
     }
 
+    // ================================================================
+    // CALCOLO PERCENTUALI 1X2 CORRETTO (somma = 100%)
+    // ================================================================
+
     function getWinPercentages(homeStats, awayStats) {
-        const homePts = parseFloat(homeStats.punti) || 0;
-        const awayPts = parseFloat(awayStats.punti) || 0;
+        const homePts = parseInt(homeStats.punti) || 0;
+        const awayPts = parseInt(awayStats.punti) || 0;
         const homeGf = parseInt(homeStats.gf) || 0;
         const homeGs = parseInt(homeStats.gs) || 0;
         const awayGf = parseInt(awayStats.gf) || 0;
@@ -1158,23 +1293,28 @@
         const homeDiff = homeGf - homeGs;
         const awayDiff = awayGf - awayGs;
         
+        // Rating: punti * 3 + differenza reti * 0.5
         const homeRating = (homePts * 3) + (homeDiff * 0.5);
         const awayRating = (awayPts * 3) + (awayDiff * 0.5);
         
+        // Se entrambi i rating sono 0, usa valori predefiniti
         if (homeRating === 0 && awayRating === 0) {
             return { home: 33, draw: 34, away: 33 };
         }
         
+        // Calcola le probabilità grezze (base 15% per squadra + 30% pareggio)
         const totalRating = homeRating + awayRating;
         let homeProb = (homeRating / totalRating) * 70 + 15;
         let awayProb = (awayRating / totalRating) * 70 + 15;
         let drawProb = 30;
         
+        // Normalizza per avere somma 100
         const sum = homeProb + drawProb + awayProb;
         homeProb = Math.round((homeProb / sum) * 100);
         drawProb = Math.round((drawProb / sum) * 100);
         awayProb = Math.round((awayProb / sum) * 100);
         
+        // Correggi arrotondamenti
         let diff = 100 - (homeProb + drawProb + awayProb);
         if (diff !== 0) {
             if (homeProb >= drawProb && homeProb >= awayProb) homeProb += diff;
@@ -1191,6 +1331,10 @@
         if (value >= 40) return 'flag-green';
         return 'flag-neutral';
     }
+
+    // ================================================================
+    // MULTIGOL E UNDER/OVER
+    // ================================================================
 
     function multiGoalValues(stats) {
         if (!stats) return { p02: 0, p13: 0, p25: 0 };
@@ -1239,7 +1383,17 @@
     }
 
     // ================================================================
-    // FUNZIONI DATA
+    // STATO APP
+    // ================================================================
+
+    let currentTab = 'palinsesto';
+    let currentMatchIndex = 0;
+    let matches = [];
+    let currentFilter = 'all';
+    let isGenerating = false;
+
+    // ================================================================
+    // CALCOLO DATE
     // ================================================================
 
     function getTodayAndTomorrow() {
@@ -1249,147 +1403,55 @@
         tomorrow.setDate(tomorrow.getDate() + 1);
         const dayAfter = new Date(today);
         dayAfter.setDate(dayAfter.getDate() + 2);
+
         const format = (d) => {
             const year = d.getFullYear();
             const month = String(d.getMonth() + 1).padStart(2, '0');
             const day = String(d.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         };
+
         return { oggi: format(today), domani: format(tomorrow), dopoDomani: format(dayAfter) };
     }
 
     // ================================================================
-    // CARICAMENTO CLASSIFICA DAL SERVER
+    // FILTRO PARTITE
     // ================================================================
 
-    async function loadStandings() {
-        try {
-            const response = await fetch(`${API_BASE}/api/standings`);
-            const data = await response.json();
-            if (data.success && data.standings) {
-                standingsData = data.standings;
-                console.log(`✅ Caricate ${standingsData.length} righe di classifica`);
-            }
-        } catch (error) {
-            console.warn('⚠️ Errore caricamento classifica:', error);
-        }
+    function filterMatchesByDate() {
+        const { oggi, domani, dopoDomani } = getTodayAndTomorrow();
+        matches = matchesData.filter(m => m.data === oggi || m.data === domani || m.data === dopoDomani);
+        matches.sort((a, b) => (a.data + a.ora).localeCompare(b.data + b.ora));
     }
 
     // ================================================================
-    // CARICAMENTO PARTITE DAL SERVER
+    // RENDER PALINSESTO (con layout percentuali a 2 righe)
     // ================================================================
-
-    async function loadMatches() {
-        const container = document.getElementById('cardsContainer');
-        const btn = document.getElementById('refreshBtn');
-        if (btn) btn.disabled = true;
-
-        container.innerHTML = `
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>⏳ Caricamento partite da Prono.xlsx...</p>
-            </div>
-        `;
-
-        try {
-            const response = await fetch(`${API_BASE}/api/matches`);
-            const data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.error || 'Errore nel caricamento dei dati');
-            }
-
-            allMatches = data.matches || [];
-            
-            updateFilterOptions();
-            renderMatches();
-            
-            document.getElementById('matchCount').textContent = `Partite: ${allMatches.length}`;
-            
-            const lastUpdate = document.getElementById('lastUpdate');
-            if (lastUpdate) {
-                lastUpdate.textContent = `🔄 Ultimo aggiornamento: ${new Date().toLocaleTimeString()}`;
-            }
-
-            console.log(`✅ Caricate ${allMatches.length} partite`);
-
-        } catch (error) {
-            console.error('❌ Errore:', error);
-            container.innerHTML = `
-                <div class="no-match">
-                    ❌ Errore nel caricamento dei dati<br>
-                    <span style="font-size:0.85rem;color:var(--text-secondary);">
-                        ${error.message}<br>
-                        Verifica che il server Node.js sia in esecuzione.
-                    </span>
-                    <br><br>
-                    <button onclick="loadMatches()" style="padding:10px 24px;border-radius:30px;border:none;background:#3b82f6;color:#fff;font-weight:600;cursor:pointer;">
-                        🔄 Riprova
-                    </button>
-                </div>
-            `;
-        }
-
-        if (btn) btn.disabled = false;
-    }
-
-    // ================================================================
-    // FILTRO CAMPIONATI
-    // ================================================================
-
-    function updateFilterOptions() {
-        const select = document.getElementById('campFilter');
-        const leagues = [...new Set(allMatches.map(m => m.campionato))].sort();
-        
-        select.innerHTML = '<option value="all">📋 Tutti i Campionati</option>';
-        leagues.forEach(league => {
-            if (league && league.trim()) {
-                const option = document.createElement('option');
-                option.value = league;
-                option.textContent = '🏆 ' + league;
-                select.appendChild(option);
-            }
-        });
-        
-        select.value = currentFilter;
-    }
 
     function getFilteredMatches() {
-        if (currentFilter === 'all') return allMatches;
-        return allMatches.filter(m => m.campionato === currentFilter);
+        if (currentFilter === 'all') return matches;
+        return matches.filter(m => m.campionato === currentFilter);
     }
 
-    // ================================================================
-    // RENDER PALINSESTO
-    // ================================================================
-
-    function renderMatches() {
+    function renderCards() {
         const container = document.getElementById('cardsContainer');
         const filtered = getFilteredMatches();
-        const { oggi, domani, dopoDomani } = getTodayAndTomorrow();
-
+        
         document.getElementById('matchCount').textContent = `Partite: ${filtered.length}`;
-
+        
         if (filtered.length === 0) {
-            container.innerHTML = `
-                <div class="no-match">
-                    📅 Nessuna partita in programma per oggi, domani o dopodomani.
-                    <br><br>
-                    <span style="font-size:0.85rem;color:var(--text-secondary);">
-                        Assicurati che il file prono.xlsx contenga partite per le date:
-                        <br>
-                        📆 ${oggi} | ${domani} | ${dopoDomani}
-                    </span>
-                </div>
-            `;
+            container.innerHTML = `<div class="no-match">📅 Nessuna partita in programma per oggi, domani o dopodomani.</div>`;
             return;
         }
+
+        const { oggi, domani, dopoDomani } = getTodayAndTomorrow();
 
         let html = '';
         filtered.forEach((match, idx) => {
             const homeStats = getTeamStats(match.campionato, match.casa);
             const awayStats = getTeamStats(match.campionato, match.ospite);
             
+            // CALCOLO PERCENTUALI 1X2 CORRETTO (somma = 100%)
             const perc = getWinPercentages(homeStats, awayStats);
             const homePerc = perc.home;
             const drawPerc = perc.draw;
@@ -1408,6 +1470,7 @@
             const homeBestLabel = homeBest === homeMulti.p02 ? '(0-2)' : homeBest === homeMulti.p13 ? '(1-3)' : '(2-5)';
             const awayBestLabel = awayBest === awayMulti.p02 ? '(0-2)' : awayBest === awayMulti.p13 ? '(1-3)' : '(2-5)';
             
+            // Differenza percentuali per la freccia
             const diff = homePerc - awayPerc;
             const diffAbs = Math.abs(diff);
             const diffLabel = diffAbs + '%';
@@ -1442,7 +1505,7 @@
                 badgeClass = 'dayafter-badge';
             }
 
-            const originalIdx = allMatches.indexOf(match);
+            const originalIdx = matches.indexOf(match);
 
             html += `
                 <div class="card" data-index="${originalIdx}" data-tab="palinsesto">
@@ -1497,7 +1560,6 @@
                     <div class="stat-footer">
                         <span class="footer-tag ${under45.flag}">📊 12+Under 4.5: ${under45.label}</span>
                         <span class="footer-tag ${over15.flag}">⚽ Over 1.5: ${over15.label}</span>
-                        <span class="data-source" style="font-size:0.65rem;">📊 da prono.xlsx</span>
                     </div>
                 </div>
             `;
@@ -1507,13 +1569,30 @@
         document.querySelectorAll('.card[data-tab="palinsesto"]').forEach(el => {
             el.addEventListener('click', function() {
                 const idx = parseInt(this.dataset.index);
-                if (!isNaN(idx) && idx < allMatches.length) {
+                if (!isNaN(idx)) {
                     currentMatchIndex = idx;
                     switchTab('analisi');
                     renderAnalisiAI(idx);
                 }
             });
         });
+    }
+
+    // ================================================================
+    // POPOLA FILTRO CAMPIONATI
+    // ================================================================
+
+    function populateFilter() {
+        const select = document.getElementById('campFilter');
+        const leagues = [...new Set(matches.map(m => m.campionato))].sort();
+        select.innerHTML = '<option value="all">📋 Tutti i Campionati</option>';
+        leagues.forEach(league => {
+            const option = document.createElement('option');
+            option.value = league;
+            option.textContent = '🏆 ' + league;
+            select.appendChild(option);
+        });
+        select.value = currentFilter;
     }
 
     // ================================================================
@@ -1615,6 +1694,7 @@
 
         const sicurezza = Math.min(100, Math.round(pronPerc + 10));
 
+        // Genera i quadratini colorati per lo stato forma nel report
         function getFormaBoxes(forma) {
             if (!forma || forma === '') {
                 return '⬜⬜⬜⬜⬜';
@@ -1672,6 +1752,19 @@
 
 ---
 
+## 📈 DETTAGLIO 3 GIOCATE
+
+**GIOCATA 1 (12+U4.5)**: ${giocata1}%
+- Formula: (Vittorie Casa ${vittorieCasa} + Vittorie Ospite ${vittorieOspite}) / Partite Totali ${totalePartite} * 100 + Under 4.5 ${under45}% / 2
+
+**GIOCATA 2 (COMBINATA)**: ${giocata2}%
+- Multigol 1-3 Casa: ${multiCasa13}% | Multigol 1-3 Ospite: ${multiOspite13}%
+- Media: (${multiCasa13} + ${multiOspite13}) / 2 = ${giocata2}%
+
+**GIOCATA 3 (LIBERA)**: ${bestCombo.nome} = ${bestCombo.valore}%
+
+---
+
 ## 💰 CONSIGLI DI TRADING
 
 | # | Giocata | Percentuale |
@@ -1696,7 +1789,7 @@
     }
 
     // ================================================================
-    // FORMATTAZIONE REPORT (Markdown -> HTML)
+    // FUNZIONE PER FORMATARE IL REPORT (Markdown -> HTML)
     // ================================================================
 
     function formatReportToHtml(text) {
@@ -1801,12 +1894,41 @@
     }
 
     // ================================================================
+    // SIMULAZIONE TELEFONO
+    // ================================================================
+
+    function openPhoneSimulator() {
+        const overlay = document.getElementById('phoneSimulator');
+        const content = document.getElementById('phoneContent');
+        
+        // Clona il contenuto principale nella simulazione
+        const mainContent = document.querySelector('.tab-content.active');
+        if (mainContent) {
+            content.innerHTML = mainContent.innerHTML;
+        } else {
+            content.innerHTML = document.querySelector('#tab-palinsesto').innerHTML;
+        }
+        
+        content.style.background = 'var(--bg)';
+        content.style.color = 'var(--text-primary)';
+        
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePhoneSimulator() {
+        const overlay = document.getElementById('phoneSimulator');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // ================================================================
     // RENDER ANALISI AI
     // ================================================================
 
     async function renderAnalisiAI(index, forceRegenerate = false) {
         const container = document.getElementById('aiContent');
-        const match = allMatches[index];
+        const match = matches[index];
         if (!match) {
             container.innerHTML = `<div class="ai-loading"><p>Nessuna partita selezionata</p></div>`;
             return;
@@ -1826,6 +1948,7 @@
         const awayStats = getTeamStats(match.campionato, match.ospite);
         const homeCity = teamCityMap[match.casa] || match.casa;
 
+        // Box forma
         const homeFormaBoxes = homeStats.forma ? homeStats.forma.split(' ').map(c => {
             const letter = c === 'W' ? 'V' : c === 'D' ? 'P' : c === 'L' ? 'S' : '-';
             return `<span class="forma-box-small ${letter}">${letter}</span>`;
@@ -1837,11 +1960,8 @@
         }).join('') : '<span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span>';
 
         // Classifica
-        const allStandings = standingsData.filter(s => {
-            const sCampionato = String(s.Campionato || s['Campionato'] || '').trim();
-            return sCampionato === match.campionato;
-        });
-        allStandings.sort((a, b) => (parseFloat(b.Pts || b['Pts'] || b.Punti || 0)) - (parseFloat(a.Pts || a['Pts'] || a.Punti || 0)));
+        const allStandings = standings.filter(s => s.campionato === match.campionato);
+        allStandings.sort((a, b) => (parseInt(b.punti) || 0) - (parseInt(a.punti) || 0));
         
         let standingsHtml = `
             <table>
@@ -1863,21 +1983,20 @@
                 <tbody>
         `;
         allStandings.forEach(s => {
-            const isGold = (s.Squad || s['Squad'] || s.Squadra || '') === match.casa || 
-                          (s.Squad || s['Squad'] || s.Squadra || '') === match.ospite;
+            const isGold = s.squadra === match.casa || s.squadra === match.ospite;
             standingsHtml += `
                 <tr class="${isGold ? 'gold' : ''}">
-                    <td>${s.Rk || s['Rk'] || s.Pos || '-'}</td>
-                    <td>${s.Squad || s['Squad'] || s.Squadra || ''}</td>
-                    <td>${s.MP || s['MP'] || s.PG || '-'}</td>
-                    <td>${s.W || s['W'] || s.V || '-'}</td>
-                    <td>${s.D || s['D'] || s.P || '-'}</td>
-                    <td>${s.L || s['L'] || s.S || '-'}</td>
-                    <td>${s.GF || s['GF'] || 0}</td>
-                    <td>${s.GA || s['GA'] || 0}</td>
-                    <td>${s.GD || s['GD'] || s.Diff || '-'}</td>
-                    <td>${s.xG || s['xG'] || 0}</td>
-                    <td>${s.Pts || s['Pts'] || s.Punti || '-'}</td>
+                    <td>${s.pos}</td>
+                    <td>${s.squadra}</td>
+                    <td>${s.pg}</td>
+                    <td>${s.v}</td>
+                    <td>${s.p}</td>
+                    <td>${s.s}</td>
+                    <td>${s.gf}</td>
+                    <td>${s.gs}</td>
+                    <td>${s.diff}</td>
+                    <td>${s.xg}</td>
+                    <td>${s.punti}</td>
                 </tr>
             `;
         });
@@ -1885,6 +2004,7 @@
 
         const stats = generateStatsForPrompt(match);
 
+        // HTML base
         let htmlContent = `
             <div class="ai-container">
                 <div class="ai-header">
@@ -1979,10 +2099,12 @@
         let groqSuccess = false;
         let groqError = '';
 
+        // Se non c'è una chiave API, usa subito il fallback
         if (!groqKey) {
             groqError = 'Nessuna API Key configurata';
             console.log('🔄 Nessuna API Key, uso fallback');
         } else {
+            // Costruisci il prompt per GROQ
             const prompt = `Sei un analista sportivo professionista specializzato in statistica calcistica. Analizza questa partita:
 
 CAMPIONATO: ${match.campionato}
@@ -2037,6 +2159,7 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
             }
         }
 
+        // Fallback se GROQ fallisce
         if (!groqSuccess) {
             console.log('🔄 Uso fallback locale');
             const fallbackReport = generateFallbackReport(match, stats);
@@ -2053,6 +2176,7 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
                 `;
             }
             
+            // Aggiungi avviso se GROQ ha fallito
             if (groqError) {
                 reportHtml = `
                 <div style="padding:10px;background:var(--red);color:#fff;border-radius:8px;margin-bottom:10px;font-size:0.85rem;">
@@ -2074,6 +2198,7 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
             `;
         }
 
+        // Ripristina il bottone
         const btn = document.getElementById('rigeneraBtn');
         if (btn) {
             btn.innerHTML = '🔄 Rigenera Pronostico';
@@ -2087,9 +2212,9 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
 
     window.handleRigenera = function() {
         console.log('🔄 Rigenera - index:', currentMatchIndex);
-        if (allMatches.length > 0 && currentMatchIndex < allMatches.length) {
+        if (matches.length > 0 && currentMatchIndex < matches.length) {
             renderAnalisiAI(currentMatchIndex, true);
-        } else if (allMatches.length > 0) {
+        } else if (matches.length > 0) {
             currentMatchIndex = 0;
             renderAnalisiAI(0, true);
         }
@@ -2122,6 +2247,7 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
     // ================================================================
 
     function switchTab(tab) {
+        currentTab = tab;
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tab);
         });
@@ -2149,16 +2275,16 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
 
         if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
             const tabs = ['palinsesto', 'analisi', 'impostazioni'];
-            const currentIdx = tabs.indexOf(currentTab || 'palinsesto');
+            const currentIdx = tabs.indexOf(currentTab);
             if (diffX < 0 && currentIdx < tabs.length - 1) {
                 switchTab(tabs[currentIdx + 1]);
-                if (tabs[currentIdx + 1] === 'analisi' && allMatches.length > 0) {
+                if (tabs[currentIdx + 1] === 'analisi' && matches.length > 0) {
                     renderAnalisiAI(currentMatchIndex);
                 }
             } else if (diffX > 0 && currentIdx > 0) {
                 switchTab(tabs[currentIdx - 1]);
             }
-        } else if ((currentTab || 'palinsesto') === 'palinsesto' && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 30) {
+        } else if (currentTab === 'palinsesto' && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 30) {
             const filtered = getFilteredMatches();
             if (diffY < 0 && currentMatchIndex < filtered.length - 1) {
                 currentMatchIndex++;
@@ -2188,37 +2314,6 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
     }
 
     // ================================================================
-    // SIMULAZIONE TELEFONO
-    // ================================================================
-
-    function openPhoneSimulator() {
-        const overlay = document.getElementById('phoneSimulator');
-        const content = document.getElementById('phoneContent');
-        
-        const mainContent = document.querySelector('.tab-content.active');
-        if (mainContent) {
-            content.innerHTML = mainContent.innerHTML;
-        } else {
-            content.innerHTML = document.querySelector('#tab-palinsesto').innerHTML;
-        }
-        
-        content.style.background = 'var(--bg)';
-        content.style.color = 'var(--text-primary)';
-        
-        overlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closePhoneSimulator() {
-        const overlay = document.getElementById('phoneSimulator');
-        overlay.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    window.openPhoneSimulator = openPhoneSimulator;
-    window.closePhoneSimulator = closePhoneSimulator;
-
-    // ================================================================
     // CLOCK, TEMA, FONT SIZE
     // ================================================================
 
@@ -2234,11 +2329,13 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
         document.body.classList.toggle('light', theme === 'light');
         currentTheme = theme;
         localStorage.setItem('theme', theme);
-        const darkBtn = document.getElementById('themeDark');
-        const lightBtn = document.getElementById('themeLight');
-        if (darkBtn) darkBtn.className = theme === 'dark' ? 'tab-btn active' : 'tab-btn';
-        if (lightBtn) lightBtn.className = theme === 'light' ? 'tab-btn active' : 'tab-btn';
+        document.getElementById('themeDark').className = theme === 'dark' ? 'tab-btn active' : 'tab-btn';
+        document.getElementById('themeLight').className = theme === 'light' ? 'tab-btn active' : 'tab-btn';
     }
+
+    // ================================================================
+    // FONT SIZE
+    // ================================================================
 
     const fontClasses = ['font-sm', 'font-md', 'font-lg', 'font-xl'];
     const fontLabels = ['Piccolo (13px)', 'Medio (16px)', 'Grande (19px)', 'Extra Grande (22px)'];
@@ -2248,10 +2345,8 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
         if (level >= 1 && level <= 4) {
             document.body.classList.add(fontClasses[level - 1]);
         }
-        const display = document.getElementById('fontSizeDisplay');
-        if (display) display.textContent = fontLabels[level - 1] || 'Medio (16px)';
-        const slider = document.getElementById('fontSizeSlider');
-        if (slider) slider.value = level;
+        document.getElementById('fontSizeDisplay').textContent = fontLabels[level - 1] || 'Medio (16px)';
+        document.getElementById('fontSizeSlider').value = level;
         localStorage.setItem('fontSize', level);
     }
 
@@ -2263,9 +2358,11 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
     document.getElementById('themeLight').addEventListener('click', () => applyTheme('light'));
 
     document.getElementById('fontSizeSlider').addEventListener('input', function() {
-        applyFontSize(parseInt(this.value));
+        const level = parseInt(this.value);
+        applyFontSize(level);
     });
 
+    // Test GROQ
     document.getElementById('testGroqBtn').addEventListener('click', testGroqConnection);
 
     document.getElementById('saveSettings').addEventListener('click', () => {
@@ -2276,19 +2373,15 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
         localStorage.setItem('groqModel', model);
         if (weather) localStorage.setItem('weatherApiKey', weather);
         alert('✅ Impostazioni salvate!');
-        if ((currentTab || 'palinsesto') === 'analisi' && allMatches.length > 0) {
+        if (currentTab === 'analisi' && matches.length > 0) {
             renderAnalisiAI(currentMatchIndex, true);
         }
     });
 
     // Carica impostazioni
-    const groqKeyInput = document.getElementById('groqKey');
-    const groqModelSelect = document.getElementById('groqModel');
-    const weatherKeyInput = document.getElementById('weatherKey');
-    
-    if (groqKeyInput) groqKeyInput.value = localStorage.getItem('groqApiKey') || '';
-    if (groqModelSelect) groqModelSelect.value = localStorage.getItem('groqModel') || 'llama-3.1-8b-instant';
-    if (weatherKeyInput) weatherKeyInput.value = localStorage.getItem('weatherApiKey') || 'd8df501134ef44eab6515526262007';
+    document.getElementById('groqKey').value = localStorage.getItem('groqApiKey') || '';
+    document.getElementById('groqModel').value = localStorage.getItem('groqModel') || 'llama-3.1-8b-instant';
+    document.getElementById('weatherKey').value = localStorage.getItem('weatherApiKey') || 'd8df501134ef44eab6515526262007';
 
     // ================================================================
     // SIMULA TELEFONO
@@ -2302,21 +2395,8 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
 
     document.getElementById('campFilter').addEventListener('change', function() {
         currentFilter = this.value;
-        renderMatches();
+        renderCards();
         document.querySelector('.grid-cards').scrollTop = 0;
-    });
-
-    // ================================================================
-    // REFRESH DATI
-    // ================================================================
-
-    document.getElementById('refreshBtn').addEventListener('click', async function() {
-        this.disabled = true;
-        this.textContent = '⏳ Caricamento...';
-        await loadMatches();
-        await loadStandings();
-        this.textContent = '🔄 Aggiorna Dati Ora';
-        this.disabled = false;
     });
 
     // ================================================================
@@ -2327,7 +2407,7 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
         btn.addEventListener('click', function() {
             const tab = this.dataset.tab;
             switchTab(tab);
-            if (tab === 'analisi' && allMatches.length > 0) {
+            if (tab === 'analisi' && matches.length > 0) {
                 renderAnalisiAI(currentMatchIndex);
             }
         });
@@ -2340,7 +2420,7 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
     document.getElementById('homeBtn').addEventListener('click', () => {
         currentMatchIndex = 0;
         switchTab('palinsesto');
-        if (allMatches.length > 0) {
+        if (matches.length > 0) {
             setTimeout(() => scrollToCard(0), 300);
         }
     });
@@ -2349,23 +2429,23 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
     // AVVIO
     // ================================================================
 
+    filterMatchesByDate();
+
     const savedFontSize = parseInt(localStorage.getItem('fontSize')) || 2;
     applyFontSize(savedFontSize);
+
     applyTheme(currentTheme);
     updateClock();
+    populateFilter();
+    renderCards();
     setInterval(updateClock, 1000);
-
-    // Carica classifica e partite
-    loadStandings();
-    loadMatches();
-
-    // Ricarica ogni 5 minuti
     setInterval(() => {
-        loadStandings();
-        loadMatches();
-    }, 5 * 60 * 1000);
+        filterMatchesByDate();
+        populateFilter();
+        renderCards();
+    }, 60000);
 
-    if (allMatches.length > 0 && (currentTab || 'palinsesto') === 'analisi') {
+    if (matches.length > 0 && currentTab === 'analisi') {
         renderAnalisiAI(0);
     }
 </script>
