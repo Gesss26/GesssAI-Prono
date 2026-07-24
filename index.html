@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Calcio Card - Statistiche Partite</title>
+    <!-- SheetJS per leggere file Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -862,6 +864,53 @@
             background: rgba(255,255,255,0.3);
         }
 
+        /* Style per l'upload Excel */
+        .file-upload-area {
+            background: var(--badge-bg);
+            border: 2px dashed var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin: 8px 0 12px;
+            transition: 0.3s;
+        }
+        .file-upload-area.dragover {
+            border-color: var(--tab-active);
+            background: var(--section-bg);
+        }
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+        .file-upload-area .upload-label {
+            display: inline-block;
+            background: var(--tab-active);
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .file-upload-area .upload-label:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+        .file-upload-area .file-name {
+            display: block;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .file-upload-area .file-status {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .file-upload-area .file-status.success { color: #22c55e; }
+        .file-upload-area .file-status.error { color: #ef4444; }
+
         @media (max-width: 480px) {
             .top-bar { flex-direction: column; align-items: stretch; gap: 8px; }
             .datetime { justify-content: space-between; }
@@ -946,6 +995,19 @@
     <div class="ai-container">
         <h3 style="font-size:1rem;margin-bottom:12px;color:var(--text-primary);">⚙️ Impostazioni</h3>
 
+        <!-- CARICAMENTO FILE EXCEL -->
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">📂 Carica Dati da Excel (Prono.xlsx)</label>
+        <div class="file-upload-area" id="fileDropArea">
+            <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:10px;">Trascina qui il file <strong>Prono.xlsx</strong> o clicca per selezionarlo</p>
+            <label class="upload-label" for="excelFileInput">📁 Scegli File</label>
+            <input type="file" id="excelFileInput" accept=".xlsx,.xls">
+            <span class="file-name" id="fileNameDisplay">Nessun file caricato</span>
+            <span class="file-status" id="fileStatusDisplay"></span>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:12px;">
+            ℹ️ Il file Excel deve contenere fogli: <strong>Partite</strong>, <strong>Classifica</strong> e <strong>MappaCitta</strong>
+        </div>
+
         <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">Tema</label>
         <div style="display:flex;gap:12px;margin-bottom:16px;">
             <button id="themeDark" class="tab-btn active" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-weight:600;cursor:pointer;">🌙 Scuro</button>
@@ -992,10 +1054,10 @@
 
 <script>
     // ================================================================
-    // DATI REALI
+    // DATI REALI (di default)
     // ================================================================
 
-    const matchesData = [
+    let matchesData = [
         // Europa League - 23 LUGLIO 2026
         { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Molde', ospite: 'Legia Warszawa' },
         { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Slavia Praha', ospite: 'Fenerbahçe' },
@@ -1080,7 +1142,7 @@
     ];
 
     // --------------------- CLASSIFICA COMPLETA ---------------------
-    const standings = [
+    let standings = [
         // Allsvenskan
         { campionato: 'Allsvenskan', squadra: 'Sirius', pos: 1, punti: 32, pg: 12, v: 10, p: 2, s: 0, gf: 33, gs: 15, diff: 18, xg: 28.5, forma: 'W W W D W' },
         { campionato: 'Allsvenskan', squadra: 'Hammarby', pos: 2, punti: 23, pg: 12, v: 7, p: 2, s: 3, gf: 28, gs: 14, diff: 14, xg: 24.2, forma: 'L L L W W' },
@@ -1202,7 +1264,7 @@
     ];
 
     // --------------------- MAPPATURA SQUADRA -> CITTÀ ---------------------
-    const teamCityMap = {
+    let teamCityMap = {
         'AIK Stockholm': 'Stockholm', 'BK Häcken': 'Gothenburg', 'Brommapojkarna': 'Stockholm',
         'Degerfors': 'Degerfors', 'Djurgården': 'Stockholm', 'Elfsborg': 'Borås',
         'GAIS': 'Gothenburg', 'Göteborg': 'Gothenburg', 'Halmstad': 'Halmstad',
@@ -1244,6 +1306,163 @@
         'Zrinjski Mostar': 'Mostar', 'Ludogorets': 'Razgrad', 'Baník Ostrava': 'Ostrava',
         'Dinamo Minsk': 'Minsk',
     };
+
+    // ================================================================
+    // FUNZIONI PER LEGGERE EXCEL
+    // ================================================================
+
+    function readExcelFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                let partiteLoaded = false;
+                let classificaLoaded = false;
+                let mappaLoaded = false;
+
+                // Leggi foglio "Partite"
+                if (workbook.SheetNames.includes('Partite')) {
+                    const sheet = workbook.Sheets['Partite'];
+                    const json = XLSX.utils.sheet_to_json(sheet);
+                    if (json && json.length > 0) {
+                        matchesData = json.map(row => ({
+                            campionato: String(row.Campionato || row.campionato || ''),
+                            giornata: row.Giornata || row.giornata || '',
+                            data: String(row.Data || row.data || ''),
+                            ora: String(row.Ora || row.ora || ''),
+                            casa: String(row.Casa || row.casa || ''),
+                            ospite: String(row.Ospite || row.ospite || '')
+                        }));
+                        partiteLoaded = true;
+                        console.log('✅ Partite caricate:', matchesData.length);
+                    }
+                }
+
+                // Leggi foglio "Classifica"
+                if (workbook.SheetNames.includes('Classifica')) {
+                    const sheet = workbook.Sheets['Classifica'];
+                    const json = XLSX.utils.sheet_to_json(sheet);
+                    if (json && json.length > 0) {
+                        standings = json.map(row => ({
+                            campionato: String(row.Campionato || row.campionato || ''),
+                            squadra: String(row.Squadra || row.squadra || ''),
+                            pos: parseInt(row.Pos || row.pos) || 0,
+                            punti: parseInt(row.Punti || row.punti) || 0,
+                            pg: parseInt(row.PG || row.pg) || 0,
+                            v: parseInt(row.V || row.v) || 0,
+                            p: parseInt(row.P || row.p) || 0,
+                            s: parseInt(row.S || row.s) || 0,
+                            gf: parseInt(row.GF || row.gf) || 0,
+                            gs: parseInt(row.GS || row.gs) || 0,
+                            diff: parseInt(row.Diff || row.diff) || 0,
+                            xg: parseFloat(row.xG || row.xg) || 0,
+                            forma: String(row.Forma || row.forma || '')
+                        }));
+                        classificaLoaded = true;
+                        console.log('✅ Classifica caricata:', standings.length);
+                    }
+                }
+
+                // Leggi foglio "MappaCitta"
+                if (workbook.SheetNames.includes('MappaCitta')) {
+                    const sheet = workbook.Sheets['MappaCitta'];
+                    const json = XLSX.utils.sheet_to_json(sheet);
+                    if (json && json.length > 0) {
+                        const newMap = {};
+                        json.forEach(row => {
+                            const squadra = String(row.Squadra || row.squadra || '').trim();
+                            const citta = String(row.Citta || row.citta || '').trim();
+                            if (squadra && citta) {
+                                newMap[squadra] = citta;
+                            }
+                        });
+                        if (Object.keys(newMap).length > 0) {
+                            teamCityMap = newMap;
+                            mappaLoaded = true;
+                            console.log('✅ Mappa città caricata:', Object.keys(teamCityMap).length);
+                        }
+                    }
+                }
+
+                // Aggiorna UI
+                const statusDisplay = document.getElementById('fileStatusDisplay');
+                if (partiteLoaded || classificaLoaded || mappaLoaded) {
+                    let msg = '✅ File caricato con successo! ';
+                    if (partiteLoaded) msg += `📋 ${matchesData.length} partite, `;
+                    if (classificaLoaded) msg += `📊 ${standings.length} righe classifica, `;
+                    if (mappaLoaded) msg += `🗺️ ${Object.keys(teamCityMap).length} città`;
+                    statusDisplay.textContent = msg;
+                    statusDisplay.className = 'file-status success';
+                    
+                    // Ricarica i dati
+                    filterMatchesByDate();
+                    populateFilter();
+                    renderCards();
+                    if (currentTab === 'analisi' && matches.length > 0) {
+                        renderAnalisiAI(currentMatchIndex, true);
+                    }
+                } else {
+                    statusDisplay.textContent = '❌ Nessun dato valido trovato nel file. Verifica i nomi dei fogli.';
+                    statusDisplay.className = 'file-status error';
+                }
+            } catch (error) {
+                console.error('Errore lettura Excel:', error);
+                const statusDisplay = document.getElementById('fileStatusDisplay');
+                statusDisplay.textContent = '❌ Errore durante la lettura del file: ' + error.message;
+                statusDisplay.className = 'file-status error';
+            }
+        };
+        reader.onerror = function() {
+            const statusDisplay = document.getElementById('fileStatusDisplay');
+            statusDisplay.textContent = '❌ Errore durante la lettura del file';
+            statusDisplay.className = 'file-status error';
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // ================================================================
+    // HANDLER UPLOAD EXCEL
+    // ================================================================
+
+    const fileInput = document.getElementById('excelFileInput');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const fileDropArea = document.getElementById('fileDropArea');
+
+    fileInput.addEventListener('change', function(e) {
+        const file = this.files[0];
+        if (file) {
+            fileNameDisplay.textContent = '📄 ' + file.name;
+            readExcelFile(file);
+        }
+    });
+
+    // Drag & Drop
+    fileDropArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+
+    fileDropArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+
+    fileDropArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+            fileNameDisplay.textContent = '📄 ' + file.name;
+            fileInput.files = e.dataTransfer.files;
+            readExcelFile(file);
+        } else {
+            const statusDisplay = document.getElementById('fileStatusDisplay');
+            statusDisplay.textContent = '❌ Per favore carica un file Excel (.xlsx o .xls)';
+            statusDisplay.className = 'file-status error';
+        }
+    });
 
     // ================================================================
     // FUNZIONI STATISTICHE
@@ -1425,7 +1644,7 @@
     }
 
     // ================================================================
-    // RENDER PALINSESTO (con layout percentuali a 2 righe)
+    // RENDER PALINSESTO
     // ================================================================
 
     function getFilteredMatches() {
@@ -1451,7 +1670,7 @@
             const homeStats = getTeamStats(match.campionato, match.casa);
             const awayStats = getTeamStats(match.campionato, match.ospite);
             
-            // CALCOLO PERCENTUALI 1X2 CORRETTO (somma = 100%)
+            // CALCOLO PERCENTUALI 1X2
             const perc = getWinPercentages(homeStats, awayStats);
             const homePerc = perc.home;
             const drawPerc = perc.draw;
@@ -1470,7 +1689,6 @@
             const homeBestLabel = homeBest === homeMulti.p02 ? '(0-2)' : homeBest === homeMulti.p13 ? '(1-3)' : '(2-5)';
             const awayBestLabel = awayBest === awayMulti.p02 ? '(0-2)' : awayBest === awayMulti.p13 ? '(1-3)' : '(2-5)';
             
-            // Differenza percentuali per la freccia
             const diff = homePerc - awayPerc;
             const diffAbs = Math.abs(diff);
             const diffLabel = diffAbs + '%';
@@ -1694,7 +1912,6 @@
 
         const sicurezza = Math.min(100, Math.round(pronPerc + 10));
 
-        // Genera i quadratini colorati per lo stato forma nel report
         function getFormaBoxes(forma) {
             if (!forma || forma === '') {
                 return '⬜⬜⬜⬜⬜';
@@ -1901,7 +2118,6 @@
         const overlay = document.getElementById('phoneSimulator');
         const content = document.getElementById('phoneContent');
         
-        // Clona il contenuto principale nella simulazione
         const mainContent = document.querySelector('.tab-content.active');
         if (mainContent) {
             content.innerHTML = mainContent.innerHTML;
@@ -1948,7 +2164,6 @@
         const awayStats = getTeamStats(match.campionato, match.ospite);
         const homeCity = teamCityMap[match.casa] || match.casa;
 
-        // Box forma
         const homeFormaBoxes = homeStats.forma ? homeStats.forma.split(' ').map(c => {
             const letter = c === 'W' ? 'V' : c === 'D' ? 'P' : c === 'L' ? 'S' : '-';
             return `<span class="forma-box-small ${letter}">${letter}</span>`;
@@ -1959,7 +2174,6 @@
             return `<span class="forma-box-small ${letter}">${letter}</span>`;
         }).join('') : '<span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span>';
 
-        // Classifica
         const allStandings = standings.filter(s => s.campionato === match.campionato);
         allStandings.sort((a, b) => (parseInt(b.punti) || 0) - (parseInt(a.punti) || 0));
         
@@ -2004,7 +2218,6 @@
 
         const stats = generateStatsForPrompt(match);
 
-        // HTML base
         let htmlContent = `
             <div class="ai-container">
                 <div class="ai-header">
@@ -2069,7 +2282,6 @@
 
         container.innerHTML = htmlContent;
 
-        // Meteo
         const weatherKey = localStorage.getItem('weatherApiKey') || 'd8df501134ef44eab6515526262007';
         let weatherTemp = '--°C', weatherDesc = '--', weatherIcon = '🌤️';
         try {
@@ -2089,22 +2301,16 @@
         document.getElementById('weatherDesc').textContent = weatherDesc;
         document.querySelector('#weatherDisplay .weather-icon').textContent = weatherIcon;
 
-        // ================================================================
-        // CHIAMATA GROQ
-        // ================================================================
-
         const groqKey = localStorage.getItem('groqApiKey') || '';
         const groqModel = localStorage.getItem('groqModel') || 'llama-3.1-8b-instant';
         let reportHtml = '';
         let groqSuccess = false;
         let groqError = '';
 
-        // Se non c'è una chiave API, usa subito il fallback
         if (!groqKey) {
             groqError = 'Nessuna API Key configurata';
             console.log('🔄 Nessuna API Key, uso fallback');
         } else {
-            // Costruisci il prompt per GROQ
             const prompt = `Sei un analista sportivo professionista specializzato in statistica calcistica. Analizza questa partita:
 
 CAMPIONATO: ${match.campionato}
@@ -2159,7 +2365,6 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
             }
         }
 
-        // Fallback se GROQ fallisce
         if (!groqSuccess) {
             console.log('🔄 Uso fallback locale');
             const fallbackReport = generateFallbackReport(match, stats);
@@ -2176,7 +2381,6 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
                 `;
             }
             
-            // Aggiungi avviso se GROQ ha fallito
             if (groqError) {
                 reportHtml = `
                 <div style="padding:10px;background:var(--red);color:#fff;border-radius:8px;margin-bottom:10px;font-size:0.85rem;">
@@ -2198,7 +2402,6 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
             `;
         }
 
-        // Ripristina il bottone
         const btn = document.getElementById('rigeneraBtn');
         if (btn) {
             btn.innerHTML = '🔄 Rigenera Pronostico';
@@ -2362,7 +2565,6 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
         applyFontSize(level);
     });
 
-    // Test GROQ
     document.getElementById('testGroqBtn').addEventListener('click', testGroqConnection);
 
     document.getElementById('saveSettings').addEventListener('click', () => {
@@ -2378,7 +2580,6 @@ Usa solo i dati forniti. Arrotonda le percentuali.`;
         }
     });
 
-    // Carica impostazioni
     document.getElementById('groqKey').value = localStorage.getItem('groqApiKey') || '';
     document.getElementById('groqModel').value = localStorage.getItem('groqModel') || 'llama-3.1-8b-instant';
     document.getElementById('weatherKey').value = localStorage.getItem('weatherApiKey') || 'd8df501134ef44eab6515526262007';
