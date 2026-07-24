@@ -1,341 +1,2453 @@
-import os
-import time
-import sys
-import re
-from datetime import datetime
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-import pandas as pd
-from io import StringIO
-from openpyxl import load_workbook
-from openpyxl.utils.dataframe import dataframe_to_rows
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Calcio Card - Statistiche Partite</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --badge-bg: #2d3a4f;
+            --stat-bg: #2d3a4f;
+            --footer-bg: #1e2a3a;
+            --shadow: rgba(0,0,0,0.4);
+            --form-bg: #1e293b;
+            --diff-bg: #1e2a3a;
+            --score-bg: #1e2a3a;
+            --tab-active: #3b82f6;
+            --tab-inactive: #334155;
+            --home-btn: #f59e0b;
+            --section-bg: #1a2744;
+            --pronostico-bg: #1e3a5f;
+            --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #eab308;
+            --font-size-base: 16px;
+            --select-bg: #1e293b;
+            --select-border: #334155;
+            --gold: #facc15;
+            --gold-dark: #d4a800;
+        }
+        body.light {
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --badge-bg: #e9edf4;
+            --stat-bg: #f1f5f9;
+            --footer-bg: #f1f5f9;
+            --shadow: rgba(0,0,0,0.08);
+            --form-bg: #f1f5f9;
+            --diff-bg: #f1f5f9;
+            --score-bg: #f1f5f9;
+            --tab-inactive: #cbd5e1;
+            --home-btn: #d97706;
+            --section-bg: #f1f5f9;
+            --pronostico-bg: #dbeafe;
+            --select-bg: #ffffff;
+            --select-border: #e2e8f0;
+        }
+        body {
+            background: var(--bg);
+            padding: 0 12px 80px;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+            color: var(--text-primary);
+            touch-action: pan-y;
+            font-size: var(--font-size-base);
+        }
 
-# ==========================================
-# CONFIGURAZIONE
-# ==========================================
-CARTELLA_SITI = r"C:\scaricati\ai\siti"
-FILE_LOG = r"C:\scaricati\ai\refresh_log.txt"
-FILE_EXCEL_CLASSIFICA = r"C:\scaricati\ai\classifica.xlsx"
-FILE_EXCEL_RISULTATI = r"C:\scaricati\ai\risultati.xlsx"
-FILE_EXCEL_PRONO = r"C:\scaricati\ai\GesssAI-Excel.prono.xlsx"
+        .font-sm { --font-size-base: 16.25px; }
+        .font-md { --font-size-base: 20px; }
+        .font-lg { --font-size-base: 23.75px; }
+        .font-xl { --font-size-base: 27.5px; }
 
-# Lista dei campionati con URL diretti
-CAMPIONATI = [
-    {"nome": "Finlandia", "url_cla": "https://it.soccerway.com/finlandia/veikkausliiga/classifiche/h6IND07k/classifiche/generale/", "url_ris": "https://it.soccerway.com/finlandia/veikkausliiga/risultati/"},
-    {"nome": "Norvegia", "url_cla": "https://it.soccerway.com/norvegia/eliteserien/classifiche/WhRleNrH/classifiche/generale/", "url_ris": "https://it.soccerway.com/norvegia/eliteserien/risultati/"},
-    {"nome": "Svezia", "url_cla": "https://it.soccerway.com/svezia/allsvenskan/classifiche/ltrtRhko/classifiche/generale/", "url_ris": "https://it.soccerway.com/svezia/allsvenskan/risultati/"},
-    {"nome": "Danimarca", "url_cla": "https://it.soccerway.com/danimarca/superliga/classifiche/b3gDmFWi/classifiche/generale/", "url_ris": "https://it.soccerway.com/danimarca/superliga/risultati/"},
-    {"nome": "Russia", "url_cla": "https://it.soccerway.com/russia/premier-league/classifiche/d8WbLTwp/classifiche/generale/", "url_ris": "https://it.soccerway.com/russia/premier-league/risultati/"},
-    {"nome": "Corea del Sud", "url_cla": "https://it.soccerway.com/sud-corea/k-league-1/classifiche/6FsHJk9l/classifiche/generale/", "url_ris": "https://it.soccerway.com/sud-corea/k-league-1/risultati/"},
-    {"nome": "Giappone", "url_cla": "https://it.soccerway.com/giappone/j1-league/classifiche/Eucp02cS/classifiche/generale/", "url_ris": "https://it.soccerway.com/giappone/j1-league/risultati/"},
-    {"nome": "Irlanda", "url_cla": "https://it.soccerway.com/irlanda/premier-division/classifiche/dKrDn2kS/classifiche/generale/", "url_ris": "https://it.soccerway.com/irlanda/premier-division/risultati/"},
-    {"nome": "Cina", "url_cla": "https://it.soccerway.com/cina/super-league/classifiche/6qZmcKtB/classifiche/generale/", "url_ris": "https://it.soccerway.com/cina/super-league/risultati/"},
-    {"nome": "Italia", "url_cla": "https://it.soccerway.com/italia/serie-a/classifiche/CfujcOgK/classifiche/generale/", "url_ris": "https://it.soccerway.com/italia/serie-a/risultati/"},
-    {"nome": "Francia", "url_cla": "https://it.soccerway.com/francia/ligue-1/classifiche/CQF28KxR/classifiche/generale/", "url_ris": "https://it.soccerway.com/francia/ligue-1/risultati/"},
-    {"nome": "Germania", "url_cla": "https://it.soccerway.com/germania/bundesliga/classifiche/jg0MwVuC/classifiche/generale/", "url_ris": "https://it.soccerway.com/germania/bundesliga/risultati/"},
-    {"nome": "Spagna", "url_cla": "https://it.soccerway.com/spagna/laliga/classifiche/dWdJXP6U/classifiche/generale/", "url_ris": "https://it.soccerway.com/spagna/laliga/risultati/"},
-    {"nome": "Inghilterra", "url_cla": "https://it.soccerway.com/inghilterra/premier-league/classifiche/CfoA8Dmm/classifiche/generale/", "url_ris": "https://it.soccerway.com/inghilterra/premier-league/risultati/"},
-    {"nome": "Champions League", "url_cla": "https://it.soccerway.com/europa/champions-league/classifiche/KxAaL5od/tabellone/", "url_ris": "https://it.soccerway.com/europa/champions-league/risultati/"},
-    {"nome": "Europa League", "url_cla": "https://it.soccerway.com/europa/europa-league/classifiche/KIJXR4kC/tabellone/", "url_ris": "https://it.soccerway.com/europa/europa-league/risultati/"}
-]
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 4px 12px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 6px;
+            position: sticky;
+            top: 0;
+            background: var(--bg);
+            z-index: 10;
+            transition: background 0.3s;
+        }
+        .datetime {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .datetime .date { font-weight: 600; color: var(--text-primary); }
+        .datetime .time { background: var(--badge-bg); padding: 3px 12px; border-radius: 30px; font-size: 0.8rem; font-weight: 500; }
 
-# ==========================================
-# FUNZIONI DI LOG
-# ==========================================
-def log(messaggio):
-    with open(FILE_LOG, "a", encoding="utf-8") as f:
-        f.write(f"{messaggio}\n")
-    print(messaggio)
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--badge-bg);
+            border-radius: 30px;
+            padding: 3px;
+            flex-shrink: 0;
+        }
+        .tab-btn {
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            background: var(--tab-active);
+            color: #fff;
+        }
+        .tab-btn:hover:not(.active) { background: var(--tab-inactive); color: var(--text-primary); }
 
-# ==========================================
-# FUNZIONE PER LEGGERE I DATI DA PRONO.XLSX
-# ==========================================
-def leggi_dati_prono():
-    """
-    Legge i dati dal file Prono.xlsx e restituisce un dizionario
-    con le informazioni utili per l'aggiornamento
-    """
-    try:
-        if not os.path.exists(FILE_EXCEL_PRONO):
-            log(f"⚠️ File Prono.xlsx non trovato in {FILE_EXCEL_PRONO}")
-            return None
-        
-        # Leggi il file Excel
-        df_prono = pd.read_excel(FILE_EXCEL_PRONO, sheet_name=None)
-        
-        log(f"✅ File Prono.xlsx caricato con {len(df_prono)} fogli")
-        
-        # Mostra i nomi dei fogli disponibili
-        for nome_foglio in df_prono.keys():
-            log(f"   - Foglio: {nome_foglio} ({len(df_prono[nome_foglio])} righe)")
-        
-        # Cerca il foglio principale (di solito il primo o chiamato "Prono" o "Dati")
-        foglio_principale = None
-        for nome in ['Prono', 'Dati', 'Sheet1', 'Foglio1']:
-            if nome in df_prono:
-                foglio_principale = nome
-                break
-        
-        if foglio_principale is None:
-            # Usa il primo foglio disponibile
-            foglio_principale = list(df_prono.keys())[0]
-        
-        df = df_prono[foglio_principale]
-        log(f"📊 Usando foglio: {foglio_principale} ({len(df)} righe)")
-        
-        return df
-        
-    except Exception as e:
-        log(f"❌ Errore lettura Prono.xlsx: {e}")
-        return None
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active { display: block; }
 
-# ==========================================
-# FUNZIONE PER SALVARE PRESERVANDO LA FORMATTAZIONE
-# ==========================================
-def salva_con_formattazione(file_path, df, nome_foglio="Sheet"):
-    try:
-        if os.path.exists(file_path):
-            wb = load_workbook(file_path)
-            if nome_foglio in wb.sheetnames:
-                ws = wb[nome_foglio]
-            else:
-                ws = wb.create_sheet(nome_foglio)
-            
-            if ws.max_row > 1:
-                ws.delete_rows(2, ws.max_row - 1)
-                
-            for r_idx, row in enumerate(dataframe_to_rows(df, index=False, header=False), start=2):
-                for c_idx, value in enumerate(row, start=1):
-                    ws.cell(row=r_idx, column=c_idx, value=value)
-                    
-            wb.save(file_path)
-            log(f"    💾 File Excel aggiornato: {os.path.basename(file_path)}")
-        else:
-            with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-                df.to_excel(writer, sheet_name=nome_foglio, index=False)
-            log(f"    💾 File Excel creato: {os.path.basename(file_path)}")
-    except Exception as e:
-        log(f"    ❌ Errore salvataggio Excel: {e}")
+        @keyframes fadeIn {
+            from { opacity: 0.5; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-# ==========================================
-# FUNZIONE PER AGGIUNGERE DATI DA PRONO ALLE CLASSIFICHE
-# ==========================================
-def aggiungi_dati_prono_a_classifica(df_classifica, df_prono):
-    """
-    Aggiunge i dati di prono alle classifiche in base al campionato
-    """
-    if df_prono is None:
-        return df_classifica
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter-bar select {
+            background: var(--select-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--select-border);
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            outline: none;
+            min-width: 180px;
+            flex: 1;
+            max-width: 300px;
+        }
+        .filter-bar .count-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-top: 4px;
+            padding-bottom: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            box-shadow: 0 4px 16px var(--shadow);
+            padding: 16px 14px 18px;
+            border: 1px solid var(--card-border);
+            transition: 0.2s;
+            width: 100%;
+            cursor: pointer;
+            touch-action: pan-y;
+        }
+        .card:active { transform: scale(0.98); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding-bottom: 6px;
+            border-bottom: 1px dashed var(--card-border);
+            margin-bottom: 10px;
+        }
+        .card-header .campionato {
+            background: var(--badge-bg);
+            padding: 0 12px 0 8px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: inline-flex;
+            align-items: center;
+        }
+        .card-header .giornata { color: var(--text-secondary); font-weight: 500; }
+
+        .data-ora {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: var(--badge-bg);
+            padding: 5px 12px;
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .data-ora .today-badge { color: #22c55e; font-weight: 700; }
+        .data-ora .tomorrow-badge { color: #eab308; font-weight: 700; }
+        .data-ora .dayafter-badge { color: #60a5fa; font-weight: 700; }
+
+        .squadre {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 4px 0 8px;
+            color: var(--text-primary);
+        }
+        .squadre .vs { color: var(--text-secondary); font-weight: 400; font-size: 0.9rem; }
+
+        .forme {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 8px 0 4px;
+        }
+        .forma-badge {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            background: var(--form-bg);
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            color: var(--text-primary);
+            flex: 1;
+            justify-content: center;
+            min-height: 32px;
+            align-items: center;
+        }
+        .forma-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #000;
+            background: #6b7280;
+        }
+        .forma-box.V { background: #22c55e; }
+        .forma-box.P { background: #eab308; }
+        .forma-box.S { background: #ef4444; }
+        .forma-box.\- { background: #6b7280; color: #fff; }
+
+        .forma-score {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 2px 0 6px;
+        }
+        .forma-score .score {
+            background: var(--score-bg);
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            flex: 1;
+            text-align: center;
+        }
+        .forma-score .score .num { color: var(--text-primary); font-weight: 700; }
+
+        .diff-perc {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 0 6px;
+            background: var(--diff-bg);
+            border-radius: 30px;
+            margin: 2px 0 6px;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+        .diff-perc .diff-value {
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .diff-perc .diff-arrow {
+            font-size: 1rem;
+        }
+
+        .stat-perc {
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 30px;
+            text-align: center;
+            margin: 4px 0 8px;
+            background: var(--stat-bg);
+            color: var(--text-secondary);
+        }
+        .stat-perc .perc {
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .flag-red { background: #dc2626; color: #fff; }
+        .flag-neutral { background: #6b7280; color: #fff; }
+        .flag-green { background: #22c55e; color: #000; }
+        .flag-gold { background: #facc15; color: #000; font-weight: 700; }
+        .flag-bomb {
+            background: #facc15;
+            color: #000;
+            font-weight: 700;
+            animation: bombPulse 0.8s infinite alternate;
+            padding: 2px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        @keyframes bombPulse {
+            0% { transform: scale(1); box-shadow: 0 0 5px #facc15; }
+            100% { transform: scale(1.05); box-shadow: 0 0 20px #facc15; }
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-secondary);
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-row .stat-value { color: var(--text-primary); font-weight: 600; }
+
+        .multigol-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            padding: 2px 0;
+            color: var(--text-secondary);
+        }
+        .multigol-row .label { font-weight: 500; }
+        .multigol-row .value {
+            color: var(--text-primary);
+            font-weight: 600;
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .multigol-row .value .perc { padding: 0 6px; border-radius: 12px; }
+
+        .stat-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 6px;
+            margin-top: 10px;
+            background: var(--footer-bg);
+            padding: 8px 12px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        .stat-footer .footer-tag {
+            padding: 2px 12px;
+            border-radius: 40px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .stat-footer .footer-tag.flag-red { background: #dc2626; color: #fff; }
+        .stat-footer .footer-tag.flag-green { background: #22c55e; color: #000; }
+        .stat-footer .footer-tag.flag-gold { background: #facc15; color: #000; }
+        .stat-footer .footer-tag.flag-bomb {
+            background: #facc15;
+            color: #000;
+            font-weight: 700;
+            animation: bombPulse 0.8s infinite alternate;
+        }
+        .stat-footer .footer-tag.flag-neutral { background: #6b7280; color: #fff; }
+
+        .no-match {
+            text-align: center;
+            padding: 50px 16px;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            background: var(--card-bg);
+            border-radius: 30px;
+            border: 1px solid var(--card-border);
+        }
+
+        .ai-container {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 16px;
+            border: 1px solid var(--card-border);
+            margin-top: 4px;
+        }
+
+        .ai-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .ai-header .match-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .ai-header .match-league {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: var(--badge-bg);
+            padding: 4px 14px;
+            border-radius: 30px;
+        }
+
+        .ai-rigenera {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .ai-rigenera button {
+            background: var(--tab-active);
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ai-rigenera button:hover { transform: scale(1.02); opacity: 0.9; }
+        .ai-rigenera button:active { transform: scale(0.95); }
+        .ai-rigenera button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .ai-rigenera button .spinner-small {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .ai-weather {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--badge-bg);
+            padding: 12px 16px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .ai-weather .temp {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .ai-weather .city {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .ai-weather .desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .ai-weather .weather-icon {
+            font-size: 1.75rem;
+        }
+
+        .ai-section {
+            background: var(--section-bg);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--tab-active);
+        }
+        .ai-section .section-title {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ai-section .section-content {
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .ai-section .section-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            margin-top: 4px;
+        }
+        .ai-section .section-content table th {
+            text-align: left;
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 3px 5px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .ai-section .section-content table td {
+            padding: 3px 5px;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-primary);
+        }
+        .ai-section .section-content table tr.gold td {
+            background: var(--gold);
+            color: #000;
+            font-weight: 700;
+        }
+
+        .ai-forma-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 4px 0;
+            flex-wrap: wrap;
+        }
+        .ai-forma-row .team-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 80px;
+            font-size: 0.8rem;
+        }
+        .ai-forma-row .forma-box-small {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.65rem;
+            color: #000;
+            background: #6b7280;
+        }
+        .ai-forma-row .forma-box-small.V { background: #22c55e; }
+        .ai-forma-row .forma-box-small.P { background: #eab308; }
+        .ai-forma-row .forma-box-small.S { background: #ef4444; }
+        .ai-forma-row .forma-box-small.\- { background: #6b7280; color: #fff; }
+
+        .ai-pronostico {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .ai-pronostico .pron-box {
+            background: var(--pronostico-bg);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--card-border);
+        }
+        .ai-pronostico .pron-box .label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .ai-pronostico .pron-box .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
+        .ai-pronostico .pron-box .sub {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .ai-tips {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .ai-tips .tip-box {
+            background: var(--section-bg);
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid var(--card-border);
+            text-align: center;
+        }
+        .ai-tips .tip-box .tip-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .ai-tips .tip-box .tip-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 4px;
+        }
+
+        .ai-loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        .ai-loading .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--badge-bg);
+            border-top-color: var(--tab-active);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        .home-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--home-btn);
+            color: #000;
+            border: none;
+            font-size: 24px;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+        .home-btn:hover { transform: scale(1.1); }
+        .home-btn:active { transform: scale(0.9); }
+
+        .swipe-indicator {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            padding: 6px 0 2px;
+            opacity: 0.6;
+        }
+
+        .font-slider-container {
+            margin: 12px 0 8px;
+        }
+        .font-slider-container .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .font-slider-container input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 10px;
+            background: var(--badge-bg);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .font-slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--tab-active);
+            cursor: pointer;
+        }
+        .font-slider-container input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--tab-active);
+            cursor: pointer;
+            border: none;
+        }
+        .font-slider-container .font-size-display {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            padding: 4px 0;
+        }
+        .font-slider-container .font-size-example {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            padding: 4px 0 8px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 8px;
+        }
+        .font-slider-container .font-size-example span {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Pulsante Simula Telefono */
+        .simulate-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            color: #fff;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 99;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .simulate-btn:hover { transform: scale(1.1); }
+        .simulate-btn:active { transform: scale(0.9); }
+
+        /* MODAL SIMULAZIONE TELEFONO */
+        .phone-simulator-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .phone-simulator-overlay.active {
+            display: flex;
+        }
+        .phone-frame {
+            width: 390px;
+            max-width: 100%;
+            height: 844px;
+            max-height: 90vh;
+            background: #000;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            position: relative;
+            overflow: hidden;
+        }
+        .phone-frame .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 25px;
+            background: #000;
+            border-radius: 0 0 16px 16px;
+            z-index: 10;
+        }
+        .phone-frame .phone-content {
+            width: 100%;
+            height: 100%;
+            border-radius: 28px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: var(--bg);
+            padding: 10px 8px 20px;
+            scroll-behavior: smooth;
+        }
+        .phone-frame .phone-content::-webkit-scrollbar {
+            width: 3px;
+        }
+        .phone-frame .phone-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .phone-frame .phone-content::-webkit-scrollbar-thumb {
+            background: var(--tab-active);
+            border-radius: 10px;
+        }
+        .phone-close-btn {
+            position: absolute;
+            top: 30px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+        .phone-close-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        @media (max-width: 480px) {
+            .top-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+            .datetime { justify-content: space-between; }
+            .tabs { justify-content: center; }
+            .card { padding: 14px 12px; }
+            .squadre { font-size: 1rem; }
+            .forma-box { width: 22px; height: 22px; font-size: 0.65rem; }
+            .diff-perc { font-size: 0.7rem; gap: 12px; }
+            .stat-footer { font-size: 0.65rem; }
+            .ai-pronostico { grid-template-columns: 1fr 1fr 1fr; }
+            .ai-tips { grid-template-columns: 1fr; }
+            .home-btn { width: 48px; height: 48px; font-size: 20px; bottom: 16px; right: 16px; }
+            .ai-header .match-title { font-size: 1.05rem; }
+            .ai-weather .temp { font-size: 1.4rem; }
+            .filter-bar select { min-width: 120px; max-width: 100%; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .ai-section .section-content table { font-size: 0.6rem; }
+            .ai-section .section-content table th,
+            .ai-section .section-content table td { padding: 2px 3px; }
+            .simulate-btn { bottom: 80px; right: 10px; width: 42px; height: 42px; font-size: 16px; }
+            .phone-frame { width: 100%; height: 100%; max-height: 100vh; border-radius: 0; padding: 8px; }
+            .phone-frame .phone-content { border-radius: 0; }
+            .phone-frame .notch { display: none; }
+            .phone-close-btn { top: 10px; right: 10px; width: 32px; height: 32px; font-size: 18px; }
+        }
+        @media (max-width: 380px) {
+            .ai-pronostico { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- MODAL SIMULAZIONE TELEFONO -->
+<div class="phone-simulator-overlay" id="phoneSimulator">
+    <div class="phone-frame">
+        <div class="notch"></div>
+        <button class="phone-close-btn" onclick="closePhoneSimulator()">✕</button>
+        <div class="phone-content" id="phoneContent">
+            <!-- Il contenuto viene clonato qui -->
+        </div>
+    </div>
+</div>
+
+<div class="top-bar">
+    <div class="datetime">
+        <span class="date" id="currentDate"></span>
+        <span class="time" id="currentTime"></span>
+    </div>
+    <div class="tabs" id="tabContainer">
+        <button class="tab-btn active" data-tab="palinsesto">📋 Palinsesto</button>
+        <button class="tab-btn" data-tab="analisi">🧠 Analisi AI</button>
+        <button class="tab-btn" data-tab="impostazioni">⚙️ Impostazioni</button>
+    </div>
+</div>
+
+<!-- Pulsante Simula Telefono -->
+<button class="simulate-btn" id="simulateBtn" title="Simula schermo telefono">📱</button>
+
+<div class="tab-content active" id="tab-palinsesto">
+    <div class="swipe-indicator">⬅️ 👆 Scorri per navigare tra le partite 👇 ➡️</div>
     
-    try:
-        # Cerca di identificare le colonne di matching
-        # Di solito: colonna "Squadra" o "Team" o "Nome"
-        colonne_squadra = ['Squadra', 'Team', 'Nome', 'Squad', 'Club']
-        colonna_squadra = None
-        
-        for col in colonne_squadra:
-            if col in df_prono.columns:
-                colonna_squadra = col
-                break
-        
-        if colonna_squadra is None:
-            log("⚠️ Non trovate colonne di squadra nel file Prono")
-            return df_classifica
-        
-        # Cerca anche colonna "Campionato" o "League"
-        colonne_campionato = ['Campionato', 'League', 'Lega', 'Competizione']
-        colonna_campionato = None
-        
-        for col in colonne_campionato:
-            if col in df_prono.columns:
-                colonna_campionato = col
-                break
-        
-        # Unisci i dati
-        if colonna_campionato:
-            # Se c'è la colonna campionato, unisci per campionato e squadra
-            df_merged = df_classifica.merge(
-                df_prono[[colonna_campionato, colonna_squadra] + [c for c in df_prono.columns if c not in [colonna_campionato, colonna_squadra]]],
-                left_on=['Campionato', df_classifica.columns[2]],  # colonna squadra è la terza dopo Campionato e Data_Estrazione
-                right_on=[colonna_campionato, colonna_squadra],
-                how='left'
-            )
-            return df_merged
-        else:
-            # Unisci solo per squadra
-            df_merged = df_classifica.merge(
-                df_prono,
-                left_on=df_classifica.columns[2],  # colonna squadra
-                right_on=colonna_squadra,
-                how='left'
-            )
-            return df_merged
-            
-    except Exception as e:
-        log(f"⚠️ Errore nell'aggiunta dati prono: {e}")
-        return df_classifica
-
-# ==========================================
-# FUNZIONE PER SCARICARE PAGINE DA SOCCERWAY
-# ==========================================
-def scarica_pagine_soccerway(driver):
-    """Scarica le pagine HTML aggiornate e le salva nella cartella siti"""
-    log(f"\n🌐 INIZIO DOWNLOAD PAGINE DA SOCCERWAY...")
+    <div class="filter-bar">
+        <select id="campFilter">
+            <option value="all">📋 Tutti i Campionati</option>
+        </select>
+        <span class="count-label" id="matchCount">Partite: 0</span>
+    </div>
     
-    for camp in CAMPIONATI:
-        nome = camp['nome']
-        
-        # 1. Scarica Classifica
-        try:
-            driver.get(camp['url_cla'])
-            time.sleep(3)
-            html_content = driver.page_source
-            path_cla = os.path.join(CARTELLA_SITI, f"{nome}_Cla.html")
-            with open(path_cla, 'w', encoding='utf-8') as f:
-                f.write(html_content)
-            log(f"  ✅ Scaricata classifica: {nome}")
-        except Exception as e:
-            log(f"  ❌ Errore download classifica {nome}: {e}")
+    <div class="grid-cards" id="cardsContainer"></div>
+</div>
 
-        # 2. Scarica Risultati
-        try:
-            driver.get(camp['url_ris'])
-            time.sleep(3)
-            html_content = driver.page_source
-            path_ris = os.path.join(CARTELLA_SITI, f"{nome}_Ris.html")
-            with open(path_ris, 'w', encoding='utf-8') as f:
-                f.write(html_content)
-            log(f"  ✅ Scaricati risultati: {nome}")
-        except Exception as e:
-            log(f"  ❌ Errore download risultati {nome}: {e}")
+<div class="tab-content" id="tab-analisi">
+    <div id="aiContent">
+        <div class="ai-loading">
+            <div class="spinner"></div>
+            <p>Seleziona una partita per l'analisi AI</p>
+        </div>
+    </div>
+</div>
 
-# ==========================================
-# FUNZIONI DI ESTRAZIONE DATI (DALLOCALE)
-# ==========================================
-def estrai_classifica(driver, nome_file):
-    try:
-        campionato = nome_file.replace('_Cla.html', '').replace('_Cla.htm', '')
-        tables = driver.find_elements(By.TAG_NAME, "table")
-        for table in tables:
-            html_table = table.get_attribute('outerHTML')
-            if html_table:
-                dfs = pd.read_html(StringIO(html_table))
-                if dfs:
-                    df = dfs[0]
-                    cols = [str(c).lower() for c in df.columns]
-                    if any('pos' in c or 'squadra' in c or 'pt' in c for c in cols):
-                        df.dropna(how='all', inplace=True)
-                        df.insert(0, 'Campionato', campionato)
-                        return df
-        return None
-    except:
-        return None
+<div class="tab-content" id="tab-impostazioni">
+    <div class="ai-container">
+        <h3 style="font-size:1rem;margin-bottom:12px;color:var(--text-primary);">⚙️ Impostazioni</h3>
 
-def estrai_risultati(driver, nome_file):
-    try:
-        campionato = nome_file.replace('_Ris.html', '').replace('_Ris.htm', '')
-        tables = driver.find_elements(By.TAG_NAME, "table")
-        for table in tables:
-            html_table = table.get_attribute('outerHTML')
-            if html_table:
-                dfs = pd.read_html(StringIO(html_table))
-                if dfs:
-                    df = dfs[0]
-                    cols = [str(c).lower() for c in df.columns]
-                    if any('data' in c or 'casa' in c or 'ospite' in c for c in cols):
-                        df.dropna(how='all', inplace=True)
-                        df.insert(0, 'Campionato', campionato)
-                        return df
-        return None
-    except:
-        return None
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">Tema</label>
+        <div style="display:flex;gap:12px;margin-bottom:16px;">
+            <button id="themeDark" class="tab-btn active" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-weight:600;cursor:pointer;">🌙 Scuro</button>
+            <button id="themeLight" class="tab-btn" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-weight:600;cursor:pointer;">☀️ Chiaro</button>
+        </div>
 
-# ==========================================
-# FUNZIONE PRINCIPALE
-# ==========================================
-def main():
-    try:
-        log(f"\n{'='*50}")
-        log(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] INIZIO AGGIORNAMENTO COMPLETO")
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">Dimensione caratteri</label>
+        <div class="font-slider-container">
+            <div class="slider-label">
+                <span>🔤 Piccolo</span>
+                <span>🔤 Grande</span>
+            </div>
+            <input type="range" id="fontSizeSlider" min="1" max="4" step="1" value="2">
+            <div class="font-size-display" id="fontSizeDisplay">Medio (16px)</div>
+            <div class="font-size-example">Esempio: <span>Testo di prova</span> — <span style="font-weight:400;color:var(--text-secondary);">Tutte le scritte si ridimensionano</span></div>
+        </div>
+
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">GROQ API Key</label>
+        <input type="text" id="groqKey" placeholder="Inserisci API Key GROQ" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-size:0.85rem;outline:none;margin-bottom:4px;">
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:8px;">✅ API Key salvata localmente</div>
+
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">Modello GROQ</label>
+        <select id="groqModel" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-size:0.85rem;outline:none;margin-bottom:8px;">
+            <option value="llama3-8b-8192">🦙 Llama 3 8B</option>
+            <option value="llama3-70b-8192">🦙 Llama 3 70B</option>
+            <option value="mixtral-8x7b-32768">🧠 Mixtral 8x7B</option>
+            <option value="gemma-7b-it">🔵 Gemma 7B</option>
+            <option value="gemma2-9b-it">🔵 Gemma 2 9B</option>
+            <option value="llama-3.1-8b-instant" selected>🦙 Llama 3.1 8B</option>
+            <option value="llama-3.1-70b-versatile">🦙 Llama 3.1 70B</option>
+        </select>
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:12px;">✅ Modello salvato localmente</div>
+
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">World Weather Online API Key</label>
+        <input type="text" id="weatherKey" placeholder="Inserisci API Key Weather" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-size:0.85rem;outline:none;margin-bottom:4px;">
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:16px;">✅ API Key salvata localmente</div>
+
+        <button id="testGroqBtn" style="width:100%;padding:12px;border-radius:30px;border:none;background:#f59e0b;color:#000;font-weight:600;font-size:0.95rem;cursor:pointer;margin-bottom:8px;">🔍 Test Connessione GROQ</button>
+        <button id="saveSettings" style="width:100%;padding:12px;border-radius:30px;border:none;background:#3b82f6;color:#fff;font-weight:600;font-size:0.95rem;cursor:pointer;">💾 Salva Impostazioni</button>
+    </div>
+</div>
+
+<button class="home-btn" id="homeBtn" title="Torna all'inizio">🏠</button>
+
+<script>
+    // ================================================================
+    // DATI REALI
+    // ================================================================
+
+    const matchesData = [
+        // Europa League - 23 LUGLIO 2026
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Molde', ospite: 'Legia Warszawa' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Slavia Praha', ospite: 'Fenerbahçe' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Gent', ospite: 'AZ Alkmaar' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Sparta Praha', ospite: 'PAOK' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Anderlecht', ospite: 'Dinamo Minsk' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Maccabi Tel Aviv', ospite: 'Baník Ostrava' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Union Saint-Gilloise', ospite: 'Hajduk Split' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Austria Wien', ospite: 'Celtic' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Trabzonspor', ospite: 'Copenhagen' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Rijeka', ospite: 'Bodo/Glimt' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Ludogorets', ospite: 'Zrinjski Mostar' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '18:45', casa: 'Partizan', ospite: 'Rudar Pljevlja' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Roma', ospite: 'HJK Helsinki' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Lazio', ospite: 'Dinamo Zagreb' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Athletic Bilbao', ospite: 'Pafos' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Betis', ospite: 'Mladá Boleslav' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Olympiacos', ospite: 'Víkingur' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'FCSB', ospite: 'Viktoria Plzeň' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Rangers', ospite: 'KÍ' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Basel', ospite: 'Ferencváros' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Malmö', ospite: 'KAA Gent' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Bodø/Glimt', ospite: 'Rijeka' },
+        { campionato: 'Europa League', giornata: 'QR2 Andata', data: '2026-07-23', ora: '21:00', casa: 'Shamrock Rovers', ospite: 'Maccabi Haifa' },
+        // Allsvenskan
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-19', ora: '16:30', casa: 'Halmstad', ospite: 'BK Häcken' },
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-19', ora: '16:30', casa: 'Elfsborg', ospite: 'Sirius' },
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-19', ora: '16:30', casa: 'Hammarby', ospite: 'Degerfors' },
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-20', ora: '19:00', casa: 'Kalmar', ospite: 'Malmö' },
+        { campionato: 'Allsvenskan', giornata: 13, data: '2026-07-20', ora: '20:00', casa: 'Örgryte', ospite: 'Djurgården' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-24', ora: '19:00', casa: 'Västerås', ospite: 'Örgryte' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-25', ora: '15:00', casa: 'Degerfors', ospite: 'Djurgården' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-25', ora: '17:30', casa: 'Kalmar', ospite: 'Mjällby' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-26', ora: '14:00', casa: 'Sirius', ospite: 'Göteborg' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-26', ora: '14:00', casa: 'Brommapojkarna', ospite: 'Hammarby' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-26', ora: '16:30', casa: 'Malmö', ospite: 'Elfsborg' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-26', ora: '17:30', casa: 'GAIS', ospite: 'Halmstad' },
+        { campionato: 'Allsvenskan', giornata: 14, data: '2026-07-27', ora: '19:00', casa: 'BK Häcken', ospite: 'AIK Stockholm' },
+        // Austria Bundesliga
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-07-31', ora: '19:30', casa: 'LASK', ospite: 'Grazer AK' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-01', ora: '17:00', casa: 'WSG Tirol', ospite: 'Sturm Graz' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-01', ora: '19:30', casa: 'RB Salzburg', ospite: 'Hartberg' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-02', ora: '17:00', casa: 'Austria Lustenau', ospite: 'Ried' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-02', ora: '17:00', casa: 'RZ Pellets WAC', ospite: 'Austria Wien' },
+        { campionato: 'Austria Bundesliga', giornata: 1, data: '2026-08-02', ora: '19:00', casa: 'Rapid Wien', ospite: 'Rheindorf Altach' },
+        // Chinese Super League
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-25', ora: '17:30', casa: 'Qingdao Hainiu', ospite: 'Jinmen Tiger' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-25', ora: '19:35', casa: 'Shanghai Port', ospite: 'Shanghai Shen' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-25', ora: '19:35', casa: 'Shenyang Urban', ospite: 'Q. West Coast' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-26', ora: '19:00', casa: 'Yunnan Yukun', ospite: 'SZ Peng City' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-26', ora: '19:35', casa: 'SD Taishan', ospite: 'Henan' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-26', ora: '19:35', casa: 'Rongcheng', ospite: 'Beijing Guoan' },
+        { campionato: 'Chinese Super League', giornata: 20, data: '2026-07-26', ora: '20:00', casa: 'Zhejiang', ospite: 'Dalian Yingbo' },
+        // Veikkausliiga
+        { campionato: 'Veikkausliiga', giornata: 16, data: '2026-07-19', ora: '18:30', casa: 'FF Jaro', ospite: 'Inter Turku' },
+        { campionato: 'Veikkausliiga', giornata: 16, data: '2026-07-20', ora: '18:00', casa: 'TPS', ospite: 'Ilves' },
+        { campionato: 'Veikkausliiga', giornata: 16, data: '2026-07-20', ora: '19:00', casa: 'IFK Mariehamn', ospite: 'Lahti' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-24', ora: '19:00', casa: 'FF Jaro', ospite: 'SJK' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-25', ora: '16:30', casa: 'IFK Mariehamn', ospite: 'AC Oulu' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-25', ora: '17:00', casa: 'KuPS', ospite: 'VPS' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-26', ora: '15:00', casa: 'Ilves', ospite: 'Lahti' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-26', ora: '15:00', casa: 'Inter Turku', ospite: 'IF Gnistan' },
+        { campionato: 'Veikkausliiga', giornata: 17, data: '2026-07-26', ora: '17:00', casa: 'HJK Helsinki', ospite: 'TPS' },
+        // Ireland Premier Division
+        { campionato: 'Ireland Premier Division', giornata: 25, data: '2026-07-24', ora: '20:00', casa: 'St Patrick\'s', ospite: 'Dundalk FC' },
+        { campionato: 'Ireland Premier Division', giornata: 25, data: '2026-07-25', ora: '17:00', casa: 'Galway United', ospite: 'Waterford United' },
+        { campionato: 'Ireland Premier Division', giornata: 25, data: '2026-07-25', ora: '19:45', casa: 'Sligo Rovers', ospite: 'Drogheda United' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-07-31', ora: '19:45', casa: 'Dundalk FC', ospite: 'Sligo Rovers' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-07-31', ora: '20:00', casa: 'Drogheda United', ospite: 'Shamrock' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-08-02', ora: '15:00', casa: 'Waterford United', ospite: 'Shelbourne FC' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-08-02', ora: '17:00', casa: 'St Patrick\'s', ospite: 'Derry City' },
+        { campionato: 'Ireland Premier Division', giornata: 26, data: '2026-08-02', ora: '19:00', casa: 'Bohemian FC', ospite: 'Galway United' },
+        // K League 1
+        { campionato: 'K League 1', giornata: 18, data: '2026-07-19', ora: '19:30', casa: 'FC Anyang', ospite: 'Gwangju FC' },
+        { campionato: 'K League 1', giornata: 18, data: '2026-07-19', ora: '19:30', casa: 'Bucheon FC', ospite: 'FC Seoul' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-21', ora: '19:30', casa: 'Jeju United', ospite: 'Gangwon FC' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-21', ora: '19:30', casa: 'Ulsan HD', ospite: 'Incheon United' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-21', ora: '19:30', casa: 'Jeonbuk', ospite: 'Daejeon Hana' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-22', ora: '19:30', casa: 'FC Seoul', ospite: 'Pohang Steelers' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-22', ora: '19:30', casa: 'Gwangju FC', ospite: 'Sangmu' },
+        { campionato: 'K League 1', giornata: 19, data: '2026-07-22', ora: '19:30', casa: 'Bucheon FC', ospite: 'FC Anyang' },
+    ];
+
+    // --------------------- CLASSIFICA COMPLETA ---------------------
+    const standings = [
+        // Allsvenskan
+        { campionato: 'Allsvenskan', squadra: 'Sirius', pos: 1, punti: 32, pg: 12, v: 10, p: 2, s: 0, gf: 33, gs: 15, diff: 18, xg: 28.5, forma: 'W W W D W' },
+        { campionato: 'Allsvenskan', squadra: 'Hammarby', pos: 2, punti: 23, pg: 12, v: 7, p: 2, s: 3, gf: 28, gs: 14, diff: 14, xg: 24.2, forma: 'L L L W W' },
+        { campionato: 'Allsvenskan', squadra: 'AIK Stockholm', pos: 3, punti: 21, pg: 12, v: 6, p: 3, s: 3, gf: 18, gs: 18, diff: 0, xg: 16.8, forma: 'W L W W W' },
+        { campionato: 'Allsvenskan', squadra: 'BK Häcken', pos: 4, punti: 20, pg: 12, v: 6, p: 2, s: 4, gf: 25, gs: 22, diff: 3, xg: 22.1, forma: 'W D W L L' },
+        { campionato: 'Allsvenskan', squadra: 'Djurgården', pos: 5, punti: 19, pg: 12, v: 6, p: 1, s: 5, gf: 26, gs: 15, diff: 11, xg: 23.4, forma: 'W L L W W' },
+        { campionato: 'Allsvenskan', squadra: 'Malmö', pos: 6, punti: 19, pg: 12, v: 6, p: 1, s: 5, gf: 25, gs: 20, diff: 5, xg: 21.9, forma: 'L L W W W' },
+        { campionato: 'Allsvenskan', squadra: 'GAIS', pos: 7, punti: 19, pg: 12, v: 5, p: 4, s: 3, gf: 18, gs: 14, diff: 4, xg: 16.3, forma: 'L W D W L' },
+        { campionato: 'Allsvenskan', squadra: 'Västerås', pos: 8, punti: 19, pg: 12, v: 5, p: 4, s: 3, gf: 22, gs: 23, diff: -1, xg: 19.7, forma: 'W L W W D' },
+        { campionato: 'Allsvenskan', squadra: 'Elfsborg', pos: 9, punti: 18, pg: 12, v: 4, p: 6, s: 2, gf: 17, gs: 14, diff: 3, xg: 15.4, forma: 'D D D L L' },
+        { campionato: 'Allsvenskan', squadra: 'Mjällby', pos: 10, punti: 17, pg: 12, v: 4, p: 5, s: 3, gf: 19, gs: 17, diff: 2, xg: 17.2, forma: 'D D D L D' },
+        { campionato: 'Allsvenskan', squadra: 'Brommapojkarna', pos: 11, punti: 16, pg: 12, v: 4, p: 4, s: 4, gf: 18, gs: 21, diff: -3, xg: 15.9, forma: 'W D D L L' },
+        { campionato: 'Allsvenskan', squadra: 'Kalmar', pos: 12, punti: 13, pg: 12, v: 4, p: 1, s: 7, gf: 14, gs: 17, diff: -3, xg: 13.1, forma: 'L W L W L' },
+        { campionato: 'Allsvenskan', squadra: 'Göteborg', pos: 13, punti: 13, pg: 12, v: 3, p: 4, s: 5, gf: 16, gs: 29, diff: -13, xg: 14.2, forma: 'D W L L W' },
+        { campionato: 'Allsvenskan', squadra: 'Degerfors', pos: 14, punti: 10, pg: 12, v: 2, p: 4, s: 6, gf: 12, gs: 19, diff: -7, xg: 11.8, forma: 'D L D L L' },
+        { campionato: 'Allsvenskan', squadra: 'Örgryte', pos: 15, punti: 9, pg: 12, v: 2, p: 3, s: 7, gf: 14, gs: 31, diff: -17, xg: 12.7, forma: 'L L D L W' },
+        { campionato: 'Allsvenskan', squadra: 'Halmstad', pos: 16, punti: 6, pg: 12, v: 1, p: 3, s: 8, gf: 10, gs: 26, diff: -16, xg: 9.8, forma: 'D W L L L' },
+        // Chinese Super League
+        { campionato: 'Chinese Super League', squadra: 'Rongcheng', pos: 1, punti: 43, pg: 20, v: 12, p: 7, s: 1, gf: 39, gs: 18, diff: 21, xg: 35.6, forma: 'W W D D D' },
+        { campionato: 'Chinese Super League', squadra: 'SD Taishan', pos: 2, punti: 30, pg: 20, v: 9, p: 3, s: 8, gf: 35, gs: 34, diff: 1, xg: 31.2, forma: 'L W L W L' },
+        { campionato: 'Chinese Super League', squadra: 'Shanghai Shen', pos: 3, punti: 29, pg: 20, v: 8, p: 5, s: 7, gf: 36, gs: 29, diff: 7, xg: 32.8, forma: 'L D W W L' },
+        { campionato: 'Chinese Super League', squadra: 'Chongqing', pos: 4, punti: 29, pg: 20, v: 8, p: 5, s: 7, gf: 23, gs: 21, diff: 2, xg: 21.4, forma: 'L W L D D' },
+        { campionato: 'Chinese Super League', squadra: 'Dalian Yingbo', pos: 5, punti: 28, pg: 20, v: 8, p: 4, s: 8, gf: 28, gs: 32, diff: -4, xg: 25.9, forma: 'W L L W W' },
+        { campionato: 'Chinese Super League', squadra: 'Beijing Guoan', pos: 6, punti: 27, pg: 20, v: 8, p: 3, s: 9, gf: 30, gs: 24, diff: 6, xg: 27.5, forma: 'L W W W D' },
+        { campionato: 'Chinese Super League', squadra: 'Zhejiang', pos: 7, punti: 26, pg: 20, v: 7, p: 5, s: 8, gf: 27, gs: 32, diff: -5, xg: 24.8, forma: 'W L L W D' },
+        { campionato: 'Chinese Super League', squadra: 'Q. West Coast', pos: 8, punti: 25, pg: 20, v: 6, p: 7, s: 7, gf: 23, gs: 29, diff: -6, xg: 21.7, forma: 'D W W L D' },
+        { campionato: 'Chinese Super League', squadra: 'Yunnan Yukun', pos: 9, punti: 25, pg: 20, v: 6, p: 7, s: 7, gf: 36, gs: 35, diff: 1, xg: 32.4, forma: 'D L W L D' },
+        { campionato: 'Chinese Super League', squadra: 'Henan', pos: 10, punti: 24, pg: 20, v: 7, p: 3, s: 10, gf: 23, gs: 23, diff: 0, xg: 21.3, forma: 'W L L L W' },
+        { campionato: 'Chinese Super League', squadra: 'Shenyang Urban', pos: 11, punti: 21, pg: 20, v: 5, p: 6, s: 9, gf: 25, gs: 30, diff: -5, xg: 22.8, forma: 'W W L W D' },
+        { campionato: 'Chinese Super League', squadra: 'Shanghai Port', pos: 12, punti: 21, pg: 20, v: 5, p: 6, s: 9, gf: 28, gs: 26, diff: 2, xg: 25.1, forma: 'D L W L D' },
+        { campionato: 'Chinese Super League', squadra: 'Qingdao Hainiu', pos: 13, punti: 21, pg: 20, v: 6, p: 3, s: 11, gf: 30, gs: 36, diff: -6, xg: 27.3, forma: 'L W D L L' },
+        { campionato: 'Chinese Super League', squadra: 'Jinmen Tiger', pos: 14, punti: 21, pg: 20, v: 6, p: 3, s: 11, gf: 24, gs: 22, diff: 2, xg: 22.1, forma: 'D W L W W' },
+        { campionato: 'Chinese Super League', squadra: 'SZ Peng City', pos: 15, punti: 20, pg: 20, v: 5, p: 5, s: 10, gf: 25, gs: 33, diff: -8, xg: 22.6, forma: 'W L L W L' },
+        { campionato: 'Chinese Super League', squadra: 'Wuhan 3 Towns', pos: 16, punti: 16, pg: 20, v: 4, p: 4, s: 12, gf: 26, gs: 34, diff: -8, xg: 23.5, forma: 'D D L L W' },
+        // Veikkausliiga
+        { campionato: 'Veikkausliiga', squadra: 'KuPS', pos: 1, punti: 33, pg: 15, v: 10, p: 3, s: 2, gf: 29, gs: 15, diff: 14, xg: 26.3, forma: 'D W W W W' },
+        { campionato: 'Veikkausliiga', squadra: 'Inter Turku', pos: 2, punti: 30, pg: 15, v: 8, p: 6, s: 1, gf: 23, gs: 12, diff: 11, xg: 21.1, forma: 'D D D D W' },
+        { campionato: 'Veikkausliiga', squadra: 'VPS', pos: 3, punti: 27, pg: 15, v: 8, p: 3, s: 4, gf: 23, gs: 13, diff: 10, xg: 20.8, forma: 'W D W W L' },
+        { campionato: 'Veikkausliiga', squadra: 'AC Oulu', pos: 4, punti: 26, pg: 15, v: 7, p: 5, s: 3, gf: 20, gs: 20, diff: 0, xg: 18.4, forma: 'W L D L L' },
+        { campionato: 'Veikkausliiga', squadra: 'HJK Helsinki', pos: 5, punti: 25, pg: 15, v: 7, p: 4, s: 4, gf: 27, gs: 20, diff: 7, xg: 24.5, forma: 'D W L L W' },
+        { campionato: 'Veikkausliiga', squadra: 'IF Gnistan', pos: 6, punti: 25, pg: 15, v: 7, p: 4, s: 4, gf: 25, gs: 20, diff: 5, xg: 22.7, forma: 'D D L W W' },
+        { campionato: 'Veikkausliiga', squadra: 'TPS', pos: 7, punti: 22, pg: 15, v: 6, p: 4, s: 5, gf: 19, gs: 16, diff: 3, xg: 17.4, forma: 'L D W L W' },
+        { campionato: 'Veikkausliiga', squadra: 'Lahti', pos: 8, punti: 19, pg: 15, v: 5, p: 4, s: 6, gf: 18, gs: 15, diff: 3, xg: 16.5, forma: 'L D D W W' },
+        { campionato: 'Veikkausliiga', squadra: 'Ilves', pos: 9, punti: 16, pg: 15, v: 4, p: 4, s: 7, gf: 25, gs: 29, diff: -4, xg: 22.8, forma: 'W W L D L' },
+        { campionato: 'Veikkausliiga', squadra: 'SJK', pos: 10, punti: 14, pg: 15, v: 3, p: 5, s: 7, gf: 18, gs: 25, diff: -7, xg: 16.3, forma: 'D D W L L' },
+        { campionato: 'Veikkausliiga', squadra: 'FF Jaro', pos: 11, punti: 11, pg: 15, v: 3, p: 2, s: 10, gf: 15, gs: 32, diff: -17, xg: 13.8, forma: 'L L D L W' },
+        { campionato: 'Veikkausliiga', squadra: 'IFK Mariehamn', pos: 12, punti: 4, pg: 15, v: 1, p: 1, s: 13, gf: 8, gs: 33, diff: -25, xg: 7.8, forma: 'L L L L L' },
+        // Ireland Premier Division
+        { campionato: 'Ireland Premier Division', squadra: 'Shamrock', pos: 1, punti: 50, pg: 24, v: 15, p: 5, s: 4, gf: 40, gs: 22, diff: 18, xg: 36.7, forma: 'L W D W W' },
+        { campionato: 'Ireland Premier Division', squadra: 'Bohemian FC', pos: 2, punti: 43, pg: 24, v: 13, p: 4, s: 7, gf: 40, gs: 27, diff: 13, xg: 36.2, forma: 'L L W W W' },
+        { campionato: 'Ireland Premier Division', squadra: 'St Patrick\'s', pos: 3, punti: 42, pg: 24, v: 12, p: 6, s: 6, gf: 39, gs: 20, diff: 19, xg: 35.8, forma: 'W W L W D' },
+        { campionato: 'Ireland Premier Division', squadra: 'Dundalk FC', pos: 4, punti: 35, pg: 24, v: 10, p: 5, s: 9, gf: 38, gs: 36, diff: 2, xg: 34.5, forma: 'W W L L L' },
+        { campionato: 'Ireland Premier Division', squadra: 'Shelbourne FC', pos: 5, punti: 34, pg: 24, v: 9, p: 7, s: 8, gf: 35, gs: 35, diff: 0, xg: 32.1, forma: 'W D L D W' },
+        { campionato: 'Ireland Premier Division', squadra: 'Derry City', pos: 6, punti: 29, pg: 24, v: 8, p: 5, s: 11, gf: 32, gs: 31, diff: 1, xg: 29.4, forma: 'W L D W L' },
+        { campionato: 'Ireland Premier Division', squadra: 'Galway United', pos: 7, punti: 27, pg: 24, v: 8, p: 3, s: 13, gf: 32, gs: 39, diff: -7, xg: 29.1, forma: 'L W L L W' },
+        { campionato: 'Ireland Premier Division', squadra: 'Drogheda United', pos: 8, punti: 25, pg: 24, v: 7, p: 4, s: 13, gf: 29, gs: 41, diff: -12, xg: 26.4, forma: 'L D L L W' },
+        { campionato: 'Ireland Premier Division', squadra: 'Waterford United', pos: 9, punti: 21, pg: 24, v: 6, p: 3, s: 15, gf: 33, gs: 47, diff: -14, xg: 29.8, forma: 'W L W W D' },
+        { campionato: 'Ireland Premier Division', squadra: 'Sligo Rovers', pos: 10, punti: 20, pg: 24, v: 5, p: 5, s: 14, gf: 20, gs: 40, diff: -20, xg: 18.5, forma: 'L L D L L' },
+        // K League 1
+        { campionato: 'K League 1', squadra: 'FC Seoul', pos: 1, punti: 36, pg: 18, v: 10, p: 6, s: 2, gf: 28, gs: 12, diff: 16, xg: 25.8, forma: 'L W W W D' },
+        { campionato: 'K League 1', squadra: 'Gangwon FC', pos: 2, punti: 31, pg: 18, v: 9, p: 4, s: 5, gf: 23, gs: 11, diff: 12, xg: 21.3, forma: 'W W W D W' },
+        { campionato: 'K League 1', squadra: 'Jeonbuk', pos: 3, punti: 29, pg: 18, v: 8, p: 5, s: 5, gf: 25, gs: 16, diff: 9, xg: 22.9, forma: 'D W L W L' },
+        { campionato: 'K League 1', squadra: 'Ulsan HD', pos: 4, punti: 28, pg: 18, v: 8, p: 4, s: 6, gf: 26, gs: 26, diff: 0, xg: 23.7, forma: 'W L D L D' },
+        { campionato: 'K League 1', squadra: 'Pohang Steelers', pos: 5, punti: 28, pg: 18, v: 8, p: 4, s: 6, gf: 19, gs: 16, diff: 3, xg: 17.5, forma: 'W L W W L' },
+        { campionato: 'K League 1', squadra: 'Incheon United', pos: 6, punti: 24, pg: 18, v: 7, p: 3, s: 8, gf: 22, gs: 19, diff: 3, xg: 20.2, forma: 'L W L L W' },
+        { campionato: 'K League 1', squadra: 'FC Anyang', pos: 7, punti: 23, pg: 18, v: 6, p: 5, s: 7, gf: 22, gs: 19, diff: 3, xg: 20.1, forma: 'D D W L W' },
+        { campionato: 'K League 1', squadra: 'Jeju United', pos: 8, punti: 23, pg: 18, v: 6, p: 5, s: 7, gf: 16, gs: 18, diff: -2, xg: 14.8, forma: 'L L D D W' },
+        { campionato: 'K League 1', squadra: 'Daejeon Hana', pos: 9, punti: 19, pg: 18, v: 4, p: 7, s: 7, gf: 21, gs: 20, diff: 1, xg: 19.3, forma: 'L L D D D' },
+        { campionato: 'K League 1', squadra: 'Bucheon FC', pos: 10, punti: 19, pg: 18, v: 5, p: 4, s: 9, gf: 14, gs: 18, diff: -4, xg: 13.1, forma: 'L D W D D' },
+        { campionato: 'K League 1', squadra: 'Sangmu', pos: 11, punti: 16, pg: 18, v: 3, p: 7, s: 8, gf: 17, gs: 25, diff: -8, xg: 15.6, forma: 'D L D D L' },
+        { campionato: 'K League 1', squadra: 'Gwangju FC', pos: 12, punti: 8, pg: 18, v: 1, p: 5, s: 12, gf: 8, gs: 41, diff: -33, xg: 7.2, forma: 'D L L D L' },
+        // Austria Bundesliga
+        { campionato: 'Austria Bundesliga', squadra: 'LASK', pos: 1, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Sturm Graz', pos: 2, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Rapid Wien', pos: 3, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Austria Wien', pos: 4, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'RB Salzburg', pos: 5, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Grazer AK', pos: 6, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Ried', pos: 7, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'WSG Tirol', pos: 8, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Austria Lustenau', pos: 9, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Rheindorf Altach', pos: 10, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'RZ Pellets WAC', pos: 11, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Austria Bundesliga', squadra: 'Hartberg', pos: 12, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        // Europa League
+        { campionato: 'Europa League', squadra: 'Roma', pos: 1, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Lazio', pos: 2, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Athletic Bilbao', pos: 3, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Betis', pos: 4, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Olympiacos', pos: 5, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Rangers', pos: 6, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Fenerbahçe', pos: 7, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Celtic', pos: 8, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Copenhagen', pos: 9, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Slavia Praha', pos: 10, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Molde', pos: 11, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Gent', pos: 12, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'AZ Alkmaar', pos: 13, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'PAOK', pos: 14, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Anderlecht', pos: 15, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Maccabi Tel Aviv', pos: 16, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'HJK Helsinki', pos: 17, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Dinamo Zagreb', pos: 18, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Bodø/Glimt', pos: 19, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Legia Warszawa', pos: 20, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Trabzonspor', pos: 21, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Malmö', pos: 22, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'KAA Gent', pos: 23, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Basel', pos: 24, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Ferencváros', pos: 25, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Sparta Praha', pos: 26, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Union Saint-Gilloise', pos: 27, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Hajduk Split', pos: 28, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Rijeka', pos: 29, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'FCSB', pos: 30, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Viktoria Plzeň', pos: 31, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Maccabi Haifa', pos: 32, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Europa League', squadra: 'Shamrock Rovers', pos: 33, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+    ];
+
+    // --------------------- MAPPATURA SQUADRA -> CITTÀ ---------------------
+    const teamCityMap = {
+        'AIK Stockholm': 'Stockholm', 'BK Häcken': 'Gothenburg', 'Brommapojkarna': 'Stockholm',
+        'Degerfors': 'Degerfors', 'Djurgården': 'Stockholm', 'Elfsborg': 'Borås',
+        'GAIS': 'Gothenburg', 'Göteborg': 'Gothenburg', 'Halmstad': 'Halmstad',
+        'Hammarby': 'Stockholm', 'Kalmar': 'Kalmar', 'Malmö': 'Malmö',
+        'Mjällby': 'Hällevik', 'Sirius': 'Uppsala', 'Västerås': 'Västerås', 'Örgryte': 'Gothenburg',
+        'LASK': 'Linz', 'Sturm Graz': 'Graz', 'Rapid Wien': 'Vienna', 'Austria Wien': 'Vienna',
+        'RB Salzburg': 'Salzburg', 'Grazer AK': 'Graz', 'Ried': 'Ried im Innkreis',
+        'WSG Tirol': 'Innsbruck', 'Austria Lustenau': 'Lustenau', 'Rheindorf Altach': 'Altach',
+        'RZ Pellets WAC': 'Wolfsberg', 'Hartberg': 'Hartberg',
+        'Rongcheng': 'Chengdu', 'Chongqing': 'Chongqing', 'Dalian Yingbo': 'Dalian',
+        'Q. West Coast': 'Qingdao', 'Yunnan Yukun': 'Kunming', 'SD Taishan': 'Jinan',
+        'Beijing Guoan': 'Beijing', 'Shenyang Urban': 'Shenyang', 'Zhejiang': 'Hangzhou',
+        'SZ Peng City': 'Shenzhen', 'Shanghai Shen': 'Shanghai', 'Henan': 'Zhengzhou',
+        'Shanghai Port': 'Shanghai', 'Qingdao Hainiu': 'Qingdao', 'Jinmen Tiger': 'Tianjin',
+        'Wuhan 3 Towns': 'Wuhan',
+        'KuPS': 'Kuopio', 'Inter Turku': 'Turku', 'VPS': 'Vaasa', 'AC Oulu': 'Oulu',
+        'HJK Helsinki': 'Helsinki', 'IF Gnistan': 'Helsinki', 'TPS': 'Turku', 'Lahti': 'Lahti',
+        'Ilves': 'Tampere', 'SJK': 'Seinäjoki', 'FF Jaro': 'Jakobstad', 'IFK Mariehamn': 'Mariehamn',
+        'Shamrock': 'Dublin', 'Bohemian FC': 'Dublin', 'St Patrick\'s': 'Dublin',
+        'Dundalk FC': 'Dundalk', 'Shelbourne FC': 'Dublin', 'Derry City': 'Derry',
+        'Galway United': 'Galway', 'Drogheda United': 'Drogheda', 'Waterford United': 'Waterford',
+        'Sligo Rovers': 'Sligo',
+        'FC Seoul': 'Seoul', 'Gangwon FC': 'Chuncheon', 'Jeonbuk': 'Jeonju',
+        'Ulsan HD': 'Ulsan', 'Pohang Steelers': 'Pohang', 'Incheon United': 'Incheon',
+        'FC Anyang': 'Anyang', 'Jeju United': 'Jeju', 'Daejeon Hana': 'Daejeon',
+        'Bucheon FC': 'Bucheon', 'Sangmu': 'Gimcheon', 'Gwangju FC': 'Gwangju',
+        'Roma': 'Roma', 'Lazio': 'Roma', 'Athletic Bilbao': 'Bilbao',
+        'Betis': 'Sevilla', 'Olympiacos': 'Piraeus', 'Rangers': 'Glasgow',
+        'Fenerbahçe': 'Istanbul', 'Celtic': 'Glasgow', 'Copenhagen': 'Copenhagen',
+        'Slavia Praha': 'Prague', 'Molde': 'Molde', 'Gent': 'Ghent',
+        'AZ Alkmaar': 'Alkmaar', 'PAOK': 'Thessaloniki', 'Anderlecht': 'Brussels',
+        'Maccabi Tel Aviv': 'Tel Aviv', 'Dinamo Zagreb': 'Zagreb', 'Bodø/Glimt': 'Bodø',
+        'Legia Warszawa': 'Warsaw', 'Trabzonspor': 'Trabzon', 'KAA Gent': 'Ghent',
+        'Basel': 'Basel', 'Ferencváros': 'Budapest', 'Sparta Praha': 'Prague',
+        'Union Saint-Gilloise': 'Brussels', 'Hajduk Split': 'Split', 'Rijeka': 'Rijeka',
+        'FCSB': 'Bucharest', 'Viktoria Plzeň': 'Plzeň', 'Maccabi Haifa': 'Haifa',
+        'Shamrock Rovers': 'Dublin', 'KÍ': 'Klaksvík', 'Pafos': 'Paphos',
+        'Mladá Boleslav': 'Mladá Boleslav', 'Víkingur': 'Reykjavík', 'Rudar Pljevlja': 'Pljevlja',
+        'Zrinjski Mostar': 'Mostar', 'Ludogorets': 'Razgrad', 'Baník Ostrava': 'Ostrava',
+        'Dinamo Minsk': 'Minsk',
+    };
+
+    // ================================================================
+    // FUNZIONI STATISTICHE
+    // ================================================================
+
+    function getTeamStats(campionato, squadra) {
+        const found = standings.find(s => s.campionato === campionato && s.squadra === squadra);
+        if (found) return found;
+        return { pos: '-', punti: '-', pg: '-', v: '-', p: '-', s: '-', gf: 0, gs: 0, diff: '-', xg: 0, forma: '' };
+    }
+
+    function formaBoxes(forma) {
+        if (!forma || forma === '') {
+            return '<span class="forma-box">-</span><span class="forma-box">-</span><span class="forma-box">-</span><span class="forma-box">-</span><span class="forma-box">-</span>';
+        }
+        return forma.split(' ').map(c => {
+            const letter = c === 'W' ? 'V' : c === 'D' ? 'P' : c === 'L' ? 'S' : '-';
+            return `<span class="forma-box ${letter}">${letter}</span>`;
+        }).join('');
+    }
+
+    function formatDate(dateStr) {
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return dateStr;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    function calculateFormScore(forma) {
+        if (!forma || forma === '') return 0;
+        let total = 0;
+        forma.split(' ').forEach(c => { if (c === 'W') total += 20; else if (c === 'D') total += 7.5; });
+        return total;
+    }
+
+    // ================================================================
+    // CALCOLO PERCENTUALI 1X2 CORRETTO (somma = 100%)
+    // ================================================================
+
+    function getWinPercentages(homeStats, awayStats) {
+        const homePts = parseInt(homeStats.punti) || 0;
+        const awayPts = parseInt(awayStats.punti) || 0;
+        const homeGf = parseInt(homeStats.gf) || 0;
+        const homeGs = parseInt(homeStats.gs) || 0;
+        const awayGf = parseInt(awayStats.gf) || 0;
+        const awayGs = parseInt(awayStats.gs) || 0;
         
-        # LEGGI I DATI DA PRONO.XLSX
-        df_prono = leggi_dati_prono()
+        const homeDiff = homeGf - homeGs;
+        const awayDiff = awayGf - awayGs;
         
-        # Configura Chrome
-        print("🌐 Avvio Chrome...")
-        opzioni = Options()
-        opzioni.add_argument("--disable-gpu")
-        opzioni.add_argument("--log-level=3")
-        opzioni.add_argument("--mute-audio")
+        // Rating: punti * 3 + differenza reti * 0.5
+        const homeRating = (homePts * 3) + (homeDiff * 0.5);
+        const awayRating = (awayPts * 3) + (awayDiff * 0.5);
         
-        driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install()),
-            options=opzioni
-        )
+        // Se entrambi i rating sono 0, usa valori predefiniti
+        if (homeRating === 0 && awayRating === 0) {
+            return { home: 33, draw: 34, away: 33 };
+        }
         
-        # FASE 1: SCARICA I FILE HTML AGGIORNATI
-        scarica_pagine_soccerway(driver)
+        // Calcola le probabilità grezze (base 15% per squadra + 30% pareggio)
+        const totalRating = homeRating + awayRating;
+        let homeProb = (homeRating / totalRating) * 70 + 15;
+        let awayProb = (awayRating / totalRating) * 70 + 15;
+        let drawProb = 30;
         
-        # FASE 2: ELABORA I FILE LOCALI APPENA SCARICATI
-        tutte_classifiche = []
-        tutti_risultati = []
+        // Normalizza per avere somma 100
+        const sum = homeProb + drawProb + awayProb;
+        homeProb = Math.round((homeProb / sum) * 100);
+        drawProb = Math.round((drawProb / sum) * 100);
+        awayProb = Math.round((awayProb / sum) * 100);
         
-        file_html = [f for f in os.listdir(CARTELLA_SITI) if f.endswith('.html')]
+        // Correggi arrotondamenti
+        let diff = 100 - (homeProb + drawProb + awayProb);
+        if (diff !== 0) {
+            if (homeProb >= drawProb && homeProb >= awayProb) homeProb += diff;
+            else if (drawProb >= homeProb && drawProb >= awayProb) drawProb += diff;
+            else awayProb += diff;
+        }
         
-        for file in file_html:
-            percorso = os.path.join(CARTELLA_SITI, file)
-            url = f"file:///{percorso.replace(os.sep, '/')}"
+        return { home: homeProb, draw: drawProb, away: awayProb };
+    }
+
+    function getFlagForPercent(value) {
+        if (value >= 75) return 'flag-bomb';
+        if (value >= 60) return 'flag-gold';
+        if (value >= 40) return 'flag-green';
+        return 'flag-neutral';
+    }
+
+    // ================================================================
+    // MULTIGOL E UNDER/OVER
+    // ================================================================
+
+    function multiGoalValues(stats) {
+        if (!stats) return { p02: 0, p13: 0, p25: 0 };
+        const gf = parseInt(stats.gf) || 0;
+        const gs = parseInt(stats.gs) || 0;
+        const total = gf + gs;
+        if (total === 0) return { p02: 0, p13: 0, p25: 0 };
+        const media = total / 10;
+        let p02 = 40, p13 = 35, p25 = 25;
+        if (media < 1.5) { p02 = 70; p13 = 20; p25 = 10; }
+        else if (media < 2.5) { p02 = 50; p13 = 35; p25 = 15; }
+        else if (media < 3.5) { p02 = 30; p13 = 45; p25 = 25; }
+        else if (media < 4.5) { p02 = 20; p13 = 40; p25 = 40; }
+        else { p02 = 10; p13 = 30; p25 = 60; }
+        return { p02, p13, p25 };
+    }
+
+    function under45Percent(homeStats, awayStats) {
+        const hTotal = (parseInt(homeStats.gf) || 0) + (parseInt(homeStats.gs) || 0);
+        const aTotal = (parseInt(awayStats.gf) || 0) + (parseInt(awayStats.gs) || 0);
+        const total = hTotal + aTotal;
+        if (total === 0) return { value: 0, label: '0%', flag: 'flag-neutral' };
+        const media = total / 20;
+        let value = 0;
+        if (media < 1.5) value = 78;
+        else if (media < 2.5) value = 62;
+        else if (media < 3.5) value = 48;
+        else if (media < 4.5) value = 35;
+        else value = 22;
+        return { value, label: value + '%', flag: getFlagForPercent(value) };
+    }
+
+    function over15Percent(homeStats, awayStats) {
+        const hTotal = (parseInt(homeStats.gf) || 0) + (parseInt(homeStats.gs) || 0);
+        const aTotal = (parseInt(awayStats.gf) || 0) + (parseInt(awayStats.gs) || 0);
+        const total = hTotal + aTotal;
+        if (total === 0) return { value: 0, label: '0%', flag: 'flag-neutral' };
+        const media = total / 20;
+        let value = 0;
+        if (media < 1.5) value = 30;
+        else if (media < 2.5) value = 55;
+        else if (media < 3.5) value = 70;
+        else if (media < 4.5) value = 82;
+        else value = 92;
+        return { value, label: value + '%', flag: getFlagForPercent(value) };
+    }
+
+    // ================================================================
+    // STATO APP
+    // ================================================================
+
+    let currentTab = 'palinsesto';
+    let currentMatchIndex = 0;
+    let matches = [];
+    let currentFilter = 'all';
+    let isGenerating = false;
+
+    // ================================================================
+    // CALCOLO DATE
+    // ================================================================
+
+    function getTodayAndTomorrow() {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dayAfter = new Date(today);
+        dayAfter.setDate(dayAfter.getDate() + 2);
+
+        const format = (d) => {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        return { oggi: format(today), domani: format(tomorrow), dopoDomani: format(dayAfter) };
+    }
+
+    // ================================================================
+    // FILTRO PARTITE
+    // ================================================================
+
+    function filterMatchesByDate() {
+        const { oggi, domani, dopoDomani } = getTodayAndTomorrow();
+        matches = matchesData.filter(m => m.data === oggi || m.data === domani || m.data === dopoDomani);
+        matches.sort((a, b) => (a.data + a.ora).localeCompare(b.data + b.ora));
+    }
+
+    // ================================================================
+    // RENDER PALINSESTO (con layout percentuali a 2 righe)
+    // ================================================================
+
+    function getFilteredMatches() {
+        if (currentFilter === 'all') return matches;
+        return matches.filter(m => m.campionato === currentFilter);
+    }
+
+    function renderCards() {
+        const container = document.getElementById('cardsContainer');
+        const filtered = getFilteredMatches();
+        
+        document.getElementById('matchCount').textContent = `Partite: ${filtered.length}`;
+        
+        if (filtered.length === 0) {
+            container.innerHTML = `<div class="no-match">📅 Nessuna partita in programma per oggi, domani o dopodomani.</div>`;
+            return;
+        }
+
+        const { oggi, domani, dopoDomani } = getTodayAndTomorrow();
+
+        let html = '';
+        filtered.forEach((match, idx) => {
+            const homeStats = getTeamStats(match.campionato, match.casa);
+            const awayStats = getTeamStats(match.campionato, match.ospite);
             
-            if '_Cla' in file:
-                driver.get(url)
-                time.sleep(2)
-                df = estrai_classifica(driver, file)
-                if df is not None:
-                    # Aggiungi i dati di prono se disponibili
-                    if df_prono is not None:
-                        df = aggiungi_dati_prono_a_classifica(df, df_prono)
-                    tutte_classifiche.append(df)
+            // CALCOLO PERCENTUALI 1X2 CORRETTO (somma = 100%)
+            const perc = getWinPercentages(homeStats, awayStats);
+            const homePerc = perc.home;
+            const drawPerc = perc.draw;
+            const awayPerc = perc.away;
+            
+            const homeMulti = multiGoalValues(homeStats);
+            const awayMulti = multiGoalValues(awayStats);
+            const under45 = under45Percent(homeStats, awayStats);
+            const over15 = over15Percent(homeStats, awayStats);
+            const homeBoxes = formaBoxes(homeStats.forma);
+            const awayBoxes = formaBoxes(awayStats.forma);
+            const homeScore = calculateFormScore(homeStats.forma);
+            const awayScore = calculateFormScore(awayStats.forma);
+            const homeBest = Math.max(homeMulti.p02, homeMulti.p13, homeMulti.p25);
+            const awayBest = Math.max(awayMulti.p02, awayMulti.p13, awayMulti.p25);
+            const homeBestLabel = homeBest === homeMulti.p02 ? '(0-2)' : homeBest === homeMulti.p13 ? '(1-3)' : '(2-5)';
+            const awayBestLabel = awayBest === awayMulti.p02 ? '(0-2)' : awayBest === awayMulti.p13 ? '(1-3)' : '(2-5)';
+            
+            // Differenza percentuali per la freccia
+            const diff = homePerc - awayPerc;
+            const diffAbs = Math.abs(diff);
+            const diffLabel = diffAbs + '%';
+            let arrow = '↔️';
+            let arrowColor = 'color: #eab308;';
+            if (diff > 10) { arrow = '⬅️'; arrowColor = 'color: #22c55e;'; }
+            else if (diff < -10) { arrow = '➡️'; arrowColor = 'color: #ef4444;'; }
+            else { arrow = '↔️'; arrowColor = 'color: #eab308;'; }
+            
+            const homeBestFlag = getFlagForPercent(homeBest);
+            const awayBestFlag = getFlagForPercent(awayBest);
+
+            const formDiff = homeScore - awayScore;
+            const formDiffAbs = Math.abs(Math.round(formDiff));
+            const formDiffLabel = formDiffAbs + '%';
+            let formArrow = '↔️';
+            let formArrowColor = 'color: #eab308;';
+            if (formDiff > 10) { formArrow = '⬅️'; formArrowColor = 'color: #22c55e;'; }
+            else if (formDiff < -10) { formArrow = '➡️'; formArrowColor = 'color: #ef4444;'; }
+            else { formArrow = '↔️'; formArrowColor = 'color: #eab308;'; }
+
+            let dataDisplay = formatDate(match.data);
+            let badgeClass = '';
+            if (match.data === oggi) {
+                dataDisplay = '🔴 OGGI ' + dataDisplay;
+                badgeClass = 'today-badge';
+            } else if (match.data === domani) {
+                dataDisplay = '🟡 DOMANI ' + dataDisplay;
+                badgeClass = 'tomorrow-badge';
+            } else if (match.data === dopoDomani) {
+                dataDisplay = '🔵 DOPODOMANI ' + dataDisplay;
+                badgeClass = 'dayafter-badge';
+            }
+
+            const originalIdx = matches.indexOf(match);
+
+            html += `
+                <div class="card" data-index="${originalIdx}" data-tab="palinsesto">
+                    <div class="card-header">
+                        <span class="campionato">🏆 ${match.campionato}</span>
+                        <span class="giornata">${match.giornata}</span>
+                    </div>
+                    <div class="data-ora">
+                        <span>📅 <span class="${badgeClass}">${dataDisplay}</span></span>
+                        <span>⏰ ${match.ora}</span>
+                    </div>
+                    <div class="squadre">
+                        <span class="home">${match.casa}</span>
+                        <span class="vs">vs</span>
+                        <span class="away">${match.ospite}</span>
+                    </div>
+                    <div class="forme">
+                        <div class="forma-badge">${homeBoxes}</div>
+                        <div class="forma-badge">${awayBoxes}</div>
+                    </div>
+                    <div class="forma-score">
+                        <div class="score">📊 <span class="num">${homeScore}</span></div>
+                        <div class="score">📊 <span class="num">${awayScore}</span></div>
+                    </div>
+                    <div class="diff-perc">
+                        <span>Stato Forma Diff.: <span class="diff-value" style="${formArrowColor}"><span class="diff-arrow">${formArrow}</span> ${formDiffLabel}</span></span>
+                        <span>Percentuale Vittoria: <span class="diff-value" style="${arrowColor}"><span class="diff-arrow">${arrow}</span> ${diffLabel}</span></span>
+                    </div>
+                    <div class="stat-perc">
+                        <div style="font-size:0.7rem;color:var(--text-secondary);font-weight:500;margin-bottom:2px;">Percentuale di Vittoria</div>
+                        <div style="display:flex;justify-content:center;gap:12px;font-weight:700;">
+                            <span class="perc ${getFlagForPercent(homePerc)}" style="font-size:0.85rem;">🏠 ${homePerc}%</span>
+                            <span class="perc ${getFlagForPercent(drawPerc)}" style="font-size:0.85rem;">🤝 ${drawPerc}%</span>
+                            <span class="perc ${getFlagForPercent(awayPerc)}" style="font-size:0.85rem;">✈️ ${awayPerc}%</span>
+                        </div>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">🏠 ${match.casa}</span>
+                        <span class="stat-value">Pts: ${homeStats.punti} | Pos: ${homeStats.pos}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">✈️ ${match.ospite}</span>
+                        <span class="stat-value">Pts: ${awayStats.punti} | Pos: ${awayStats.pos}</span>
+                    </div>
+                    <div class="multigol-row">
+                        <span class="label">🎯 Multigol Best</span>
+                        <span class="value">
+                            <span class="perc ${homeBestFlag}">${homeBestLabel} ${homeBest}%</span>
+                            <span class="perc ${awayBestFlag}">${awayBestLabel} ${awayBest}%</span>
+                        </span>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="footer-tag ${under45.flag}">📊 12+Under 4.5: ${under45.label}</span>
+                        <span class="footer-tag ${over15.flag}">⚽ Over 1.5: ${over15.label}</span>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+
+        document.querySelectorAll('.card[data-tab="palinsesto"]').forEach(el => {
+            el.addEventListener('click', function() {
+                const idx = parseInt(this.dataset.index);
+                if (!isNaN(idx)) {
+                    currentMatchIndex = idx;
+                    switchTab('analisi');
+                    renderAnalisiAI(idx);
+                }
+            });
+        });
+    }
+
+    // ================================================================
+    // POPOLA FILTRO CAMPIONATI
+    // ================================================================
+
+    function populateFilter() {
+        const select = document.getElementById('campFilter');
+        const leagues = [...new Set(matches.map(m => m.campionato))].sort();
+        select.innerHTML = '<option value="all">📋 Tutti i Campionati</option>';
+        leagues.forEach(league => {
+            const option = document.createElement('option');
+            option.value = league;
+            option.textContent = '🏆 ' + league;
+            select.appendChild(option);
+        });
+        select.value = currentFilter;
+    }
+
+    // ================================================================
+    // GENERAZIONE STATISTICHE PER IL PROMPT
+    // ================================================================
+
+    function generateStatsForPrompt(match) {
+        const homeStats = getTeamStats(match.campionato, match.casa);
+        const awayStats = getTeamStats(match.campionato, match.ospite);
+
+        const homeMediaFatti = homeStats.pg > 0 ? (homeStats.gf / homeStats.pg).toFixed(2) : 'N/D';
+        const homeMediaSubiti = homeStats.pg > 0 ? (homeStats.gs / homeStats.pg).toFixed(2) : 'N/D';
+        const homeMediaTotali = homeStats.pg > 0 ? ((homeStats.gf + homeStats.gs) / homeStats.pg).toFixed(2) : 'N/D';
+        const awayMediaFatti = awayStats.pg > 0 ? (awayStats.gf / awayStats.pg).toFixed(2) : 'N/D';
+        const awayMediaSubiti = awayStats.pg > 0 ? (awayStats.gs / awayStats.pg).toFixed(2) : 'N/D';
+        const awayMediaTotali = awayStats.pg > 0 ? ((awayStats.gf + awayStats.gs) / awayStats.pg).toFixed(2) : 'N/D';
+
+        const formaHome = homeStats.forma || '';
+        const formaAway = awayStats.forma || '';
+        const puntiHome = formaHome ? formaHome.split(' ').filter(c => c === 'W').length * 3 + formaHome.split(' ').filter(c => c === 'D').length * 1 : 0;
+        const puntiAway = formaAway ? formaAway.split(' ').filter(c => c === 'W').length * 3 + formaAway.split(' ').filter(c => c === 'D').length * 1 : 0;
+        const percPuntiHome = formaHome ? Math.round((puntiHome / 15) * 100) : 0;
+        const percPuntiAway = formaAway ? Math.round((puntiAway / 15) * 100) : 0;
+
+        const trendHome = percPuntiHome >= 80 ? '📈 In crescita' : percPuntiHome >= 50 ? '📊 Stabile' : '📉 In calo';
+        const trendAway = percPuntiAway >= 80 ? '📈 In crescita' : percPuntiAway >= 50 ? '📊 Stabile' : '📉 In calo';
+
+        return {
+            homeStats, awayStats,
+            homeMediaFatti, homeMediaSubiti, homeMediaTotali,
+            awayMediaFatti, awayMediaSubiti, awayMediaTotali,
+            percPuntiHome, percPuntiAway,
+            trendHome, trendAway,
+            formaHome, formaAway
+        };
+    }
+
+    // ================================================================
+    // GENERAZIONE REPORT FALLBACK
+    // ================================================================
+
+    function generateFallbackReport(match, stats) {
+        const { homeStats, awayStats, homeMediaFatti, homeMediaSubiti, homeMediaTotali, awayMediaFatti, awayMediaSubiti, awayMediaTotali, percPuntiHome, percPuntiAway, trendHome, trendAway } = stats;
+
+        const homeMulti = multiGoalValues(homeStats);
+        const awayMulti = multiGoalValues(awayStats);
+
+        const totalGoals = (parseInt(homeStats.gf) || 0) + (parseInt(homeStats.gs) || 0) + (parseInt(awayStats.gf) || 0) + (parseInt(awayStats.gs) || 0);
+        const mediaGol = homeStats.pg > 0 && awayStats.pg > 0 ? totalGoals / (homeStats.pg + awayStats.pg) : 0;
+        
+        const over15 = Math.min(100, Math.round((mediaGol / 5) * 100 + 10));
+        const over25 = Math.min(100, Math.round((mediaGol / 4) * 100 + 5));
+        const under35 = Math.min(100, Math.round(100 - (mediaGol / 4) * 80));
+        const under45 = Math.min(100, Math.round(100 - (mediaGol / 5) * 60));
+
+        const vittorieCasa = parseInt(homeStats.v) || 0;
+        const vittorieOspite = parseInt(awayStats.v) || 0;
+        const totalePartite = (parseInt(homeStats.pg) || 0) + (parseInt(awayStats.pg) || 0);
+        const giocata1 = totalePartite > 0 ? Math.round(((vittorieCasa + vittorieOspite) / totalePartite * 100 + under45) / 2) : 50;
+
+        const multiCasa13 = homeMulti.p13 || 0;
+        const multiOspite13 = awayMulti.p13 || 0;
+        const giocata2 = Math.round((multiCasa13 + multiOspite13) / 2);
+
+        const doppieChance = [
+            { nome: '1X', valore: Math.round((parseInt(homeStats.punti) || 0) / (parseInt(homeStats.pg) || 1) * 2 + 20) },
+            { nome: '12', valore: Math.round(((parseInt(homeStats.punti) || 0) + (parseInt(awayStats.punti) || 0)) / (parseInt(homeStats.pg) || 1 + parseInt(awayStats.pg) || 1) * 2 + 15) },
+            { nome: 'X2', valore: Math.round((parseInt(awayStats.punti) || 0) / (parseInt(awayStats.pg) || 1) * 2 + 20) }
+        ];
+        const multigolTotali = [
+            { nome: 'Over 1.5', valore: over15 },
+            { nome: '1-4', valore: Math.round((homeMulti.p02 + awayMulti.p02 + homeMulti.p13 + awayMulti.p13) / 4) },
+            { nome: '2-5', valore: Math.round((homeMulti.p13 + awayMulti.p13 + homeMulti.p25 + awayMulti.p25) / 4) }
+        ];
+        
+        let bestCombo = { nome: '12+Under4.5', valore: giocata1 };
+        doppieChance.forEach(dc => {
+            multigolTotali.forEach(mg => {
+                const comboVal = Math.round((dc.valore + mg.valore) / 2);
+                if (comboVal > bestCombo.valore) {
+                    bestCombo = { nome: dc.nome + ' + ' + mg.nome, valore: comboVal };
+                }
+            });
+        });
+
+        const homeWin = Math.min(100, Math.max(5, Math.round((parseInt(homeStats.punti) || 0) * 3.5 + (parseInt(homeStats.diff) || 0) * 1.2)));
+        const awayWin = Math.min(100, Math.max(5, Math.round((parseInt(awayStats.punti) || 0) * 3.5 + (parseInt(awayStats.diff) || 0) * 1.2)));
+        let draw = Math.max(5, 100 - homeWin - awayWin);
+        if (draw < 5) draw = 5;
+        const sum = homeWin + awayWin + draw;
+        const homeP = Math.round((homeWin / sum) * 100);
+        const awayP = Math.round((awayWin / sum) * 100);
+        const drawP = Math.round((draw / sum) * 100);
+        
+        let pronostico = 'X';
+        let pronPerc = drawP;
+        if (homeP > awayP && homeP > drawP) { pronostico = '1'; pronPerc = homeP; }
+        else if (awayP > homeP && awayP > drawP) { pronostico = '2'; pronPerc = awayP; }
+
+        const sicurezza = Math.min(100, Math.round(pronPerc + 10));
+
+        // Genera i quadratini colorati per lo stato forma nel report
+        function getFormaBoxes(forma) {
+            if (!forma || forma === '') {
+                return '⬜⬜⬜⬜⬜';
+            }
+            return forma.split(' ').map(c => {
+                if (c === 'W') return '🟩';
+                if (c === 'D') return '🟨';
+                if (c === 'L') return '🟥';
+                return '⬜';
+            }).join('');
+        }
+
+        const homeFormaEmoji = getFormaBoxes(homeStats.forma);
+        const awayFormaEmoji = getFormaBoxes(awayStats.forma);
+
+        return `
+## 📊 STATO DI FORMA
+
+**${match.casa}**: ${homeFormaEmoji} ${homeStats.forma || 'N/D'} | Punti ultimi 5: ${percPuntiHome}% | ${trendHome}
+**${match.ospite}**: ${awayFormaEmoji} ${awayStats.forma || 'N/D'} | Punti ultimi 5: ${percPuntiAway}% | ${trendAway}
+
+---
+
+## 📊 MEDIA GOL
+
+| Squadra | Gol Fatti | Gol Subiti | Totale | xG |
+|---------|-----------|------------|--------|-----|
+| ${match.casa} | ${homeMediaFatti} | ${homeMediaSubiti} | ${homeMediaTotali} | ${homeStats.xg || 'N/D'} |
+| ${match.ospite} | ${awayMediaFatti} | ${awayMediaSubiti} | ${awayMediaTotali} | ${awayStats.xg || 'N/D'} |
+
+---
+
+## 📊 RANGE GOL PIÙ FREQUENTE
+
+**${match.casa}**: 0-2: ${homeMulti.p02}% | 1-3: ${homeMulti.p13}% | Over 1.5: ${Math.round((homeMulti.p13 + homeMulti.p25) / 2)}%
+**${match.ospite}**: 0-2: ${awayMulti.p02}% | 1-3: ${awayMulti.p13}% | Over 1.5: ${Math.round((awayMulti.p13 + awayMulti.p25) / 2)}%
+
+---
+
+## 📊 MULTIGOL CASA/OSPITE
+
+| Squadra | 0-2 | 1-3 | 2-5 |
+|---------|-----|-----|-----|
+| ${match.casa} | ${homeMulti.p02}% | ${homeMulti.p13}% | ${homeMulti.p25}% |
+| ${match.ospite} | ${awayMulti.p02}% | ${awayMulti.p13}% | ${awayMulti.p25}% |
+
+---
+
+## 📊 UNDER/OVER
+
+- Over 1.5: ${over15}%
+- Over 2.5: ${over25}%
+- Under 3.5: ${under35}%
+- Under 4.5: ${under45}%
+
+---
+
+## 📈 DETTAGLIO 3 GIOCATE
+
+**GIOCATA 1 (12+U4.5)**: ${giocata1}%
+- Formula: (Vittorie Casa ${vittorieCasa} + Vittorie Ospite ${vittorieOspite}) / Partite Totali ${totalePartite} * 100 + Under 4.5 ${under45}% / 2
+
+**GIOCATA 2 (COMBINATA)**: ${giocata2}%
+- Multigol 1-3 Casa: ${multiCasa13}% | Multigol 1-3 Ospite: ${multiOspite13}%
+- Media: (${multiCasa13} + ${multiOspite13}) / 2 = ${giocata2}%
+
+**GIOCATA 3 (LIBERA)**: ${bestCombo.nome} = ${bestCombo.valore}%
+
+---
+
+## 💰 CONSIGLI DI TRADING
+
+| # | Giocata | Percentuale |
+|---|---------|-------------|
+| 1 | 12+Under 4.5 | ${giocata1}% |
+| 2 | Multigol 1-3 Media | ${giocata2}% |
+| 3 | ${bestCombo.nome} | ${bestCombo.valore}% |
+
+**🎯 PRONOSTICO 1X2**: ${pronostico} (${pronPerc}%)
+**🎯 SICUREZZA**: ${sicurezza}% ${sicurezza >= 60 ? '✅ Alta' : sicurezza >= 40 ? '⚠️ Media' : '❌ Bassa'}
+
+---
+
+## 📊 VALUTAZIONE FINALE
+
+- **Score Generale**: ${Math.round((giocata1 + giocata2 + bestCombo.valore) / 3)}%
+- **Indice Rischio**: ${sicurezza >= 70 ? '🟢 Basso' : sicurezza >= 50 ? '🟡 Medio' : '🔴 Alto'}
+- **Affidabilità**: ${sicurezza >= 70 ? '✅ Alta' : sicurezza >= 50 ? '⚠️ Media' : '❌ Bassa'}
+
+---
+*Report generato automaticamente in base ai dati statistici disponibili.*`;
+    }
+
+    // ================================================================
+    // FUNZIONE PER FORMATARE IL REPORT (Markdown -> HTML)
+    // ================================================================
+
+    function formatReportToHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>')
+            .replace(/## (.*?)(<br>|$)/g, '<br><strong style="font-size:1.1rem;color:var(--text-primary);">📌 $1</strong><br>')
+            .replace(/### (.*?)(<br>|$)/g, '<br><strong style="font-size:0.95rem;color:var(--text-secondary);">$1</strong><br>')
+            .replace(/---/g, '<hr style="border-color:var(--card-border);margin:8px 0;">')
+            .replace(/\|/g, ' | ')
+            .replace(/🟩/g, '<span style="display:inline-block;width:18px;height:18px;background:#22c55e;border-radius:4px;margin:0 1px;"></span>')
+            .replace(/🟨/g, '<span style="display:inline-block;width:18px;height:18px;background:#eab308;border-radius:4px;margin:0 1px;"></span>')
+            .replace(/🟥/g, '<span style="display:inline-block;width:18px;height:18px;background:#ef4444;border-radius:4px;margin:0 1px;"></span>')
+            .replace(/⬜/g, '<span style="display:inline-block;width:18px;height:18px;background:#6b7280;border-radius:4px;margin:0 1px;"></span>');
+    }
+
+    // ================================================================
+    // TEST CONNESSIONE GROQ
+    // ================================================================
+
+    async function testGroqConnection() {
+        const groqKey = document.getElementById('groqKey').value.trim() || localStorage.getItem('groqApiKey') || '';
+        const groqModel = document.getElementById('groqModel').value || localStorage.getItem('groqModel') || 'llama-3.1-8b-instant';
+        const btn = document.getElementById('testGroqBtn');
+        
+        if (!groqKey) {
+            btn.innerHTML = '❌ Inserisci una API Key!';
+            btn.style.background = '#ef4444';
+            btn.style.color = '#fff';
+            setTimeout(() => {
+                btn.innerHTML = '🔍 Test Connessione GROQ';
+                btn.style.background = '#f59e0b';
+                btn.style.color = '#000';
+            }, 3000);
+            return;
+        }
+        
+        btn.innerHTML = '⏳ Test in corso...';
+        btn.disabled = true;
+        btn.style.background = '#f59e0b';
+        
+        try {
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${groqKey}`
+                },
+                body: JSON.stringify({
+                    model: groqModel,
+                    messages: [{ role: 'user', content: 'Rispondi con "OK" se funziona.' }],
+                    temperature: 0.3,
+                    max_tokens: 10
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.status === 200 && data.choices && data.choices[0]) {
+                btn.innerHTML = '✅ GROQ FUNZIONA!';
+                btn.style.background = '#22c55e';
+                btn.style.color = '#fff';
+                localStorage.setItem('groqApiKey', groqKey);
+                localStorage.setItem('groqModel', groqModel);
+                setTimeout(() => {
+                    btn.innerHTML = '🔍 Test Connessione GROQ';
+                    btn.style.background = '#f59e0b';
+                    btn.style.color = '#000';
+                    btn.disabled = false;
+                }, 3000);
+                return true;
+            } else {
+                let errorMsg = data.error?.message || 'Errore sconosciuto';
+                if (response.status === 401) errorMsg = '❌ CHIAVE NON VALIDA!';
+                else if (response.status === 429) errorMsg = '❌ TROPPE RICHIESTE! Attendere.';
+                else if (response.status === 404) errorMsg = '❌ MODELLO NON TROVATO!';
+                btn.innerHTML = errorMsg;
+                btn.style.background = '#ef4444';
+                btn.style.color = '#fff';
+                setTimeout(() => {
+                    btn.innerHTML = '🔍 Test Connessione GROQ';
+                    btn.style.background = '#f59e0b';
+                    btn.style.color = '#000';
+                    btn.disabled = false;
+                }, 4000);
+                return false;
+            }
+        } catch (error) {
+            btn.innerHTML = '❌ ERRORE: ' + error.message;
+            btn.style.background = '#ef4444';
+            btn.style.color = '#fff';
+            setTimeout(() => {
+                btn.innerHTML = '🔍 Test Connessione GROQ';
+                btn.style.background = '#f59e0b';
+                btn.style.color = '#000';
+                btn.disabled = false;
+            }, 4000);
+            return false;
+        }
+    }
+
+    // ================================================================
+    // SIMULAZIONE TELEFONO
+    // ================================================================
+
+    function openPhoneSimulator() {
+        const overlay = document.getElementById('phoneSimulator');
+        const content = document.getElementById('phoneContent');
+        
+        // Clona il contenuto principale nella simulazione
+        const mainContent = document.querySelector('.tab-content.active');
+        if (mainContent) {
+            content.innerHTML = mainContent.innerHTML;
+        } else {
+            content.innerHTML = document.querySelector('#tab-palinsesto').innerHTML;
+        }
+        
+        content.style.background = 'var(--bg)';
+        content.style.color = 'var(--text-primary)';
+        
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePhoneSimulator() {
+        const overlay = document.getElementById('phoneSimulator');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // ================================================================
+    // RENDER ANALISI AI
+    // ================================================================
+
+    async function renderAnalisiAI(index, forceRegenerate = false) {
+        const container = document.getElementById('aiContent');
+        const match = matches[index];
+        if (!match) {
+            container.innerHTML = `<div class="ai-loading"><p>Nessuna partita selezionata</p></div>`;
+            return;
+        }
+
+        currentMatchIndex = index;
+
+        if (forceRegenerate) {
+            const btn = document.getElementById('rigeneraBtn');
+            if (btn) {
+                btn.innerHTML = '<span class="spinner-small"></span> Rigenerando...';
+                btn.disabled = true;
+            }
+        }
+
+        const homeStats = getTeamStats(match.campionato, match.casa);
+        const awayStats = getTeamStats(match.campionato, match.ospite);
+        const homeCity = teamCityMap[match.casa] || match.casa;
+
+        // Box forma
+        const homeFormaBoxes = homeStats.forma ? homeStats.forma.split(' ').map(c => {
+            const letter = c === 'W' ? 'V' : c === 'D' ? 'P' : c === 'L' ? 'S' : '-';
+            return `<span class="forma-box-small ${letter}">${letter}</span>`;
+        }).join('') : '<span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span>';
+
+        const awayFormaBoxes = awayStats.forma ? awayStats.forma.split(' ').map(c => {
+            const letter = c === 'W' ? 'V' : c === 'D' ? 'P' : c === 'L' ? 'S' : '-';
+            return `<span class="forma-box-small ${letter}">${letter}</span>`;
+        }).join('') : '<span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span>';
+
+        // Classifica
+        const allStandings = standings.filter(s => s.campionato === match.campionato);
+        allStandings.sort((a, b) => (parseInt(b.punti) || 0) - (parseInt(a.punti) || 0));
+        
+        let standingsHtml = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Squadra</th>
+                        <th>PG</th>
+                        <th>V</th>
+                        <th>P</th>
+                        <th>S</th>
+                        <th>GF</th>
+                        <th>GS</th>
+                        <th>Diff</th>
+                        <th>xG</th>
+                        <th>Pti</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        allStandings.forEach(s => {
+            const isGold = s.squadra === match.casa || s.squadra === match.ospite;
+            standingsHtml += `
+                <tr class="${isGold ? 'gold' : ''}">
+                    <td>${s.pos}</td>
+                    <td>${s.squadra}</td>
+                    <td>${s.pg}</td>
+                    <td>${s.v}</td>
+                    <td>${s.p}</td>
+                    <td>${s.s}</td>
+                    <td>${s.gf}</td>
+                    <td>${s.gs}</td>
+                    <td>${s.diff}</td>
+                    <td>${s.xg}</td>
+                    <td>${s.punti}</td>
+                </tr>
+            `;
+        });
+        standingsHtml += '</tbody></table>';
+
+        const stats = generateStatsForPrompt(match);
+
+        // HTML base
+        let htmlContent = `
+            <div class="ai-container">
+                <div class="ai-header">
+                    <span class="match-title">${match.casa} vs ${match.ospite}</span>
+                    <span class="match-league">${match.campionato}</span>
+                </div>
                 
-            elif '_Ris' in file:
-                driver.get(url)
-                time.sleep(2)
-                df = estrai_risultati(driver, file)
-                if df is not None:
-                    # Aggiungi i dati di prono se disponibili
-                    if df_prono is not None:
-                        df = aggiungi_dati_prono_a_classifica(df, df_prono)
-                    tutti_risultati.append(df)
+                <div class="ai-rigenera">
+                    <button id="rigeneraBtn" onclick="handleRigenera()">
+                        🔄 Rigenera Pronostico
+                    </button>
+                </div>
 
-        driver.quit()
-        
-        # FASE 3: SALVA EXCEL
-        if tutte_classifiche:
-            df_final = pd.concat(tutte_classifiche, ignore_index=True)
-            salva_con_formattazione(FILE_EXCEL_CLASSIFICA, df_final, "Classifica")
+                <div class="ai-weather" id="weatherDisplay">
+                    <span class="weather-icon">🌤️</span>
+                    <span class="temp" id="weatherTemp">⏳ Caricamento...</span>
+                    <span class="city">📍 ${homeCity}</span>
+                    <span class="desc" id="weatherDesc"></span>
+                </div>
+
+                <div class="ai-section" style="border-left-color: var(--gold);">
+                    <div class="section-title">🏆 CLASSIFICA ${match.campionato}</div>
+                    <div class="section-content">${standingsHtml}</div>
+                </div>
+
+                <div class="ai-section" style="border-left-color: #f59e0b;">
+                    <div class="section-title">📊 STATO DI FORMA</div>
+                    <div class="section-content">
+                        <div class="ai-forma-row">
+                            <span class="team-name">${match.casa}</span>
+                            ${homeFormaBoxes}
+                            <span style="color:var(--text-secondary);font-size:0.8rem;">${homeStats.forma || 'N/D'}</span>
+                            <span style="color:var(--text-secondary);font-size:0.8rem;">| Punti: ${stats.percPuntiHome}% | ${stats.trendHome}</span>
+                        </div>
+                        <div class="ai-forma-row">
+                            <span class="team-name">${match.ospite}</span>
+                            ${awayFormaBoxes}
+                            <span style="color:var(--text-secondary);font-size:0.8rem;">${awayStats.forma || 'N/D'}</span>
+                            <span style="color:var(--text-secondary);font-size:0.8rem;">| Punti: ${stats.percPuntiAway}% | ${stats.trendAway}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-section">
+                    <div class="section-title">📊 STATISTICHE CHIAVE</div>
+                    <div class="section-content">
+                        <strong>${match.casa}:</strong> Punti ${homeStats.punti} | Pos. ${homeStats.pos} | PG ${homeStats.pg} | V${homeStats.v}-P${homeStats.p}-S${homeStats.s} | GF ${homeStats.gf} | GS ${homeStats.gs} | Diff ${homeStats.diff} | xG ${homeStats.xg}<br>
+                        <strong>${match.ospite}:</strong> Punti ${awayStats.punti} | Pos. ${awayStats.pos} | PG ${awayStats.pg} | V${awayStats.v}-P${awayStats.p}-S${awayStats.s} | GF ${awayStats.gf} | GS ${awayStats.gs} | Diff ${awayStats.diff} | xG ${awayStats.xg}<br>
+                        <strong>Media Gol Casa:</strong> Fatti ${stats.homeMediaFatti} | Subiti ${stats.homeMediaSubiti} | Totali ${stats.homeMediaTotali}<br>
+                        <strong>Media Gol Ospite:</strong> Fatti ${stats.awayMediaFatti} | Subiti ${stats.awayMediaSubiti} | Totali ${stats.awayMediaTotali}
+                    </div>
+                </div>
+
+                <div id="aiReportContainer">
+                    <div class="ai-loading">
+                        <div class="spinner"></div>
+                        <p>🧠 Generando analisi professionale con GROQ...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = htmlContent;
+
+        // Meteo
+        const weatherKey = localStorage.getItem('weatherApiKey') || 'd8df501134ef44eab6515526262007';
+        let weatherTemp = '--°C', weatherDesc = '--', weatherIcon = '🌤️';
+        try {
+            const weatherUrl = `https://api.worldweatheronline.com/premium/v1/weather.ashx?key=${weatherKey}&q=${encodeURIComponent(homeCity)}&format=json&num_of_days=1&tp=24`;
+            const weatherRes = await fetch(weatherUrl);
+            const weatherData = await weatherRes.json();
+            if (weatherData.data && weatherData.data.current_condition) {
+                const current = weatherData.data.current_condition[0];
+                weatherTemp = current.temp_C ? `${current.temp_C}°C` : '--°C';
+                weatherDesc = current.weatherDesc ? current.weatherDesc[0].value : '--';
+                const code = current.weatherCode || '113';
+                weatherIcon = getWeatherIcon(code);
+            }
+        } catch (e) {}
+
+        document.getElementById('weatherTemp').textContent = weatherTemp;
+        document.getElementById('weatherDesc').textContent = weatherDesc;
+        document.querySelector('#weatherDisplay .weather-icon').textContent = weatherIcon;
+
+        // ================================================================
+        // CHIAMATA GROQ
+        // ================================================================
+
+        const groqKey = localStorage.getItem('groqApiKey') || '';
+        const groqModel = localStorage.getItem('groqModel') || 'llama-3.1-8b-instant';
+        let reportHtml = '';
+        let groqSuccess = false;
+        let groqError = '';
+
+        // Se non c'è una chiave API, usa subito il fallback
+        if (!groqKey) {
+            groqError = 'Nessuna API Key configurata';
+            console.log('🔄 Nessuna API Key, uso fallback');
+        } else {
+            // Costruisci il prompt per GROQ
+            const prompt = `Sei un analista sportivo professionista specializzato in statistica calcistica. Analizza questa partita:
+
+CAMPIONATO: ${match.campionato}
+CASA: ${match.casa} (Punti ${homeStats.punti}, Pos. ${homeStats.pos}, Gol ${homeStats.gf}/${homeStats.gs}, Forma: ${homeStats.forma || 'N/D'})
+OSPITE: ${match.ospite} (Punti ${awayStats.punti}, Pos. ${awayStats.pos}, Gol ${awayStats.gf}/${awayStats.gs}, Forma: ${awayStats.forma || 'N/D'})
+
+Genera un report conciso con:
+1. STATO DI FORMA - sequenza e trend (usa emoji per i risultati: 🟩=vittoria, 🟨=pareggio, 🟥=sconfitta)
+2. STATISTICHE CHIAVE - punti, gol, differenza reti
+3. PRONOSTICO 1X2
+4. SICUREZZA (0-100%)
+5. CONSIGLIO SINGOLA
+6. CONSIGLIO COMBO
+
+Usa solo i dati forniti. Arrotonda le percentuali.`;
+
+            try {
+                console.log('📤 GROQ - Model:', groqModel);
+                console.log('📤 GROQ - Key presente:', groqKey ? 'Sì' : 'No');
+                
+                const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${groqKey}`
+                    },
+                    body: JSON.stringify({
+                        model: groqModel,
+                        messages: [{ role: 'user', content: prompt }],
+                        temperature: 0.3,
+                        max_tokens: 800
+                    })
+                });
+
+                const data = await groqRes.json();
+                console.log('📥 GROQ - Status:', groqRes.status);
+
+                if (groqRes.status === 200 && data.choices && data.choices[0]) {
+                    reportHtml = formatReportToHtml(data.choices[0].message.content);
+                    groqSuccess = true;
+                    console.log('✅ GROQ successo!');
+                } else {
+                    groqError = data.error?.message || 'Errore sconosciuto';
+                    console.error('❌ GROQ errore:', groqError);
+                    if (groqRes.status === 401) groqError = '❌ CHIAVE API NON VALIDA!';
+                    else if (groqRes.status === 429) groqError = '❌ TROPPE RICHIESTE! Attendere.';
+                    else if (groqRes.status === 404) groqError = '❌ MODELLO NON TROVATO!';
+                }
+            } catch (error) {
+                console.error('❌ GROQ errore di rete:', error);
+                groqError = error.message;
+            }
+        }
+
+        // Fallback se GROQ fallisce
+        if (!groqSuccess) {
+            console.log('🔄 Uso fallback locale');
+            const fallbackReport = generateFallbackReport(match, stats);
+            reportHtml = formatReportToHtml(fallbackReport);
             
-        if tutti_risultati:
-            df_final = pd.concat(tutti_risultati, ignore_index=True)
-            salva_con_formattazione(FILE_EXCEL_RISULTATI, df_final, "Risultati")
+            if (reportHtml.length < 30) {
+                reportHtml = `
+                <strong>📊 STATO DI FORMA</strong><br>
+                <strong>${match.casa}:</strong> ${stats.formaHome || 'N/D'} | Punti: ${stats.percPuntiHome}%<br>
+                <strong>${match.ospite}:</strong> ${stats.formaAway || 'N/D'} | Punti: ${stats.percPuntiAway}%<br><br>
+                <strong>📊 STATISTICHE CHIAVE</strong><br>
+                <strong>${match.casa}:</strong> Punti ${homeStats.punti} | GF ${homeStats.gf} | GS ${homeStats.gs}<br>
+                <strong>${match.ospite}:</strong> Punti ${awayStats.punti} | GF ${awayStats.gf} | GS ${awayStats.gs}
+                `;
+            }
             
-        log(f"\n✅ OPERAZIONE COMPLETATA CON SUCCESSO")
-        log(f"   - Classifiche: {len(tutte_classifiche)} campionati")
-        log(f"   - Risultati: {len(tutti_risultati)} campionati")
-        input("\nPremi INVIO per chiudere...")
+            // Aggiungi avviso se GROQ ha fallito
+            if (groqError) {
+                reportHtml = `
+                <div style="padding:10px;background:var(--red);color:#fff;border-radius:8px;margin-bottom:10px;font-size:0.85rem;">
+                    ⚠️ GROQ: ${groqError}<br>
+                    <span style="font-size:0.75rem;opacity:0.8;">Utilizzo analisi statistica locale</span>
+                </div>
+                ${reportHtml}
+                `;
+            }
+        }
 
-    except Exception as e:
-        print(f"❌ ERRORE: {e}")
-        import traceback
-        traceback.print_exc()
-    finally:
-        try: 
-            driver.quit()
-        except: 
-            pass
+        const finalContainer = document.getElementById('aiReportContainer');
+        if (finalContainer) {
+            finalContainer.innerHTML = `
+                <div class="ai-section" style="border-left-color: ${groqSuccess ? '#22c55e' : '#ef4444'};">
+                    <div class="section-title">${groqSuccess ? '✅' : '📋'} REPORT ANALISI ${groqSuccess ? 'GROQ' : 'LOCALE'}</div>
+                    <div class="section-content">${reportHtml}</div>
+                </div>
+            `;
+        }
 
-if __name__ == "__main__":
-    main()
+        // Ripristina il bottone
+        const btn = document.getElementById('rigeneraBtn');
+        if (btn) {
+            btn.innerHTML = '🔄 Rigenera Pronostico';
+            btn.disabled = false;
+        }
+    }
+
+    // ================================================================
+    // HANDLER RIGENERA
+    // ================================================================
+
+    window.handleRigenera = function() {
+        console.log('🔄 Rigenera - index:', currentMatchIndex);
+        if (matches.length > 0 && currentMatchIndex < matches.length) {
+            renderAnalisiAI(currentMatchIndex, true);
+        } else if (matches.length > 0) {
+            currentMatchIndex = 0;
+            renderAnalisiAI(0, true);
+        }
+    };
+
+    // ================================================================
+    // ICONE METEO
+    // ================================================================
+
+    function getWeatherIcon(code) {
+        const icons = {
+            '113': '☀️', '116': '⛅', '119': '☁️', '122': '☁️',
+            '143': '🌫️', '176': '🌦️', '179': '🌨️', '182': '🌧️',
+            '185': '🌧️', '200': '⛈️', '227': '❄️', '230': '❄️',
+            '248': '🌫️', '260': '🌫️', '263': '🌦️', '266': '🌧️',
+            '281': '🌧️', '284': '🌧️', '293': '🌧️', '296': '🌧️',
+            '299': '🌧️', '302': '🌧️', '305': '🌧️', '308': '🌧️',
+            '311': '🌧️', '314': '🌧️', '317': '🌧️', '320': '🌨️',
+            '323': '❄️', '326': '❄️', '329': '❄️', '332': '❄️',
+            '335': '❄️', '338': '❄️', '350': '🌧️', '353': '🌦️',
+            '356': '🌧️', '359': '🌧️', '362': '🌨️', '365': '🌨️',
+            '368': '❄️', '371': '❄️', '374': '🌧️', '377': '🌧️',
+            '386': '⛈️', '389': '⛈️', '392': '⛈️', '395': '❄️'
+        };
+        return icons[code] || '🌤️';
+    }
+
+    // ================================================================
+    // TAB MANAGEMENT
+    // ================================================================
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tab);
+        });
+        document.querySelectorAll('.tab-content').forEach(el => {
+            el.classList.toggle('active', el.id === `tab-${tab}`);
+        });
+    }
+
+    // ================================================================
+    // SWIPE
+    // ================================================================
+
+    let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
+
+    document.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
+            const tabs = ['palinsesto', 'analisi', 'impostazioni'];
+            const currentIdx = tabs.indexOf(currentTab);
+            if (diffX < 0 && currentIdx < tabs.length - 1) {
+                switchTab(tabs[currentIdx + 1]);
+                if (tabs[currentIdx + 1] === 'analisi' && matches.length > 0) {
+                    renderAnalisiAI(currentMatchIndex);
+                }
+            } else if (diffX > 0 && currentIdx > 0) {
+                switchTab(tabs[currentIdx - 1]);
+            }
+        } else if (currentTab === 'palinsesto' && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 30) {
+            const filtered = getFilteredMatches();
+            if (diffY < 0 && currentMatchIndex < filtered.length - 1) {
+                currentMatchIndex++;
+                scrollToCard(currentMatchIndex);
+            } else if (diffY > 0 && currentMatchIndex > 0) {
+                currentMatchIndex--;
+                scrollToCard(currentMatchIndex);
+            }
+        }
+    }, { passive: true });
+
+    function scrollToCard(index) {
+        const cards = document.querySelectorAll('.card[data-tab="palinsesto"]');
+        if (cards[index]) {
+            cards[index].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            cards.forEach((c, i) => {
+                c.style.borderColor = i === index ? '#3b82f6' : 'var(--card-border)';
+                c.style.transform = i === index ? 'scale(1.02)' : 'scale(1)';
+            });
+            setTimeout(() => {
+                cards.forEach(c => {
+                    c.style.borderColor = 'var(--card-border)';
+                    c.style.transform = 'scale(1)';
+                });
+            }, 1000);
+        }
+    }
+
+    // ================================================================
+    // CLOCK, TEMA, FONT SIZE
+    // ================================================================
+
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('currentDate').textContent = now.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+
+    let currentTheme = localStorage.getItem('theme') || 'dark';
+
+    function applyTheme(theme) {
+        document.body.classList.toggle('light', theme === 'light');
+        currentTheme = theme;
+        localStorage.setItem('theme', theme);
+        document.getElementById('themeDark').className = theme === 'dark' ? 'tab-btn active' : 'tab-btn';
+        document.getElementById('themeLight').className = theme === 'light' ? 'tab-btn active' : 'tab-btn';
+    }
+
+    // ================================================================
+    // FONT SIZE
+    // ================================================================
+
+    const fontClasses = ['font-sm', 'font-md', 'font-lg', 'font-xl'];
+    const fontLabels = ['Piccolo (13px)', 'Medio (16px)', 'Grande (19px)', 'Extra Grande (22px)'];
+
+    function applyFontSize(level) {
+        document.body.classList.remove(...fontClasses);
+        if (level >= 1 && level <= 4) {
+            document.body.classList.add(fontClasses[level - 1]);
+        }
+        document.getElementById('fontSizeDisplay').textContent = fontLabels[level - 1] || 'Medio (16px)';
+        document.getElementById('fontSizeSlider').value = level;
+        localStorage.setItem('fontSize', level);
+    }
+
+    // ================================================================
+    // IMPOSTAZIONI
+    // ================================================================
+
+    document.getElementById('themeDark').addEventListener('click', () => applyTheme('dark'));
+    document.getElementById('themeLight').addEventListener('click', () => applyTheme('light'));
+
+    document.getElementById('fontSizeSlider').addEventListener('input', function() {
+        const level = parseInt(this.value);
+        applyFontSize(level);
+    });
+
+    // Test GROQ
+    document.getElementById('testGroqBtn').addEventListener('click', testGroqConnection);
+
+    document.getElementById('saveSettings').addEventListener('click', () => {
+        const groq = document.getElementById('groqKey').value.trim();
+        const model = document.getElementById('groqModel').value;
+        const weather = document.getElementById('weatherKey').value.trim();
+        if (groq) localStorage.setItem('groqApiKey', groq);
+        localStorage.setItem('groqModel', model);
+        if (weather) localStorage.setItem('weatherApiKey', weather);
+        alert('✅ Impostazioni salvate!');
+        if (currentTab === 'analisi' && matches.length > 0) {
+            renderAnalisiAI(currentMatchIndex, true);
+        }
+    });
+
+    // Carica impostazioni
+    document.getElementById('groqKey').value = localStorage.getItem('groqApiKey') || '';
+    document.getElementById('groqModel').value = localStorage.getItem('groqModel') || 'llama-3.1-8b-instant';
+    document.getElementById('weatherKey').value = localStorage.getItem('weatherApiKey') || 'd8df501134ef44eab6515526262007';
+
+    // ================================================================
+    // SIMULA TELEFONO
+    // ================================================================
+
+    document.getElementById('simulateBtn').addEventListener('click', openPhoneSimulator);
+
+    // ================================================================
+    // FILTRO
+    // ================================================================
+
+    document.getElementById('campFilter').addEventListener('change', function() {
+        currentFilter = this.value;
+        renderCards();
+        document.querySelector('.grid-cards').scrollTop = 0;
+    });
+
+    // ================================================================
+    // TAB BUTTONS
+    // ================================================================
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+            switchTab(tab);
+            if (tab === 'analisi' && matches.length > 0) {
+                renderAnalisiAI(currentMatchIndex);
+            }
+        });
+    });
+
+    // ================================================================
+    // HOME BUTTON
+    // ================================================================
+
+    document.getElementById('homeBtn').addEventListener('click', () => {
+        currentMatchIndex = 0;
+        switchTab('palinsesto');
+        if (matches.length > 0) {
+            setTimeout(() => scrollToCard(0), 300);
+        }
+    });
+
+    // ================================================================
+    // AVVIO
+    // ================================================================
+
+    filterMatchesByDate();
+
+    const savedFontSize = parseInt(localStorage.getItem('fontSize')) || 2;
+    applyFontSize(savedFontSize);
+
+    applyTheme(currentTheme);
+    updateClock();
+    populateFilter();
+    renderCards();
+    setInterval(updateClock, 1000);
+    setInterval(() => {
+        filterMatchesByDate();
+        populateFilter();
+        renderCards();
+    }, 60000);
+
+    if (matches.length > 0 && currentTab === 'analisi') {
+        renderAnalisiAI(0);
+    }
+</script>
+</body>
+</html>
