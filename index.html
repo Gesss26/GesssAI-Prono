@@ -29,6 +29,7 @@
             --tab-inactive: #334155;
             --home-btn: #f59e0b;
             --section-bg: #1a2744;
+            --pronostico-bg: #1e3a5f;
             --font-size-base: 16px;
             --select-bg: #1e293b;
             --select-border: #334155;
@@ -50,6 +51,7 @@
             --tab-inactive: #cbd5e1;
             --home-btn: #d97706;
             --section-bg: #f1f5f9;
+            --pronostico-bg: #dbeafe;
             --select-bg: #ffffff;
             --select-border: #e2e8f0;
         }
@@ -416,6 +418,195 @@
             border: 1px solid var(--card-border);
         }
 
+        .ai-container {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 16px;
+            border: 1px solid var(--card-border);
+            margin-top: 4px;
+        }
+        .ai-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .ai-header .match-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .ai-header .match-league {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: var(--badge-bg);
+            padding: 4px 14px;
+            border-radius: 30px;
+        }
+
+        .ai-rigenera {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        .ai-rigenera button {
+            background: var(--tab-active);
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ai-rigenera button:hover { transform: scale(1.02); opacity: 0.9; }
+        .ai-rigenera button:active { transform: scale(0.95); }
+        .ai-rigenera button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .ai-rigenera button .spinner-small {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .ai-weather {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--badge-bg);
+            padding: 12px 16px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .ai-weather .temp {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .ai-weather .city {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        .ai-weather .desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .ai-weather .weather-icon {
+            font-size: 1.75rem;
+        }
+
+        .ai-section {
+            background: var(--section-bg);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--tab-active);
+        }
+        .ai-section .section-title {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ai-section .section-content {
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .ai-section .section-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            margin-top: 4px;
+        }
+        .ai-section .section-content table th {
+            text-align: left;
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 3px 5px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .ai-section .section-content table td {
+            padding: 3px 5px;
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-primary);
+        }
+        .ai-section .section-content table tr.gold td {
+            background: var(--gold);
+            color: #000;
+            font-weight: 700;
+        }
+
+        .ai-forma-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 4px 0;
+            flex-wrap: wrap;
+        }
+        .ai-forma-row .team-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 80px;
+            font-size: 0.8rem;
+        }
+        .ai-forma-row .forma-box-small {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.65rem;
+            color: #000;
+            background: #6b7280;
+        }
+        .ai-forma-row .forma-box-small.V { background: #22c55e; }
+        .ai-forma-row .forma-box-small.P { background: #eab308; }
+        .ai-forma-row .forma-box-small.S { background: #ef4444; }
+        .ai-forma-row .forma-box-small.\- { background: #6b7280; color: #fff; }
+
+        .ai-loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        .ai-loading .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid var(--badge-bg);
+            border-top-color: var(--tab-active);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
         .home-btn {
             position: fixed;
             bottom: 20px;
@@ -503,7 +694,28 @@
             font-weight: 600;
         }
 
-        /* Modal telefono */
+        .simulate-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            color: #fff;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 99;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .simulate-btn:hover { transform: scale(1.1); }
+        .simulate-btn:active { transform: scale(0.9); }
+
         .phone-simulator-overlay {
             display: none;
             position: fixed;
@@ -631,28 +843,6 @@
         .file-upload-area .file-status.success { color: #22c55e; }
         .file-upload-area .file-status.error { color: #ef4444; }
 
-        .simulate-btn {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: #8b5cf6;
-            color: #fff;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 99;
-            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .simulate-btn:hover { transform: scale(1.1); }
-        .simulate-btn:active { transform: scale(0.9); }
-
         @media (max-width: 480px) {
             .top-bar { flex-direction: column; align-items: stretch; gap: 8px; }
             .datetime { justify-content: space-between; }
@@ -675,7 +865,6 @@
 </head>
 <body>
 
-<!-- Modal telefono -->
 <div class="phone-simulator-overlay" id="phoneSimulator">
     <div class="phone-frame">
         <div class="notch"></div>
@@ -691,6 +880,7 @@
     </div>
     <div class="tabs" id="tabContainer">
         <button class="tab-btn active" data-tab="palinsesto">📋 Palinsesto</button>
+        <button class="tab-btn" data-tab="analisi">🧠 Analisi AI</button>
         <button class="tab-btn" data-tab="impostazioni">⚙️ Impostazioni</button>
     </div>
 </div>
@@ -710,8 +900,17 @@
     <div class="grid-cards" id="cardsContainer"></div>
 </div>
 
+<div class="tab-content" id="tab-analisi">
+    <div id="aiContent">
+        <div class="ai-loading">
+            <div class="spinner"></div>
+            <p>Seleziona una partita per l'analisi AI</p>
+        </div>
+    </div>
+</div>
+
 <div class="tab-content" id="tab-impostazioni">
-    <div class="ai-container" style="background:var(--card-bg);border-radius:18px;padding:16px;border:1px solid var(--card-border);">
+    <div class="ai-container">
         <h3 style="font-size:1rem;margin-bottom:12px;color:var(--text-primary);">⚙️ Impostazioni</h3>
 
         <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">📂 Carica Dati da Excel (Prono.xlsx)</label>
@@ -743,7 +942,28 @@
             <div class="font-size-example">Esempio: <span>Testo di prova</span> — <span style="font-weight:400;color:var(--text-secondary);">Tutte le scritte si ridimensionano</span></div>
         </div>
 
-        <button id="saveSettings" style="width:100%;padding:12px;border-radius:30px;border:none;background:#3b82f6;color:#fff;font-weight:600;font-size:0.95rem;cursor:pointer;margin-top:8px;">💾 Salva Impostazioni</button>
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">GROQ API Key</label>
+        <input type="text" id="groqKey" placeholder="Inserisci API Key GROQ" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-size:0.85rem;outline:none;margin-bottom:4px;">
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:8px;">✅ API Key salvata localmente</div>
+
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">Modello GROQ</label>
+        <select id="groqModel" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-size:0.85rem;outline:none;margin-bottom:8px;">
+            <option value="llama3-8b-8192">🦙 Llama 3 8B</option>
+            <option value="llama3-70b-8192">🦙 Llama 3 70B</option>
+            <option value="mixtral-8x7b-32768">🧠 Mixtral 8x7B</option>
+            <option value="gemma-7b-it">🔵 Gemma 7B</option>
+            <option value="gemma2-9b-it">🔵 Gemma 2 9B</option>
+            <option value="llama-3.1-8b-instant" selected>🦙 Llama 3.1 8B</option>
+            <option value="llama-3.1-70b-versatile">🦙 Llama 3.1 70B</option>
+        </select>
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:12px;">✅ Modello salvato localmente</div>
+
+        <label style="display:block;font-size:0.8rem;font-weight:500;color:var(--text-secondary);margin:10px 0 4px;">World Weather Online API Key</label>
+        <input type="text" id="weatherKey" placeholder="Inserisci API Key Weather" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--card-border);background:var(--bg);color:var(--text-primary);font-size:0.85rem;outline:none;margin-bottom:4px;">
+        <div style="font-size:0.75rem;color:var(--text-secondary);margin-bottom:16px;">✅ API Key salvata localmente</div>
+
+        <button id="testGroqBtn" style="width:100%;padding:12px;border-radius:30px;border:none;background:#f59e0b;color:#000;font-weight:600;font-size:0.95rem;cursor:pointer;margin-bottom:8px;">🔍 Test Connessione GROQ</button>
+        <button id="saveSettings" style="width:100%;padding:12px;border-radius:30px;border:none;background:#3b82f6;color:#fff;font-weight:600;font-size:0.95rem;cursor:pointer;">💾 Salva Impostazioni</button>
     </div>
 </div>
 
@@ -757,8 +977,12 @@
     let matchesData = [];
     let standings = [];
     let teamCityMap = {};
+    let matches = [];
+    let currentFilter = 'all';
+    let currentMatchIndex = 0;
+    let currentTab = 'palinsesto';
 
-    // Dati di default minimi (vuoti, verranno sovrascritti da Excel)
+    // Dati di default (esempio)
     const defaultMatches = [
         { campionato: 'Serie A', giornata: 1, data: '2026-07-24', ora: '20:45', casa: 'Juventus', ospite: 'Milan' },
         { campionato: 'Serie A', giornata: 1, data: '2026-07-25', ora: '18:00', casa: 'Inter', ospite: 'Roma' },
@@ -766,11 +990,10 @@
     const defaultStandings = [
         { campionato: 'Serie A', squadra: 'Juventus', pos: 1, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
         { campionato: 'Serie A', squadra: 'Milan', pos: 2, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Serie A', squadra: 'Inter', pos: 3, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
+        { campionato: 'Serie A', squadra: 'Roma', pos: 4, punti: 0, pg: 0, v: 0, p: 0, s: 0, gf: 0, gs: 0, diff: 0, xg: 0, forma: '' },
     ];
     const defaultTeamCity = { 'Juventus': 'Torino', 'Milan': 'Milano', 'Inter': 'Milano', 'Roma': 'Roma' };
-
-    let matches = [];
-    let currentFilter = 'all';
 
     // ================================================================
     // FUNZIONI STATISTICHE
@@ -793,9 +1016,18 @@
     }
 
     function formatDate(dateStr) {
-        const parts = dateStr.split('-');
-        if (parts.length !== 3) return dateStr;
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        if (!dateStr) return '';
+        // Se è già in formato YYYY-MM-DD
+        if (dateStr.match(/^\d{4}-\d{2}-\d{2}/)) {
+            const parts = dateStr.split('-');
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        // Se è in formato DD/MM/YYYY
+        if (dateStr.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+            const parts = dateStr.split('/');
+            return `${parts[0]}/${parts[1]}/${parts[2]}`;
+        }
+        return dateStr;
     }
 
     function calculateFormScore(forma) {
@@ -918,12 +1150,25 @@
     }
 
     // ================================================================
-    // FILTRO PARTITE
+    // FILTRO PARTITE - CORRETTO per il formato delle date
     // ================================================================
 
     function filterMatchesByDate() {
         const { oggi, domani, dopoDomani } = getTodayAndTomorrow();
-        matches = matchesData.filter(m => m.data === oggi || m.data === domani || m.data === dopoDomani);
+        
+        matches = matchesData.filter(m => {
+            // Estrai solo la data (YYYY-MM-DD) da eventuali timestamp
+            let dataMatch = m.data;
+            if (dataMatch && dataMatch.includes(' ')) {
+                dataMatch = dataMatch.split(' ')[0];
+            }
+            // Se la data è in formato DD/MM/YYYY, converti in YYYY-MM-DD
+            if (dataMatch && dataMatch.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+                const parts = dataMatch.split('/');
+                dataMatch = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            return dataMatch === oggi || dataMatch === domani || dataMatch === dopoDomani;
+        });
         matches.sort((a, b) => (a.data + a.ora).localeCompare(b.data + b.ora));
     }
 
@@ -964,7 +1209,6 @@
             const under45 = under45Percent(homeStats, awayStats);
             const over15 = over15Percent(homeStats, awayStats);
             
-            // FORMA - tutti e 5 sulla stessa riga
             const homeBoxes = formaBoxes(homeStats.forma);
             const awayBoxes = formaBoxes(awayStats.forma);
             
@@ -996,13 +1240,19 @@
 
             let dataDisplay = formatDate(match.data);
             let badgeClass = '';
-            if (match.data === oggi) {
+            let dataMatch = match.data;
+            if (dataMatch && dataMatch.includes(' ')) dataMatch = dataMatch.split(' ')[0];
+            if (dataMatch && dataMatch.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+                const parts = dataMatch.split('/');
+                dataMatch = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            }
+            if (dataMatch === oggi) {
                 dataDisplay = '🔴 OGGI ' + dataDisplay;
                 badgeClass = 'today-badge';
-            } else if (match.data === domani) {
+            } else if (dataMatch === domani) {
                 dataDisplay = '🟡 DOMANI ' + dataDisplay;
                 badgeClass = 'tomorrow-badge';
-            } else if (match.data === dopoDomani) {
+            } else if (dataMatch === dopoDomani) {
                 dataDisplay = '🔵 DOPODOMANI ' + dataDisplay;
                 badgeClass = 'dayafter-badge';
             }
@@ -1024,7 +1274,6 @@
                         <span class="vs">vs</span>
                         <span class="away">${match.ospite}</span>
                     </div>
-                    <!-- STATO FORMA - UNA RIGA PER SQUADRA -->
                     <div class="forme">
                         <div class="forma-badge">${homeBoxes}</div>
                         <div class="forma-badge">${awayBoxes}</div>
@@ -1068,6 +1317,18 @@
             `;
         });
         container.innerHTML = html;
+
+        // Click sulle card -> apre analisi AI
+        document.querySelectorAll('.card').forEach(el => {
+            el.addEventListener('click', function() {
+                const idx = parseInt(this.dataset.index);
+                if (!isNaN(idx)) {
+                    currentMatchIndex = idx;
+                    switchTab('analisi');
+                    renderAnalisiAI(idx);
+                }
+            });
+        });
     }
 
     // ================================================================
@@ -1085,6 +1346,422 @@
             select.appendChild(option);
         });
         select.value = currentFilter;
+    }
+
+    // ================================================================
+    // GENERAZIONE STATISTICHE PER IL PROMPT
+    // ================================================================
+
+    function generateStatsForPrompt(match) {
+        const homeStats = getTeamStats(match.campionato, match.casa);
+        const awayStats = getTeamStats(match.campionato, match.ospite);
+
+        const homeMediaFatti = homeStats.pg > 0 ? (homeStats.gf / homeStats.pg).toFixed(2) : 'N/D';
+        const homeMediaSubiti = homeStats.pg > 0 ? (homeStats.gs / homeStats.pg).toFixed(2) : 'N/D';
+        const homeMediaTotali = homeStats.pg > 0 ? ((homeStats.gf + homeStats.gs) / homeStats.pg).toFixed(2) : 'N/D';
+        const awayMediaFatti = awayStats.pg > 0 ? (awayStats.gf / awayStats.pg).toFixed(2) : 'N/D';
+        const awayMediaSubiti = awayStats.pg > 0 ? (awayStats.gs / awayStats.pg).toFixed(2) : 'N/D';
+        const awayMediaTotali = awayStats.pg > 0 ? ((awayStats.gf + awayStats.gs) / awayStats.pg).toFixed(2) : 'N/D';
+
+        const formaHome = homeStats.forma || '';
+        const formaAway = awayStats.forma || '';
+        const puntiHome = formaHome ? formaHome.split(' ').filter(c => c === 'W').length * 3 + formaHome.split(' ').filter(c => c === 'D').length * 1 : 0;
+        const puntiAway = formaAway ? formaAway.split(' ').filter(c => c === 'W').length * 3 + formaAway.split(' ').filter(c => c === 'D').length * 1 : 0;
+        const percPuntiHome = formaHome ? Math.round((puntiHome / 15) * 100) : 0;
+        const percPuntiAway = formaAway ? Math.round((puntiAway / 15) * 100) : 0;
+
+        const trendHome = percPuntiHome >= 80 ? '📈 In crescita' : percPuntiHome >= 50 ? '📊 Stabile' : '📉 In calo';
+        const trendAway = percPuntiAway >= 80 ? '📈 In crescita' : percPuntiAway >= 50 ? '📊 Stabile' : '📉 In calo';
+
+        return {
+            homeStats, awayStats,
+            homeMediaFatti, homeMediaSubiti, homeMediaTotali,
+            awayMediaFatti, awayMediaSubiti, awayMediaTotali,
+            percPuntiHome, percPuntiAway,
+            trendHome, trendAway,
+            formaHome, formaAway
+        };
+    }
+
+    // ================================================================
+    // GENERAZIONE REPORT FALLBACK (senza GROQ)
+    // ================================================================
+
+    function generateFallbackReport(match, stats) {
+        const { homeStats, awayStats, homeMediaFatti, homeMediaSubiti, homeMediaTotali, awayMediaFatti, awayMediaSubiti, awayMediaTotali, percPuntiHome, percPuntiAway, trendHome, trendAway } = stats;
+
+        const homeMulti = multiGoalValues(homeStats);
+        const awayMulti = multiGoalValues(awayStats);
+
+        const totalGoals = (parseInt(homeStats.gf) || 0) + (parseInt(homeStats.gs) || 0) + (parseInt(awayStats.gf) || 0) + (parseInt(awayStats.gs) || 0);
+        const mediaGol = homeStats.pg > 0 && awayStats.pg > 0 ? totalGoals / (homeStats.pg + awayStats.pg) : 0;
+        
+        const over15 = Math.min(100, Math.round((mediaGol / 5) * 100 + 10));
+        const over25 = Math.min(100, Math.round((mediaGol / 4) * 100 + 5));
+        const under35 = Math.min(100, Math.round(100 - (mediaGol / 4) * 80));
+        const under45 = Math.min(100, Math.round(100 - (mediaGol / 5) * 60));
+
+        const vittorieCasa = parseInt(homeStats.v) || 0;
+        const vittorieOspite = parseInt(awayStats.v) || 0;
+        const totalePartite = (parseInt(homeStats.pg) || 0) + (parseInt(awayStats.pg) || 0);
+        const giocata1 = totalePartite > 0 ? Math.round(((vittorieCasa + vittorieOspite) / totalePartite * 100 + under45) / 2) : 50;
+
+        const multiCasa13 = homeMulti.p13 || 0;
+        const multiOspite13 = awayMulti.p13 || 0;
+        const giocata2 = Math.round((multiCasa13 + multiOspite13) / 2);
+
+        const doppieChance = [
+            { nome: '1X', valore: Math.round((parseInt(homeStats.punti) || 0) / (parseInt(homeStats.pg) || 1) * 2 + 20) },
+            { nome: '12', valore: Math.round(((parseInt(homeStats.punti) || 0) + (parseInt(awayStats.punti) || 0)) / (parseInt(homeStats.pg) || 1 + parseInt(awayStats.pg) || 1) * 2 + 15) },
+            { nome: 'X2', valore: Math.round((parseInt(awayStats.punti) || 0) / (parseInt(awayStats.pg) || 1) * 2 + 20) }
+        ];
+        const multigolTotali = [
+            { nome: 'Over 1.5', valore: over15 },
+            { nome: '1-4', valore: Math.round((homeMulti.p02 + awayMulti.p02 + homeMulti.p13 + awayMulti.p13) / 4) },
+            { nome: '2-5', valore: Math.round((homeMulti.p13 + awayMulti.p13 + homeMulti.p25 + awayMulti.p25) / 4) }
+        ];
+        
+        let bestCombo = { nome: '12+Under4.5', valore: giocata1 };
+        doppieChance.forEach(dc => {
+            multigolTotali.forEach(mg => {
+                const comboVal = Math.round((dc.valore + mg.valore) / 2);
+                if (comboVal > bestCombo.valore) {
+                    bestCombo = { nome: dc.nome + ' + ' + mg.nome, valore: comboVal };
+                }
+            });
+        });
+
+        const homeWin = Math.min(100, Math.max(5, Math.round((parseInt(homeStats.punti) || 0) * 3.5 + (parseInt(homeStats.diff) || 0) * 1.2)));
+        const awayWin = Math.min(100, Math.max(5, Math.round((parseInt(awayStats.punti) || 0) * 3.5 + (parseInt(awayStats.diff) || 0) * 1.2)));
+        let draw = Math.max(5, 100 - homeWin - awayWin);
+        if (draw < 5) draw = 5;
+        const sum = homeWin + awayWin + draw;
+        const homeP = Math.round((homeWin / sum) * 100);
+        const awayP = Math.round((awayWin / sum) * 100);
+        const drawP = Math.round((draw / sum) * 100);
+        
+        let pronostico = 'X';
+        let pronPerc = drawP;
+        if (homeP > awayP && homeP > drawP) { pronostico = '1'; pronPerc = homeP; }
+        else if (awayP > homeP && awayP > drawP) { pronostico = '2'; pronPerc = awayP; }
+
+        const sicurezza = Math.min(100, Math.round(pronPerc + 10));
+
+        function getFormaBoxes(forma) {
+            if (!forma || forma === '') {
+                return '⬜⬜⬜⬜⬜';
+            }
+            return forma.split(' ').map(c => {
+                if (c === 'W') return '🟩';
+                if (c === 'D') return '🟨';
+                if (c === 'L') return '🟥';
+                return '⬜';
+            }).join('');
+        }
+
+        const homeFormaEmoji = getFormaBoxes(homeStats.forma);
+        const awayFormaEmoji = getFormaBoxes(awayStats.forma);
+
+        return `
+## 📊 STATO DI FORMA
+
+**${match.casa}**: ${homeFormaEmoji} ${homeStats.forma || 'N/D'} | Punti ultimi 5: ${percPuntiHome}% | ${trendHome}
+**${match.ospite}**: ${awayFormaEmoji} ${awayStats.forma || 'N/D'} | Punti ultimi 5: ${percPuntiAway}% | ${trendAway}
+
+---
+
+## 📊 MEDIA GOL
+
+| Squadra | Gol Fatti | Gol Subiti | Totale | xG |
+|---------|-----------|------------|--------|-----|
+| ${match.casa} | ${homeMediaFatti} | ${homeMediaSubiti} | ${homeMediaTotali} | ${homeStats.xg || 'N/D'} |
+| ${match.ospite} | ${awayMediaFatti} | ${awayMediaSubiti} | ${awayMediaTotali} | ${awayStats.xg || 'N/D'} |
+
+---
+
+## 📊 RANGE GOL PIÙ FREQUENTE
+
+**${match.casa}**: 0-2: ${homeMulti.p02}% | 1-3: ${homeMulti.p13}% | Over 1.5: ${Math.round((homeMulti.p13 + homeMulti.p25) / 2)}%
+**${match.ospite}**: 0-2: ${awayMulti.p02}% | 1-3: ${awayMulti.p13}% | Over 1.5: ${Math.round((awayMulti.p13 + awayMulti.p25) / 2)}%
+
+---
+
+## 📊 MULTIGOL CASA/OSPITE
+
+| Squadra | 0-2 | 1-3 | 2-5 |
+|---------|-----|-----|-----|
+| ${match.casa} | ${homeMulti.p02}% | ${homeMulti.p13}% | ${homeMulti.p25}% |
+| ${match.ospite} | ${awayMulti.p02}% | ${awayMulti.p13}% | ${awayMulti.p25}% |
+
+---
+
+## 📊 UNDER/OVER
+
+- Over 1.5: ${over15}%
+- Over 2.5: ${over25}%
+- Under 3.5: ${under35}%
+- Under 4.5: ${under45}%
+
+---
+
+## 📈 DETTAGLIO 3 GIOCATE
+
+**GIOCATA 1 (12+U4.5)**: ${giocata1}%
+- Formula: (Vittorie Casa ${vittorieCasa} + Vittorie Ospite ${vittorieOspite}) / Partite Totali ${totalePartite} * 100 + Under 4.5 ${under45}% / 2
+
+**GIOCATA 2 (COMBINATA)**: ${giocata2}%
+- Multigol 1-3 Casa: ${multiCasa13}% | Multigol 1-3 Ospite: ${multiOspite13}%
+- Media: (${multiCasa13} + ${multiOspite13}) / 2 = ${giocata2}%
+
+**GIOCATA 3 (LIBERA)**: ${bestCombo.nome} = ${bestCombo.valore}%
+
+---
+
+## 💰 CONSIGLI DI TRADING
+
+| # | Giocata | Percentuale |
+|---|---------|-------------|
+| 1 | 12+Under 4.5 | ${giocata1}% |
+| 2 | Multigol 1-3 Media | ${giocata2}% |
+| 3 | ${bestCombo.nome} | ${bestCombo.valore}% |
+
+**🎯 PRONOSTICO 1X2**: ${pronostico} (${pronPerc}%)
+**🎯 SICUREZZA**: ${sicurezza}% ${sicurezza >= 60 ? '✅ Alta' : sicurezza >= 40 ? '⚠️ Media' : '❌ Bassa'}
+
+---
+
+## 📊 VALUTAZIONE FINALE
+
+- **Score Generale**: ${Math.round((giocata1 + giocata2 + bestCombo.valore) / 3)}%
+- **Indice Rischio**: ${sicurezza >= 70 ? '🟢 Basso' : sicurezza >= 50 ? '🟡 Medio' : '🔴 Alto'}
+- **Affidabilità**: ${sicurezza >= 70 ? '✅ Alta' : sicurezza >= 50 ? '⚠️ Media' : '❌ Bassa'}
+
+---
+*Report generato automaticamente in base ai dati statistici disponibili.*`;
+    }
+
+    function formatReportToHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>')
+            .replace(/## (.*?)(<br>|$)/g, '<br><strong style="font-size:1.1rem;color:var(--text-primary);">📌 $1</strong><br>')
+            .replace(/### (.*?)(<br>|$)/g, '<br><strong style="font-size:0.95rem;color:var(--text-secondary);">$1</strong><br>')
+            .replace(/---/g, '<hr style="border-color:var(--card-border);margin:8px 0;">')
+            .replace(/\|/g, ' | ')
+            .replace(/🟩/g, '<span style="display:inline-block;width:18px;height:18px;background:#22c55e;border-radius:4px;margin:0 1px;"></span>')
+            .replace(/🟨/g, '<span style="display:inline-block;width:18px;height:18px;background:#eab308;border-radius:4px;margin:0 1px;"></span>')
+            .replace(/🟥/g, '<span style="display:inline-block;width:18px;height:18px;background:#ef4444;border-radius:4px;margin:0 1px;"></span>')
+            .replace(/⬜/g, '<span style="display:inline-block;width:18px;height:18px;background:#6b7280;border-radius:4px;margin:0 1px;"></span>');
+    }
+
+    // ================================================================
+    // RENDER ANALISI AI
+    // ================================================================
+
+    async function renderAnalisiAI(index) {
+        const container = document.getElementById('aiContent');
+        const match = matches[index];
+        if (!match) {
+            container.innerHTML = `<div class="ai-loading"><p>Nessuna partita selezionata</p></div>`;
+            return;
+        }
+
+        currentMatchIndex = index;
+
+        const homeStats = getTeamStats(match.campionato, match.casa);
+        const awayStats = getTeamStats(match.campionato, match.ospite);
+        const homeCity = teamCityMap[match.casa] || match.casa;
+
+        const homeFormaBoxes = homeStats.forma ? homeStats.forma.split(' ').map(c => {
+            const letter = c === 'W' ? 'V' : c === 'D' ? 'P' : c === 'L' ? 'S' : '-';
+            return `<span class="forma-box-small ${letter}">${letter}</span>`;
+        }).join('') : '<span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span>';
+
+        const awayFormaBoxes = awayStats.forma ? awayStats.forma.split(' ').map(c => {
+            const letter = c === 'W' ? 'V' : c === 'D' ? 'P' : c === 'L' ? 'S' : '-';
+            return `<span class="forma-box-small ${letter}">${letter}</span>`;
+        }).join('') : '<span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span><span class="forma-box-small">-</span>';
+
+        const allStandings = standings.filter(s => s.campionato === match.campionato);
+        allStandings.sort((a, b) => (parseInt(b.punti) || 0) - (parseInt(a.punti) || 0));
+        
+        let standingsHtml = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pos</th>
+                        <th>Squadra</th>
+                        <th>PG</th>
+                        <th>V</th>
+                        <th>P</th>
+                        <th>S</th>
+                        <th>GF</th>
+                        <th>GS</th>
+                        <th>Diff</th>
+                        <th>xG</th>
+                        <th>Pti</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        allStandings.forEach(s => {
+            const isGold = s.squadra === match.casa || s.squadra === match.ospite;
+            standingsHtml += `
+                <tr class="${isGold ? 'gold' : ''}">
+                    <td>${s.pos}</td>
+                    <td>${s.squadra}</td>
+                    <td>${s.pg}</td>
+                    <td>${s.v}</td>
+                    <td>${s.p}</td>
+                    <td>${s.s}</td>
+                    <td>${s.gf}</td>
+                    <td>${s.gs}</td>
+                    <td>${s.diff}</td>
+                    <td>${s.xg}</td>
+                    <td>${s.punti}</td>
+                </tr>
+            `;
+        });
+        standingsHtml += '</tbody></table>';
+
+        const stats = generateStatsForPrompt(match);
+
+        let htmlContent = `
+            <div class="ai-container">
+                <div class="ai-header">
+                    <span class="match-title">${match.casa} vs ${match.ospite}</span>
+                    <span class="match-league">${match.campionato}</span>
+                </div>
+                
+                <div class="ai-rigenera">
+                    <button id="rigeneraBtn" onclick="handleRigenera()">
+                        🔄 Rigenera Pronostico
+                    </button>
+                </div>
+
+                <div class="ai-weather" id="weatherDisplay">
+                    <span class="weather-icon">🌤️</span>
+                    <span class="temp" id="weatherTemp">⏳ Caricamento...</span>
+                    <span class="city">📍 ${homeCity}</span>
+                    <span class="desc" id="weatherDesc"></span>
+                </div>
+
+                <div class="ai-section" style="border-left-color: var(--gold);">
+                    <div class="section-title">🏆 CLASSIFICA ${match.campionato}</div>
+                    <div class="section-content">${standingsHtml}</div>
+                </div>
+
+                <div class="ai-section" style="border-left-color: #f59e0b;">
+                    <div class="section-title">📊 STATO DI FORMA</div>
+                    <div class="section-content">
+                        <div class="ai-forma-row">
+                            <span class="team-name">${match.casa}</span>
+                            ${homeFormaBoxes}
+                            <span style="color:var(--text-secondary);font-size:0.8rem;">${homeStats.forma || 'N/D'}</span>
+                            <span style="color:var(--text-secondary);font-size:0.8rem;">| Punti: ${stats.percPuntiHome}% | ${stats.trendHome}</span>
+                        </div>
+                        <div class="ai-forma-row">
+                            <span class="team-name">${match.ospite}</span>
+                            ${awayFormaBoxes}
+                            <span style="color:var(--text-secondary);font-size:0.8rem;">${awayStats.forma || 'N/D'}</span>
+                            <span style="color:var(--text-secondary);font-size:0.8rem;">| Punti: ${stats.percPuntiAway}% | ${stats.trendAway}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-section">
+                    <div class="section-title">📊 STATISTICHE CHIAVE</div>
+                    <div class="section-content">
+                        <strong>${match.casa}:</strong> Punti ${homeStats.punti} | Pos. ${homeStats.pos} | PG ${homeStats.pg} | V${homeStats.v}-P${homeStats.p}-S${homeStats.s} | GF ${homeStats.gf} | GS ${homeStats.gs} | Diff ${homeStats.diff} | xG ${homeStats.xg}<br>
+                        <strong>${match.ospite}:</strong> Punti ${awayStats.punti} | Pos. ${awayStats.pos} | PG ${awayStats.pg} | V${awayStats.v}-P${awayStats.p}-S${awayStats.s} | GF ${awayStats.gf} | GS ${awayStats.gs} | Diff ${awayStats.diff} | xG ${awayStats.xg}<br>
+                        <strong>Media Gol Casa:</strong> Fatti ${stats.homeMediaFatti} | Subiti ${stats.homeMediaSubiti} | Totali ${stats.homeMediaTotali}<br>
+                        <strong>Media Gol Ospite:</strong> Fatti ${stats.awayMediaFatti} | Subiti ${stats.awayMediaSubiti} | Totali ${stats.awayMediaTotali}
+                    </div>
+                </div>
+
+                <div id="aiReportContainer">
+                    <div class="ai-loading">
+                        <div class="spinner"></div>
+                        <p>🧠 Generando analisi...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = htmlContent;
+
+        // Meteo
+        const weatherKey = localStorage.getItem('weatherApiKey') || 'd8df501134ef44eab6515526262007';
+        let weatherTemp = '--°C', weatherDesc = '--', weatherIcon = '🌤️';
+        try {
+            const weatherUrl = `https://api.worldweatheronline.com/premium/v1/weather.ashx?key=${weatherKey}&q=${encodeURIComponent(homeCity)}&format=json&num_of_days=1&tp=24`;
+            const weatherRes = await fetch(weatherUrl);
+            const weatherData = await weatherRes.json();
+            if (weatherData.data && weatherData.data.current_condition) {
+                const current = weatherData.data.current_condition[0];
+                weatherTemp = current.temp_C ? `${current.temp_C}°C` : '--°C';
+                weatherDesc = current.weatherDesc ? current.weatherDesc[0].value : '--';
+                const code = current.weatherCode || '113';
+                weatherIcon = getWeatherIcon(code);
+            }
+        } catch (e) {}
+
+        document.getElementById('weatherTemp').textContent = weatherTemp;
+        document.getElementById('weatherDesc').textContent = weatherDesc;
+        document.querySelector('#weatherDisplay .weather-icon').textContent = weatherIcon;
+
+        // Genera report (sempre fallback locale, nessuna GROQ)
+        const fallbackReport = generateFallbackReport(match, stats);
+        const reportHtml = formatReportToHtml(fallbackReport);
+
+        const finalContainer = document.getElementById('aiReportContainer');
+        if (finalContainer) {
+            finalContainer.innerHTML = `
+                <div class="ai-section" style="border-left-color: #22c55e;">
+                    <div class="section-title">📋 REPORT ANALISI</div>
+                    <div class="section-content">${reportHtml}</div>
+                </div>
+            `;
+        }
+
+        const btn = document.getElementById('rigeneraBtn');
+        if (btn) {
+            btn.innerHTML = '🔄 Rigenera Pronostico';
+            btn.disabled = false;
+        }
+    }
+
+    window.handleRigenera = function() {
+        if (matches.length > 0 && currentMatchIndex < matches.length) {
+            renderAnalisiAI(currentMatchIndex);
+        } else if (matches.length > 0) {
+            currentMatchIndex = 0;
+            renderAnalisiAI(0);
+        }
+    };
+
+    // ================================================================
+    // ICONE METEO
+    // ================================================================
+
+    function getWeatherIcon(code) {
+        const icons = {
+            '113': '☀️', '116': '⛅', '119': '☁️', '122': '☁️',
+            '143': '🌫️', '176': '🌦️', '179': '🌨️', '182': '🌧️',
+            '185': '🌧️', '200': '⛈️', '227': '❄️', '230': '❄️',
+            '248': '🌫️', '260': '🌫️', '263': '🌦️', '266': '🌧️',
+            '281': '🌧️', '284': '🌧️', '293': '🌧️', '296': '🌧️',
+            '299': '🌧️', '302': '🌧️', '305': '🌧️', '308': '🌧️',
+            '311': '🌧️', '314': '🌧️', '317': '🌧️', '320': '🌨️',
+            '323': '❄️', '326': '❄️', '329': '❄️', '332': '❄️',
+            '335': '❄️', '338': '❄️', '350': '🌧️', '353': '🌦️',
+            '356': '🌧️', '359': '🌧️', '362': '🌨️', '365': '🌨️',
+            '368': '❄️', '371': '❄️', '374': '🌧️', '377': '🌧️',
+            '386': '⛈️', '389': '⛈️', '392': '⛈️', '395': '❄️'
+        };
+        return icons[code] || '🌤️';
     }
 
     // ================================================================
@@ -1107,14 +1784,26 @@
                     const sheet = workbook.Sheets['Partite'];
                     const json = XLSX.utils.sheet_to_json(sheet);
                     if (json && json.length > 0) {
-                        matchesData = json.map(row => ({
-                            campionato: String(row.Campionato || row.campionato || '').trim(),
-                            giornata: row.Giornata || row.giornata || '',
-                            data: String(row.Data || row.data || '').trim(),
-                            ora: String(row.Ora || row.ora || '').trim(),
-                            casa: String(row.Casa || row.casa || '').trim(),
-                            ospite: String(row.Ospite || row.ospite || '').trim()
-                        }));
+                        matchesData = json.map(row => {
+                            let dataVal = String(row.Data || row.data || '').trim();
+                            // Se la data contiene uno spazio, prendi solo la parte prima
+                            if (dataVal.includes(' ')) {
+                                dataVal = dataVal.split(' ')[0];
+                            }
+                            // Se è in formato DD/MM/YYYY, converti in YYYY-MM-DD
+                            if (dataVal.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+                                const parts = dataVal.split('/');
+                                dataVal = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                            }
+                            return {
+                                campionato: String(row.Campionato || row.campionato || '').trim(),
+                                giornata: row.Giornata || row.giornata || '',
+                                data: dataVal,
+                                ora: String(row.Ora || row.ora || '').trim(),
+                                casa: String(row.Casa || row.casa || '').trim(),
+                                ospite: String(row.Ospite || row.ospite || '').trim()
+                            };
+                        });
                         partiteLoaded = true;
                         console.log('✅ Partite caricate:', matchesData.length);
                     }
@@ -1178,6 +1867,12 @@
                     filterMatchesByDate();
                     populateFilter();
                     renderCards();
+                    
+                    // Se sono nella scheda analisi, ricarica
+                    if (currentTab === 'analisi' && matches.length > 0) {
+                        if (currentMatchIndex >= matches.length) currentMatchIndex = 0;
+                        renderAnalisiAI(currentMatchIndex);
+                    }
                 } else {
                     statusDisplay.textContent = '❌ Nessun dato valido trovato. Verifica i nomi dei fogli.';
                     statusDisplay.className = 'file-status error';
@@ -1234,7 +1929,7 @@
     });
 
     // ================================================================
-    // CARICA DATI DI DEFAULT (se nessun Excel caricato)
+    // CARICA DATI DI DEFAULT
     // ================================================================
 
     function loadDefaultData() {
@@ -1251,12 +1946,18 @@
     // ================================================================
 
     function switchTab(tab) {
+        currentTab = tab;
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.tab === tab);
         });
         document.querySelectorAll('.tab-content').forEach(el => {
             el.classList.toggle('active', el.id === `tab-${tab}`);
         });
+        
+        if (tab === 'analisi' && matches.length > 0) {
+            if (currentMatchIndex >= matches.length) currentMatchIndex = 0;
+            renderAnalisiAI(currentMatchIndex);
+        }
     }
 
     // ================================================================
@@ -1277,7 +1978,7 @@
         const diffY = touchEndY - touchStartY;
 
         if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
-            const tabs = ['palinsesto', 'impostazioni'];
+            const tabs = ['palinsesto', 'analisi', 'impostazioni'];
             const currentIdx = tabs.indexOf(currentTab);
             if (diffX < 0 && currentIdx < tabs.length - 1) {
                 switchTab(tabs[currentIdx + 1]);
@@ -1332,9 +2033,26 @@
         applyFontSize(level);
     });
 
-    document.getElementById('saveSettings').addEventListener('click', () => {
-        alert('✅ Impostazioni salvate!');
+    document.getElementById('testGroqBtn').addEventListener('click', function() {
+        alert('🔍 Test GROQ - API Key: ' + (document.getElementById('groqKey').value ? '✅ Presente' : '❌ Assente'));
     });
+
+    document.getElementById('saveSettings').addEventListener('click', () => {
+        const groq = document.getElementById('groqKey').value.trim();
+        const model = document.getElementById('groqModel').value;
+        const weather = document.getElementById('weatherKey').value.trim();
+        if (groq) localStorage.setItem('groqApiKey', groq);
+        localStorage.setItem('groqModel', model);
+        if (weather) localStorage.setItem('weatherApiKey', weather);
+        alert('✅ Impostazioni salvate!');
+        if (currentTab === 'analisi' && matches.length > 0) {
+            renderAnalisiAI(currentMatchIndex);
+        }
+    });
+
+    document.getElementById('groqKey').value = localStorage.getItem('groqApiKey') || '';
+    document.getElementById('groqModel').value = localStorage.getItem('groqModel') || 'llama-3.1-8b-instant';
+    document.getElementById('weatherKey').value = localStorage.getItem('weatherApiKey') || 'd8df501134ef44eab6515526262007';
 
     // ================================================================
     // SIMULA TELEFONO
@@ -1362,6 +2080,7 @@
     }
 
     document.getElementById('simulateBtn').addEventListener('click', openPhoneSimulator);
+    window.closePhoneSimulator = closePhoneSimulator;
 
     // ================================================================
     // FILTRO
@@ -1387,7 +2106,14 @@
     // ================================================================
 
     document.getElementById('homeBtn').addEventListener('click', () => {
+        currentMatchIndex = 0;
         switchTab('palinsesto');
+        if (matches.length > 0) {
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.card');
+                if (cards[0]) cards[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
@@ -1401,7 +2127,7 @@
     updateClock();
     setInterval(updateClock, 1000);
 
-    // Carica dati di default (poi Excel li sovrascrive se caricato)
+    // Carica dati di default
     loadDefaultData();
 
     // Ricarica ogni 60 secondi
@@ -1413,9 +2139,8 @@
         }
     }, 60000);
 
-    // Esponi funzioni globali per onclick
-    window.closePhoneSimulator = closePhoneSimulator;
-    window.openPhoneSimulator = openPhoneSimulator;
+    // Aggiungi classe per lo stato forma su una riga
+    console.log('✅ App avviata!');
 </script>
 </body>
 </html>
