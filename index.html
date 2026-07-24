@@ -3,9 +3,50 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Calcio - Partite</title>
+    <title>⚽ Calcio - Excel</title>
+
+    <!-- PapaParse per CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js">
+    </script>
+
     <style>
-        /* ── Reset ── */
+        /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+           TEMI
+           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+        :root {
+            --bg: #0d0d0d;
+            --bg-card: #1a1a1a;
+            --border: #2a2a2a;
+            --text: #f0f0f0;
+            --text-secondary: #aaa;
+            --text-muted: #666;
+            --shadow: rgba(0, 0, 0, 0.5);
+            --input-bg: #2a2a2a;
+            --input-text: #fff;
+            --tab-active: #1a1a1a;
+            --tab-inactive: #111;
+            --accent: #66bb6a;
+            --accent-dark: #2e7d32;
+            --danger: #ef5350;
+            --warning: #ffa726;
+        }
+
+        body.light {
+            --bg: #f5f5f5;
+            --bg-card: #ffffff;
+            --border: #e0e0e0;
+            --text: #1a1a1a;
+            --text-secondary: #666;
+            --text-muted: #999;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --input-bg: #f0f0f0;
+            --input-text: #1a1a1a;
+            --tab-active: #ffffff;
+            --tab-inactive: #e8e8e8;
+            --accent: #2e7d32;
+            --accent-dark: #1b5e20;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,35 +55,155 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0d0d0d;
-            color: #f0f0f0;
-            padding: 16px 12px 40px;
+            background: var(--bg);
+            color: var(--text);
+            padding: 12px 12px 40px;
             min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
         }
 
-        h1 {
+        /* ── Header ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .header h1 {
             font-size: 22px;
             font-weight: 700;
-            margin-bottom: 18px;
-            letter-spacing: -0.3px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        h1 small {
+        .header h1 small {
             font-size: 14px;
             font-weight: 400;
-            color: #aaa;
+            color: var(--text-secondary);
         }
 
-        /* ── Card ── */
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--input-bg);
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn:hover {
+            transform: scale(1.03);
+            opacity: 0.85;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--accent-dark);
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+        }
+
+        /* ── Tabs ── */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--tab-inactive);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-secondary);
+            transition: all 0.3s;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+        .tab-btn.active {
+            background: var(--tab-active);
+            color: var(--text);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+        .tab-btn:hover:not(.active) {
+            color: var(--text);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ── Upload Area ── */
+        .upload-area {
+            background: var(--bg-card);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 20px 16px;
+            margin-bottom: 16px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        .upload-area.dragover {
+            border-color: var(--accent);
+        }
+        .upload-area .info {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        .upload-area .info .caricati {
+            color: var(--accent);
+        }
+        .upload-area input[type="file"] {
+            display: none;
+        }
+        .upload-area .btn-group {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* ── Card Partita ── */
         .card {
-            background: #1a1a1a;
+            background: var(--bg-card);
             border-radius: 16px;
             padding: 16px 14px 14px;
-            margin-bottom: 18px;
-            border: 1px solid #2a2a2a;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: background 0.3s;
         }
 
         .card-header {
@@ -50,21 +211,20 @@
             justify-content: space-between;
             align-items: center;
             font-size: 13px;
-            color: #aaa;
-            border-bottom: 1px solid #2a2a2a;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
             padding-bottom: 8px;
             margin-bottom: 12px;
         }
         .card-header .campionato {
-            color: #fff;
+            color: var(--text);
             font-weight: 600;
         }
         .card-header .data-ora {
-            color: #888;
+            color: var(--text-muted);
             font-size: 12px;
         }
 
-        /* ── Squadre ── */
         .squadre {
             display: flex;
             align-items: center;
@@ -102,19 +262,18 @@
             line-height: 24px;
             text-align: center;
             border-radius: 6px;
-            background: #222;
+            background: var(--input-bg);
             font-size: 14px;
         }
 
         .vs {
             font-size: 20px;
             font-weight: 700;
-            color: #555;
+            color: var(--text-muted);
             padding: 0 2px;
             flex-shrink: 0;
         }
 
-        /* ── Barre percentuali ── */
         .barra-wrap {
             width: 100%;
             max-width: 160px;
@@ -123,11 +282,11 @@
 
         .barra {
             height: 18px;
-            background: #2a2a2a;
+            background: var(--input-bg);
             border-radius: 20px;
             overflow: hidden;
             position: relative;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
         }
 
         .barra-fill {
@@ -154,52 +313,42 @@
             background: linear-gradient(90deg, #b71c1c, #ef5350);
         }
 
-        .barra-etichetta {
-            font-size: 12px;
-            font-weight: 600;
-            text-align: center;
-            margin-top: 2px;
-            color: #ccc;
-        }
-
-        /* ── Differenza Forma + xG ── */
         .diff-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 13px;
-            color: #bbb;
-            background: #222;
+            color: var(--text-secondary);
+            background: var(--input-bg);
             border-radius: 10px;
             padding: 6px 12px;
             margin: 6px 0 10px;
         }
         .diff-row .diff {
             font-weight: 700;
-            color: #fff;
+            color: var(--text);
         }
         .diff-row .diff.positiva {
-            color: #66bb6a;
+            color: var(--accent);
         }
         .diff-row .diff.negativa {
-            color: #ef5350;
+            color: var(--danger);
         }
         .diff-row .xg {
-            color: #888;
+            color: var(--text-muted);
             font-size: 12px;
         }
         .diff-row .xg strong {
-            color: #ddd;
+            color: var(--text);
         }
 
-        /* ── Stats ── */
         .stats {
             display: flex;
             flex-wrap: wrap;
             gap: 6px 14px;
             font-size: 12.5px;
-            color: #aaa;
-            border-top: 1px solid #2a2a2a;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
             padding-top: 10px;
             margin-top: 2px;
         }
@@ -207,14 +356,37 @@
             white-space: nowrap;
         }
         .stats strong {
-            color: #fff;
+            color: var(--text);
             font-weight: 600;
         }
 
-        /* ── Loading ── */
+        .stats-scroll {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .stats-scroll::-webkit-scrollbar {
+            height: 2px;
+        }
+        .stats-scroll::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--input-bg);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-left: 8px;
+        }
+
         .loading {
             text-align: center;
-            color: #888;
+            color: var(--text-secondary);
             padding: 40px 0;
             font-size: 15px;
         }
@@ -222,8 +394,8 @@
             display: inline-block;
             width: 28px;
             height: 28px;
-            border: 3px solid #2a2a2a;
-            border-top-color: #66bb6a;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin-bottom: 12px;
@@ -243,36 +415,68 @@
             text-align: center;
             font-size: 14px;
         }
-
-        /* ── Utility ── */
-        .hidden {
-            display: none !important;
+        body.light .error {
+            background: #fff0f0;
+            border-color: #ffcccc;
+            color: #cc0000;
         }
-        .text-center {
-            text-align: center;
-        }
-        .mt-8 {
+        .error .dettaglio {
+            font-size: 12px;
+            color: var(--text-muted);
             margin-top: 8px;
         }
-        .gap-4 {
-            gap: 4px;
+
+        /* ── Analisi AI ── */
+        .ai-area {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+        .ai-area textarea {
+            width: 100%;
+            min-height: 120px;
+            background: var(--input-bg);
+            color: var(--input-text);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: background 0.3s, color 0.3s;
+        }
+        .ai-area textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .ai-area .response {
+            margin-top: 12px;
+            padding: 16px;
+            background: var(--input-bg);
+            border-radius: 10px;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .ai-area .response .loading-text {
+            color: var(--text-muted);
+        }
+        .ai-area .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .ai-area .btn-group .btn {
+            flex: 1;
+            min-width: 100px;
+            justify-content: center;
         }
 
-        /* ── Scroll orizzontale per stats su schermi piccoli ── */
-        .stats-scroll {
-            overflow-x: auto;
-            white-space: nowrap;
-            padding-bottom: 4px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .stats-scroll::-webkit-scrollbar {
-            height: 2px;
-        }
-        .stats-scroll::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 4px;
-        }
-
+        /* ── Responsive ── */
         @media (max-width: 420px) {
             .squadra .nome {
                 font-size: 14px;
@@ -284,70 +488,257 @@
                 font-size: 12px;
             }
             .barra-wrap {
-                max-width: 120px;
+                max-width: 100px;
             }
             .barra {
-                height: 16px;
+                height: 14px;
             }
             .barra-fill {
-                font-size: 9px;
+                font-size: 8px;
+                min-width: 20px;
             }
             .stats {
                 font-size: 11px;
-                gap: 4px 10px;
+                gap: 4px 8px;
             }
             .diff-row {
-                font-size: 12px;
+                font-size: 11px;
                 flex-wrap: wrap;
                 gap: 4px;
             }
+            .header h1 {
+                font-size: 18px;
+            }
+            .btn {
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+            .tab-btn {
+                font-size: 12px;
+                padding: 8px 12px;
+                min-width: 60px;
+            }
+        }
+
+        /* ── Utility ── */
+        .hidden {
+            display: none !important;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gap-8 {
+            gap: 8px;
+        }
+        .w-full {
+            width: 100%;
         }
     </style>
 </head>
 <body>
 
-    <h1>
-        ⚽ Partite
-        <small id="dataOggi"></small>
-    </h1>
-
-    <div id="container">
-        <div class="loading">
-            <div class="spinner"></div>
-            Caricamento partite...
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    HEADER
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="header">
+        <h1>
+            ⚽ Partite
+            <small id="dataOggi"></small>
+            <span class="badge" id="partiteCount">0 partite</span>
+        </h1>
+        <div class="header-actions">
+            <button class="btn btn-outline" onclick="toggleTema()" id="btnTema">🌙 Tema</button>
+            <button class="btn btn-primary" onclick="refreshDati()">🔄 Refresh</button>
         </div>
     </div>
 
-    <!-- ───────────────────────────────────────────────────────────── -->
-    <!-- PapaParse per leggere i CSV                                  -->
-    <!-- ───────────────────────────────────────────────────────────── -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js">
-    </script>
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    TABS
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="tab-palinsesto">📋 Palinsesto</button>
+        <button class="tab-btn" data-tab="tab-analisi">🧠 Analisi AI</button>
+        <button class="tab-btn" data-tab="tab-impostazioni">⚙️ Impostazioni</button>
+    </div>
 
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    TAB 1: PALINSESTO
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="tab-content active" id="tab-palinsesto">
+
+        <!-- Upload Area -->
+        <div class="upload-area" id="uploadArea">
+            <div class="btn-group">
+                <label class="btn btn-primary" for="fileClassifica">📊 Carica Classifica</label>
+                <label class="btn btn-primary" for="filePartite">📅 Carica Partite</label>
+            </div>
+            <div class="info">
+                <span id="statusClassifica">Classifica: ❌ non caricata</span><br>
+                <span id="statusPartite">Partite: ❌ non caricate</span>
+            </div>
+            <input type="file" id="fileClassifica" accept=".csv" />
+            <input type="file" id="filePartite" accept=".csv" />
+        </div>
+
+        <!-- Container Partite -->
+        <div id="container">
+            <div class="loading">
+                <div class="spinner"></div>
+                Carica i file CSV per iniziare<br>
+                <span style="font-size:13px;color:var(--text-muted);">
+                    Seleziona "Classifica.csv" e "Partite.csv"
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    TAB 2: ANALISI AI
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="tab-content" id="tab-analisi">
+        <div class="ai-area">
+            <h3 style="margin-bottom:10px;">🧠 Analisi AI con Groq</h3>
+            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:10px;">
+                Inserisci una domanda sulle partite o chiedi un'analisi.
+            </p>
+            <textarea id="aiPrompt" placeholder="Es: Analizza le partite di oggi...">Analizza le partite di oggi e dammi un pronostico basato sullo stato forma delle squadre.</textarea>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="callGroq()">🤖 Chiedi a Groq</button>
+                <button class="btn btn-outline" onclick="document.getElementById('aiPrompt').value='';document.getElementById('aiResponse').innerHTML='';">🗑️ Cancella</button>
+            </div>
+
+            <div id="aiResponse" class="response">
+                <span class="loading-text">💡 Fai una domanda per ricevere un'analisi...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    TAB 3: IMPOSTAZIONI
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <div class="tab-content" id="tab-impostazioni">
+        <div class="ai-area">
+            <h3 style="margin-bottom:16px;">⚙️ Impostazioni</h3>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-weight:600;margin-bottom:4px;color:var(--text-secondary);">
+                    🌓 Tema
+                </label>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn" onclick="setTema('dark')" id="btnDark">🌙 Scuro (Blu Notte)</button>
+                    <button class="btn" onclick="setTema('light')" id="btnLight">☀️ Chiaro</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-weight:600;margin-bottom:4px;color:var(--text-secondary);">
+                    🤖 Groq API Key
+                </label>
+                <input type="password" id="groqKey" placeholder="Inserisci la tua Groq API Key"
+                style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);
+                background:var(--input-bg);color:var(--input-text);font-size:14px;" />
+                <button class="btn btn-outline mt-8" onclick="salvaGroqKey()">💾 Salva</button>
+                <span id="groqStatus" style="color:var(--text-muted);font-size:12px;margin-left:8px;"></span>
+            </div>
+
+            <div>
+                <label style="display:block;font-weight:600;margin-bottom:4px;color:var(--text-secondary);">
+                    🌤️ World Weather Online API Key
+                </label>
+                <input type="password" id="weatherKey" placeholder="Inserisci la tua Weather API Key"
+                style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);
+                background:var(--input-bg);color:var(--input-text);font-size:14px;" />
+                <button class="btn btn-outline mt-8" onclick="salvaWeatherKey()">💾 Salva</button>
+                <span id="weatherStatus" style="color:var(--text-muted);font-size:12px;margin-left:8px;"></span>
+            </div>
+
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+                <button class="btn btn-danger" onclick="resetTutto()">🗑️ Reset Tutti i Dati</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    SCRIPT
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <script>
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  1.  CONFIGURAZIONE
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-        const FILE_CLASSIFICA = 'classifica.csv';
-        const FILE_PARTITE = 'partite.csv';
-
-        const MAPPA_ICONE = {
-            'W': '🟢',
-            'D': '🟡',
-            'L': '🔴'
-        };
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  2.  STATO GLOBALE
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  1.  STATO GLOBALE
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         let classifica = {};
         let partite = [];
+        let groqKey = '';
+        let weatherKey = '';
+        let temaCorrente = 'dark';
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  3.  FUNZIONI DI CALCOLO
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const MAPPA_ICONE = { 'W': '🟢', 'D': '🟡', 'L': '🔴' };
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  2.  TEMA
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function setTema(tema) {
+            temaCorrente = tema;
+            if (tema === 'light') {
+                document.body.classList.add('light');
+            } else {
+                document.body.classList.remove('light');
+            }
+            localStorage.setItem('tema', tema);
+            document.getElementById('btnTema').textContent = tema === 'light' ? '🌙 Scuro' : '☀️ Chiaro';
+        }
+
+        function toggleTema() {
+            const nuovo = temaCorrente === 'dark' ? 'light' : 'dark';
+            setTema(nuovo);
+        }
+
+        // Carica tema salvato
+        const temaSalvato = localStorage.getItem('tema');
+        if (temaSalvato) setTema(temaSalvato);
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  3.  API KEYS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        // Groq API Key
+        groqKey = localStorage.getItem('groqKey') || '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';
+        if (groqKey) document.getElementById('groqKey').value = groqKey;
+
+        function salvaGroqKey() {
+            groqKey = document.getElementById('groqKey').value.trim();
+            localStorage.setItem('groqKey', groqKey);
+            document.getElementById('groqStatus').textContent = groqKey ? '✅ Salvata' : '❌ Vuota';
+            setTimeout(() => document.getElementById('groqStatus').textContent = '', 3000);
+        }
+
+        // Weather API Key
+        weatherKey = localStorage.getItem('weatherKey') || 'd8df501134ef44eab6515526262007';
+        if (weatherKey) document.getElementById('weatherKey').value = weatherKey;
+
+        function salvaWeatherKey() {
+            weatherKey = document.getElementById('weatherKey').value.trim();
+            localStorage.setItem('weatherKey', weatherKey);
+            document.getElementById('weatherStatus').textContent = weatherKey ? '✅ Salvata' : '❌ Vuota';
+            setTimeout(() => document.getElementById('weatherStatus').textContent = '', 3000);
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  4.  FUNZIONI DI CALCOLO
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         function calcolaPercentualeForma(forma) {
             if (!forma || forma.length === 0) return 0;
@@ -395,13 +786,14 @@
             return 1.0;
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  4.  PARSING CSV
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  5.  PARSING CSV
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         function parseClassifica(csv) {
             const result = Papa.parse(csv, { delimiter: ';', header: true, skipEmptyLines: true });
             const rows = result.data;
+            const nuovaClassifica = {};
 
             rows.forEach(row => {
                 const nome = row.Squadra?.trim();
@@ -410,25 +802,22 @@
                 const formaRaw = row.Forma || '';
                 const forma = formaRaw.split(/\s+/).filter(s => s.length > 0);
 
-                const gf = parseFloat(row.GF) || 0;
-                const p = parseInt(row.P) || 0;
-
-                classifica[nome] = {
+                nuovaClassifica[nome] = {
                     forma: forma,
-                    gf: gf,
-                    p: p,
+                    gf: parseFloat(row.GF) || 0,
+                    p: parseInt(row.P) || 0,
                     punti: parseInt(row.Punti) || 0
                 };
             });
 
-            console.log(`📊 Classifica caricata: ${Object.keys(classifica).length} squadre`);
+            classifica = nuovaClassifica;
+            return Object.keys(classifica).length;
         }
 
         function parsePartite(csv) {
             const result = Papa.parse(csv, { delimiter: ';', header: true, skipEmptyLines: true });
             const rows = result.data;
-
-            partite = [];
+            const nuovePartite = [];
 
             rows.forEach(row => {
                 const campionato = row.Campionato || row[1] || '';
@@ -437,18 +826,11 @@
                 const casa = row.Casa || row[7] || '';
                 const ospite = row.Ospite || row[9] || '';
 
-                // ⭐ LEGGI TUTTE LE STATISTICHE
                 const under = parseFloat(row['Under 4,5'] || row['Under 4.5'] || row[18]) || 0;
                 const under12 = parseFloat(row['12+Under 4,5'] || row['12+Under 4.5'] || row[20]) || 0;
                 const over = parseFloat(row['Over 1,5'] || row['Over 1.5'] || row[21]) || 0;
                 const mg0_2 = parseFloat(row['0-2 Casa'] || row[22]) || 0;
                 const mg1_3 = parseFloat(row['1-3 Casa'] || row[23]) || 0;
-                const mg2_5 = parseFloat(row['2-5 Casa'] || row[24]) || 0;
-                const mg0_2O = parseFloat(row['0-2 Ospiti'] || row[25]) || 0;
-                const mg1_3O = parseFloat(row['1-3 Ospiti'] || row[26]) || 0;
-                const mg2_5O = parseFloat(row['2-5 Ospiti'] || row[27]) || 0;
-                const multigol1_4 = parseFloat(row['Multigol 1-4'] || row[28]) || 0;
-                const multigol2_5 = parseFloat(row['Multigol 2-5'] || row[29]) || 0;
 
                 if (!casa || casa === 'Casa' || casa === 'Home') return;
                 if (!ospite || ospite === 'Ospite' || ospite === 'Away') return;
@@ -461,7 +843,7 @@
                     }
                 }
 
-                partite.push({
+                nuovePartite.push({
                     campionato: campionato,
                     data: data,
                     dataRaw: dataRaw,
@@ -472,22 +854,17 @@
                     under12: under12,
                     over: over,
                     mg0_2: mg0_2,
-                    mg1_3: mg1_3,
-                    mg2_5: mg2_5,
-                    mg0_2O: mg0_2O,
-                    mg1_3O: mg1_3O,
-                    mg2_5O: mg2_5O,
-                    multigol1_4: multigol1_4,
-                    multigol2_5: multigol2_5
+                    mg1_3: mg1_3
                 });
             });
 
-            console.log(`📅 Partite caricate: ${partite.length}`);
+            partite = nuovePartite;
+            return partite.length;
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  5.  RENDERING HTML
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  6.  RENDERING
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         function renderCard(partita) {
             const formaCasa = trovaForma(partita.casa);
@@ -504,14 +881,10 @@
             const xgOspite = trovaXg(partita.ospite);
 
             const classeDiff = diff > 0 ? 'positiva' : diff < 0 ? 'negativa' : '';
-
             const widthCasa = Math.max(percCasa, 4);
             const widthOspite = Math.max(percOspite, 4);
 
-            // ⭐ USIAMO TUTTE LE STATISTICHE
             const underDisplay = partita.under || partita.under12 || 0;
-            const multigolDisplay = partita.multigol1_4 || partita.multigol2_5 || 
-                                   (partita.mg0_2 + partita.mg1_3) || 0;
             const overDisplay = partita.over || 0;
 
             return `
@@ -529,15 +902,11 @@
                             </div>
                             <div class="barra-wrap">
                                 <div class="barra">
-                                    <div class="barra-fill ${classeBarra(percCasa)}" style="width:${widthCasa}%">
-                                        ${percCasa}%
-                                    </div>
+                                    <div class="barra-fill ${classeBarra(percCasa)}" style="width:${widthCasa}%">${percCasa}%</div>
                                 </div>
                             </div>
                         </div>
-
                         <span class="vs">🆚</span>
-
                         <div class="squadra">
                             <span class="nome">${partita.ospite}</span>
                             <div class="stato-forma">
@@ -545,24 +914,17 @@
                             </div>
                             <div class="barra-wrap">
                                 <div class="barra">
-                                    <div class="barra-fill ${classeBarra(percOspite)}" style="width:${widthOspite}%">
-                                        ${percOspite}%
-                                    </div>
+                                    <div class="barra-fill ${classeBarra(percOspite)}" style="width:${widthOspite}%">${percOspite}%</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="diff-row">
-                        <span>
-                            Differenza Forma: <span class="diff ${classeDiff}">${diff > 0 ? '+' : ''}${diff}%</span>
-                        </span>
-                        <span class="xg">
-                            xG: <strong>${xgCasa}</strong> vs <strong>${xgOspite}</strong>
-                        </span>
+                        <span>Differenza Forma: <span class="diff ${classeDiff}">${diff > 0 ? '+' : ''}${diff}%</span></span>
+                        <span class="xg">xG: <strong>${xgCasa}</strong> vs <strong>${xgOspite}</strong></span>
                     </div>
 
-                    <!-- ⭐ STATISTICHE COMPLETE -->
                     <div class="stats stats-scroll">
                         <span>12+Under 4.5: <strong>${underDisplay}%</strong></span>
                         <span>Multigol: (0-2) <strong>${partita.mg0_2 || 0}%</strong> + (1-3) <strong>${partita.mg1_3 || 0}%</strong></span>
@@ -575,8 +937,23 @@
         function renderTutteLePartite() {
             const container = document.getElementById('container');
 
+            if (Object.keys(classifica).length === 0) {
+                container.innerHTML = `
+                    <div class="error">
+                        ⚠️ Carica prima il file <strong>classifica.csv</strong><br>
+                        <span class="dettaglio">La classifica serve per calcolare lo Stato Forma delle squadre</span>
+                    </div>
+                `;
+                return;
+            }
+
             if (partite.length === 0) {
-                container.innerHTML = `<div class="error">⚠️ Nessuna partita trovata. Verifica i file CSV.</div>`;
+                container.innerHTML = `
+                    <div class="error">
+                        ⚠️ Carica il file <strong>partite.csv</strong><br>
+                        <span class="dettaglio">Seleziona il file delle partite per visualizzarle</span>
+                    </div>
+                `;
                 return;
             }
 
@@ -589,11 +966,13 @@
                 return d >= oggi && d <= domani;
             });
 
+            document.getElementById('partiteCount').textContent = `${partiteFiltrate.length} partite`;
+
             if (partiteFiltrate.length === 0) {
                 container.innerHTML = `
                     <div class="error">
-                        ⚠️ Nessuna partita trovata per il 24 e 25 Luglio 2026.<br>
-                        <span style="font-size:12px;color:#888;">Caricate ${partite.length} partite totali.</span>
+                        ⚠️ Nessuna partita per il 24 e 25 Luglio 2026.<br>
+                        <span class="dettaglio">Caricate ${partite.length} partite totali.</span>
                     </div>
                 `;
                 return;
@@ -612,56 +991,221 @@
             container.innerHTML = html;
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  6.  CARICAMENTO FILE
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  7.  GESTIONE UPLOAD FILE
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-        function caricaFile(url) {
-            return new Promise((resolve, reject) => {
-                fetch(url)
-                    .then(response => {
-                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                        return response.text();
-                    })
-                    .then(text => resolve(text))
-                    .catch(err => reject(err));
-            });
-        }
+        function aggiornaStatus() {
+            const hasClassifica = Object.keys(classifica).length > 0;
+            const hasPartite = partite.length > 0;
 
-        async function caricaTuttiIFile() {
-            const container = document.getElementById('container');
+            document.getElementById('statusClassifica').innerHTML =
+                `Classifica: ${hasClassifica ? '✅' : '❌'} ${hasClassifica ? Object.keys(classifica).length + ' squadre' : 'non caricata'}`;
+            document.getElementById('statusPartite').innerHTML =
+                `Partite: ${hasPartite ? '✅' : '❌'} ${hasPartite ? partite.length + ' partite' : 'non caricate'}`;
 
-            try {
-                const csvClassifica = await caricaFile(FILE_CLASSIFICA);
-                parseClassifica(csvClassifica);
-
-                const csvPartite = await caricaFile(FILE_PARTITE);
-                parsePartite(csvPartite);
-
-                renderTutteLePartite();
-
-            } catch (err) {
-                console.error('Errore:', err);
-                container.innerHTML = `
-                    <div class="error">
-                        ❌ Errore nel caricamento dei file:<br>
-                        <span style="font-size:13px;color:#aaa;">${err.message}</span>
-                        <br><br>
-                        <span style="font-size:12px;color:#888;">
-                            Assicurati che i file <strong>${FILE_CLASSIFICA}</strong> e <strong>${FILE_PARTITE}</strong>
-                            siano nella stessa cartella di index.html
-                        </span>
-                    </div>
-                `;
+            if (hasClassifica && hasPartite) {
+                document.getElementById('uploadArea').style.borderColor = '#66bb6a';
+            } else {
+                document.getElementById('uploadArea').style.borderColor = '';
             }
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        //  7.  AVVIO
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        function handleFile(file, tipo) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csv = e.target.result;
+                    let count = 0;
+                    if (tipo === 'classifica') {
+                        count = parseClassifica(csv);
+                    } else {
+                        count = parsePartite(csv);
+                    }
+                    aggiornaStatus();
+                    renderTutteLePartite();
+                } catch (err) {
+                    alert('Errore nella lettura del file: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ── Eventi upload ──
+        document.getElementById('fileClassifica').addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                handleFile(this.files[0], 'classifica');
+            }
+            this.value = '';
+        });
+
+        document.getElementById('filePartite').addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                handleFile(this.files[0], 'partite');
+            }
+            this.value = '';
+        });
+
+        // ── Drag & Drop ──
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+
+            const files = e.dataTransfer.files;
+            for (const file of files) {
+                const nome = file.name.toLowerCase();
+                if (nome.includes('classifica')) {
+                    handleFile(file, 'classifica');
+                } else if (nome.includes('partite')) {
+                    handleFile(file, 'partite');
+                }
+            }
+        });
+
+        // ── Refresh ──
+        function refreshDati() {
+            if (Object.keys(classifica).length > 0 || partite.length > 0) {
+                renderTutteLePartite();
+                aggiornaStatus();
+                // Mostra feedback
+                const btn = document.querySelector('.header-actions .btn-primary');
+                const orig = btn.textContent;
+                btn.textContent = '✅ Aggiornato!';
+                setTimeout(() => btn.textContent = orig, 2000);
+            } else {
+                alert('Carica prima i file CSV!');
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  8.  GROQ AI
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        async function callGroq() {
+            const prompt = document.getElementById('aiPrompt').value.trim();
+            const responseDiv = document.getElementById('aiResponse');
+
+            if (!prompt) {
+                responseDiv.innerHTML = '⚠️ Inserisci una domanda.';
+                return;
+            }
+
+            // Controlla se la chiave è salvata
+            const key = localStorage.getItem('groqKey') || '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';
+            if (!key || key === '') {
+                responseDiv.innerHTML = `
+                    ⚠️ Inserisci la tua Groq API Key nelle <strong>Impostazioni</strong>.<br>
+                    <span style="font-size:12px;color:var(--text-muted);">Oppure usa la chiave predefinita.</span>
+                `;
+                return;
+            }
+
+            responseDiv.innerHTML = `<span class="loading-text">⏳ Analisi in corso...</span>`;
+
+            try {
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${key}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'llama-3.1-8b-instant',
+                        messages: [
+                            { role: 'system', content: 'Sei un esperto analista di calcio. Analizza le partite basandoti sullo stato forma delle squadre. Dai pronostici e consigli.' },
+                            { role: 'user', content: prompt }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 800,
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    responseDiv.innerHTML = `❌ Errore: ${data.error.message || 'Errore sconosciuto'}`;
+                    return;
+                }
+
+                if (data.choices && data.choices.length > 0) {
+                    const testo = data.choices[0].message.content;
+                    responseDiv.innerHTML = testo.replace(/\n/g, '<br>');
+                } else {
+                    responseDiv.innerHTML = '❌ Nessuna risposta ricevuta.';
+                }
+
+            } catch (err) {
+                responseDiv.innerHTML = `❌ Errore di rete: ${err.message}`;
+                console.error(err);
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  9.  RESET
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        function resetTutto() {
+            if (confirm('⚠️ Resettare tutti i dati? Le API Keys rimarranno salvate.')) {
+                classifica = {};
+                partite = [];
+                document.getElementById('container').innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Dati resettati.<br>
+                        <span style="font-size:13px;color:var(--text-muted);">
+                            Carica nuovamente i file CSV.
+                        </span>
+                    </div>
+                `;
+                document.getElementById('partiteCount').textContent = '0 partite';
+                aggiornaStatus();
+            }
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  10. TABS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                const tabId = this.dataset.tab;
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        //  11. AVVIO
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         document.getElementById('dataOggi').textContent = '24/07/2026';
-        caricaTuttiIFile();
+        aggiornaStatus();
+
+        // Carica le chiavi salvate
+        if (localStorage.getItem('groqKey')) {
+            document.getElementById('groqKey').value = localStorage.getItem('groqKey');
+        }
+        if (localStorage.getItem('weatherKey')) {
+            document.getElementById('weatherKey').value = localStorage.getItem('weatherKey');
+        }
+
+        console.log('✅ App pronta!');
+        console.log('📊 Carica i file CSV per iniziare.');
     </script>
 
 </body>
